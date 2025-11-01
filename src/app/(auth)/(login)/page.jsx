@@ -31,6 +31,7 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { POST } from "@/constants/apiMethods";
 import { setAuthCookies } from "@/lib/cookies";
 import Spinner from "@/components/shared/Spinner";
+import Image from "next/image";
 
 const Login = () => {
   const router = useRouter();
@@ -52,14 +53,15 @@ const Login = () => {
     isPending: isSubmitFormLoading,
     data: result,
   } = useApiMutation({
-    url: "/admin/admins/login",
+    url: "/admin/login",
     method: POST,
     invalidateKey: ["admin-login"],
     // isToast: false,
   });
 
   const onSubmit = async (values) => {
-    await submitForm(values);
+    // await submitForm(values);
+    router.push("/admin/dashboard");
   };
 
   useEffect(() => {
@@ -80,9 +82,16 @@ const Login = () => {
   }, [result]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-main to-para-3 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-main to-para-3 p-4">
       <Card className="w-full max-w-lg bg-white dark:bg-gray-950 rounded-xl shadow-2xl overflow-hidden">
         <CardHeader className="text-center space-y-1 p-6 pb-0">
+          <Image
+            src="/logos/medico-logo.svg"
+            width={60}
+            height={60}
+            className="mx-auto"
+            alt="Medico"
+          />
           <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white">
             Admin Login
           </CardTitle>

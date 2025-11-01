@@ -56,10 +56,10 @@ export const AppSidebar = () => {
           <SidebarMenuButton asChild className="gap-x-4 h-10 px-4">
             <Link href="/" prefetch>
               <Image
-                src="/logos/logo.svg"
+                src="/logos/medico-logo.svg"
                 width={30}
                 height={30}
-                alt="Nodebase"
+                alt="Medico"
               />
               <span className="font-semibold text-sm">Medico Admin</span>
             </Link>
