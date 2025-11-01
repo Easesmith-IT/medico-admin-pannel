@@ -118,7 +118,7 @@ const Add = ({ defaultValues }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Button onClick={() => setOpen(true)}>Open Verify OTP Modal</Button>
+        {/* <Button onClick={() => setOpen(true)}>Open Verify OTP Modal</Button> */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
