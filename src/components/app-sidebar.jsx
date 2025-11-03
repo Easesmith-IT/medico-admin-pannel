@@ -10,6 +10,7 @@ import {
   LogOutIcon,
   ShieldCheckIcon,
   StarIcon,
+  StethoscopeIcon,
   UserCheckIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -40,6 +41,11 @@ const menuItems = [
         title: "Admins",
         icon: UserCheckIcon,
         url: "/admin/admins",
+      },
+      {
+        title: "Doctors",
+        icon: StethoscopeIcon,
+        url: "/admin/doctors",
       },
     ],
   },

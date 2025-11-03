@@ -46,8 +46,8 @@ export const VerifyOtpModal = ({ open, onClose, phone, onResend }) => {
     defaultValues: { otp: "" },
   });
 
-  console.log("getvalues",form.getValues());
-  
+  console.log("getvalues", form.getValues());
+
   useEffect(() => {
     if (!open) return;
     setTimer(30);
@@ -71,10 +71,9 @@ export const VerifyOtpModal = ({ open, onClose, phone, onResend }) => {
     await verifyOtp({ phone, otp: data.otp });
   };
 
-  const onError = (error)=>{
-    console.log("error",error);
-    
-  }
+  const onError = (error) => {
+    console.log("error", error);
+  };
 
   useEffect(() => {
     if (result) {
@@ -95,7 +94,7 @@ export const VerifyOtpModal = ({ open, onClose, phone, onResend }) => {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit,onError)}
+            onSubmit={form.handleSubmit(handleSubmit, onError)}
             className="space-y-6"
           >
             <FormField
