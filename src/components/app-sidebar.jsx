@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BuildingIcon,
   CreditCardIcon,
   FolderOpenIcon,
   HistoryIcon,
@@ -45,6 +46,11 @@ const menuItems = [
         title: "Admins",
         icon: UserCheckIcon,
         url: "/admin/admins",
+      },
+      {
+        title: "Cities",
+        icon: BuildingIcon,
+        url: "/admin/cities",
       },
       {
         title: "Doctors",

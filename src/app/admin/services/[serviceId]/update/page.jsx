@@ -25,14 +25,14 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { POST } from "@/constants/apiMethods";
+import { POST, PUT } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { serviceSchema } from "@/schemas/ServicesSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon, UploadCloud } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
@@ -85,6 +85,34 @@ const CreateService = () => {
   const [iconPreview, setIconPreview] = useState("");
   const [cities, setCities] = useState([]);
   const router = useRouter();
+  const params = useParams();
+
+  const form = useForm({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: {
+      name: "Nursing",
+      description:
+        "Professional medical consultation and examination by qualified doctors",
+      basePrice: 500,
+      equipmentCharges: 0,
+      taxPercentage: 18,
+      modes: ["Home Service", "Visit Provider Location"],
+      supportsDuration: true,
+      defaultDuration: 30,
+      durationOptions: [30, 45, 60],
+      paymentMode: "Both",
+      icon: "",
+      image: "",
+      cities: [],
+    },
+    mode: "onBlur",
+  });
+
+  const { control, handleSubmit, watch, setValue, formState, reset,getValues } = form;
+
+  const supportsDuration = watch("supportsDuration");
+  console.log("getValues", getValues());
+  
 
   const { data, isLoading } = useApiQuery({
     url: `/city/getAllCities`,
@@ -101,15 +129,33 @@ const CreateService = () => {
     }
   }, [data]);
 
-  const form = useForm({
-    resolver: zodResolver(serviceSchema),
-    defaultValues: DEFAULT,
-    mode: "onBlur",
+  const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
+    url: `/service/getServiceById/${params.serviceId}`,
+    queryKeys: ["service"],
   });
 
-  const { control, handleSubmit, watch, setValue, formState } = form;
+  console.log("serviceData", serviceData);
 
-  const supportsDuration = watch("supportsDuration");
+  useEffect(() => {
+    if (serviceData) {
+      const service = serviceData?.data;
+      reset({
+        name: service?.name || "",
+        basePrice: service?.basePrice || 0,
+        cities: service?.cities?.map((city) => city?._id) || [],
+        description: service?.description || "",
+        equipmentCharges: service?.equipmentCharges || 0,
+        taxPercentage: service?.taxPercentage || 0,
+        modes: service?.modes || [],
+        supportsDuration: service?.supportsDuration || false,
+        defaultDuration: service?.defaultDuration || 0,
+        durationOptions: service?.durationOptions || [],
+        paymentMode: service?.paymentMode || "Both",
+        icon: "",
+        image: "",
+      });
+    }
+  }, [serviceData]);
 
   // ===== Dropzones =====
   const onDropImage = useCallback(
@@ -151,9 +197,9 @@ const CreateService = () => {
     isPending: isSubmitFormLoading,
     data: result,
   } = useApiMutation({
-    url: "/service/createService",
-    method: POST,
-    invalidateKey: ["service"],
+    url: `/service/updateService/${serviceData?.data?._id}`,
+    method: PUT,
+    invalidateKey: ["service", serviceData?.data?._id],
   });
 
   // ===== Submit handler =====
@@ -186,7 +232,7 @@ const CreateService = () => {
     <div className="space-y-6">
       <Link href="/admin/services" className="flex gap-1 items-center mb-4">
         <ArrowLeftIcon className="text-3xl cursor-pointer" />
-        <H1>Add Service</H1>
+        <H1>Update Service</H1>
       </Link>
 
       <Card className="shadow-md">
@@ -520,7 +566,7 @@ const CreateService = () => {
                   {formState.isSubmitting || isSubmitFormLoading ? (
                     <Spinner />
                   ) : (
-                    "Save Service"
+                    "Update"
                   )}
                 </Button>
               </div>

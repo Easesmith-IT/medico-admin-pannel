@@ -32,6 +32,7 @@ import Link from "next/link";
 import { VerifyOtpModal } from "@/components/verify-otp-modal";
 import { toast } from "sonner";
 import Spinner from "@/components/shared/Spinner";
+import { useRouter } from "next/navigation";
 
 // Zod schema matching the mongoose model fields the user provided
 const adminSchema = z.object({
@@ -61,6 +62,7 @@ const adminSchema = z.object({
 const Add = ({ defaultValues }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(adminSchema),
@@ -94,7 +96,8 @@ const Add = ({ defaultValues }) => {
   useEffect(() => {
     if (result) {
       console.log("result", result);
-      setOpen(true);
+      router.push("/admin/admins");
+      // setOpen(true);
     }
   }, [result]);
 

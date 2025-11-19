@@ -38,7 +38,8 @@ export const ConfirmModal = ({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button
-            className="bg-main hover:bg-main/90"
+            // className="bg-destructive hover:bg-destructive/90"
+            variant="destructive"
             disabled={disabled}
             onClick={handleConfirm}
           >

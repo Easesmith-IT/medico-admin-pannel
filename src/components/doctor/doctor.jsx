@@ -69,6 +69,7 @@ export const Doctor = ({ doctor }) => {
           <Actions onDelete={onDelete} onEdit={onEdit} onView={onView} />
         </TableCell>
       </TableRow>
+      
       {isAlertModalOpen && (
         <ConfirmModal
           header="Delete Doctor"

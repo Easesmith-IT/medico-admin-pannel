@@ -10,11 +10,10 @@ import { Button } from "../ui/button";
 
 export const Actions = ({
   children,
-  onDelete = () => {},
-  onEdit = () => {},
-  onView = () => {},
-  showViewAction = true,
-  disabled=false,
+  onDelete,
+  onEdit,
+  onView,
+  disabled = false,
 }) => {
   return (
     <DropdownMenu>
@@ -28,23 +27,27 @@ export const Actions = ({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        {showViewAction && (
+        {onView && (
           <DropdownMenuItem onClick={onView}>
             <Eye className="mr-2 h-4 w-4" />
             View
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={onEdit}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={onDelete}
-          className="text-destructive hover:text-destructive"
-        >
-          <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-          <span className="text-destructive">Delete</span>
-        </DropdownMenuItem>
+        {onEdit && (
+          <DropdownMenuItem onClick={onEdit}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </DropdownMenuItem>
+        )}
+        {onDelete && (
+          <DropdownMenuItem
+            onClick={onDelete}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+            <span className="text-destructive">Delete</span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

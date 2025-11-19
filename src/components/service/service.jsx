@@ -1,0 +1,92 @@
+import { customId } from "@/lib/utils";
+import { Actions } from "../shared/actions";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Skeleton } from "../ui/skeleton";
+import { TableCell, TableRow } from "../ui/table";
+import { Badge } from "../ui/badge";
+import { useRouter } from "next/navigation";
+
+export const Service = ({ service }) => {
+  const router = useRouter();
+
+  const onView = () => {
+    router.push(`/admin/services/${service._id}`);
+  };
+
+  const onEdit = () => {
+    router.push(`/admin/services/${service._id}/update`);
+  };
+
+  return (
+    <TableRow>
+      <TableCell>{customId(service?._id)}</TableCell>
+      <TableCell className="flex items-center gap-3">
+        <Avatar>
+          {/* replace with real asset path or remote url */}
+          <AvatarImage src={`/images/${service.icon}`} alt={service.name} />
+          <AvatarFallback>{service.name.slice(0, 2)}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <div className="font-medium">{service.name}</div>
+          {/* <div className="text-sm text-muted-foreground">{service._id}</div> */}
+        </div>
+      </TableCell>
+      <TableCell className="max-w-xs truncate">{service.description}</TableCell>
+      <TableCell>
+        <div className="flex flex-col">
+          <span className="font-medium">₹{service.basePrice}</span>
+          <span className="text-sm text-muted-foreground">
+            Equip: ₹{service.equipmentCharges}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2 flex-wrap">
+          {service.modes.map((m) => (
+            <Badge key={m}>{m}</Badge>
+          ))}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2 flex-wrap">
+          {service.cities.map((c) => (
+            <Badge className="capitalize" variant="secondary" key={c._id}>
+              {c.name}
+            </Badge>
+          ))}
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <Actions onEdit={onEdit} onView={onView} />
+      </TableCell>
+    </TableRow>
+  );
+};
+
+Service.Skeleton = function ServiceSkeleton() {
+  return (
+    <TableRow>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="w-full h-5" />
+      </TableCell>
+    </TableRow>
+  );
+};
