@@ -130,6 +130,6 @@
     cursor: pointer;
   }
      .table-container {
-       @apply  border bg-white w-full;
+       @apply  border bg-white w-full max-w-[1130px];
      }
 }

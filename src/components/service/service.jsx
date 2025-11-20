@@ -5,9 +5,16 @@ import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "../ui/checkbox";
+import { Switch } from "../ui/switch";
+import { useEffect, useState } from "react";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { PATCH } from "@/constants/apiMethods";
+import { Spinner } from "../ui/spinner";
 
 export const Service = ({ service }) => {
   const router = useRouter();
+  const [isActive, setIsActive] = useState(service.isActive || false);
 
   const onView = () => {
     router.push(`/admin/services/${service._id}`);
@@ -16,6 +23,30 @@ export const Service = ({ service }) => {
   const onEdit = () => {
     router.push(`/admin/services/${service._id}/update`);
   };
+
+  const { mutateAsync, isPending, data, error } = useApiMutation({
+    url: `/service/${service._id}/toggle-active`,
+    method: PATCH,
+    invalidateKey: ["service"],
+  });
+
+  const toggleStatus = async () => {
+    setIsActive((prev) => !prev);
+    await mutateAsync();
+  };
+
+  useEffect(() => {
+    if (data) {
+      console.log("data", data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      console.log("error", error);
+      setIsActive(service.isActive);
+    }
+  }, [error]);
 
   return (
     <TableRow>
@@ -56,6 +87,18 @@ export const Service = ({ service }) => {
           ))}
         </div>
       </TableCell>
+      <TableCell>
+        <div className="flex flex-col gap-1">
+          <Badge variant={service.isActive ? "success" : "destructive"}>
+            {isPending ? <Spinner /> : service.isActive ? "Active" : "Inactive"}
+          </Badge>
+          <Switch
+            checked={isActive}
+            onCheckedChange={toggleStatus}
+            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+          />
+        </div>
+      </TableCell>
       <TableCell className="text-right">
         <Actions onEdit={onEdit} onView={onView} />
       </TableCell>
@@ -66,6 +109,9 @@ export const Service = ({ service }) => {
 Service.Skeleton = function ServiceSkeleton() {
   return (
     <TableRow>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>

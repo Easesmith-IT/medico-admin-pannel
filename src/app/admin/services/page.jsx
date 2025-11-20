@@ -66,6 +66,9 @@ const Services = () => {
     }
   }, [city]);
 
+  console.log("data",data);
+  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -151,6 +154,7 @@ const Services = () => {
               <TableHead>Pricing</TableHead>
               <TableHead>Modes</TableHead>
               <TableHead>Cities</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
