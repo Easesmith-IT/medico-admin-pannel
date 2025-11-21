@@ -131,7 +131,7 @@ const CreateService = () => {
 
   const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
     url: `/service/getServiceById/${params.serviceId}`,
-    queryKeys: ["service"],
+    queryKeys: ["service", params.serviceId],
   });
 
   console.log("serviceData", serviceData);

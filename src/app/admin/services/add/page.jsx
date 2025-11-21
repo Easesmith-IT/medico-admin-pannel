@@ -52,6 +52,27 @@ const DEFAULT = {
   icon: "",
   image: "",
   cities: [],
+  consultationSlots: {
+    enabled: true,
+    startTime: "",
+    endTime: "",
+    slotDuration: 30,
+  },
+  nursingSlots: {
+    enabled: true,
+    shiftTypes: ["24-hour"],
+    minDuration: 1440,
+    maxDuration: 1440,
+    available24x7: true,
+    allowCustomDuration: false,
+  },
+  equipmentBooking: {
+    enabled: true,
+    minDuration: 60,
+    maxDuration: 720,
+    available24x7: true,
+  },
+  timeFormat: "12-hour",
 };
 
 function DurationChips({ values = [], selected = [], onChange }) {
@@ -80,6 +101,15 @@ function DurationChips({ values = [], selected = [], onChange }) {
   );
 }
 
+const shiftTypesOptions = [
+  { label: "Hourly", value: "hourly" },
+  { label: "8 Hour", value: "8-hour" },
+  { label: "12 Hour", value: "12-hour" },
+  { label: "24 Hour", value: "24-hour" },
+  { label: "Day Shift", value: "day-shift" },
+  { label: "Night Shift", value: "night-shift" },
+];
+
 const CreateService = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [iconPreview, setIconPreview] = useState("");
@@ -107,8 +137,9 @@ const CreateService = () => {
     mode: "onBlur",
   });
 
-  const { control, handleSubmit, watch, setValue, formState } = form;
+  const { control, handleSubmit, watch, setValue, formState, getValues } = form;
 
+  const category = watch("category");
   const supportsDuration = watch("supportsDuration");
 
   // ===== Dropzones =====
@@ -172,7 +203,24 @@ const CreateService = () => {
       }
     });
 
-    await submitForm(values);
+    const apiData = { ...values, consultationSlots: null, nursingSlots: null };
+    const slotConfig = {};
+
+    if (category === "consultation") {
+      slotConfig.consultationSlots = values.consultationSlots;
+    }
+
+    if (category === "nursing") {
+      slotConfig.nursingSlots = values.nursingSlots;
+    }
+
+    if (category === "equipment") {
+      slotConfig.equipmentBooking = values.equipmentBooking;
+    }
+
+    console.log("apiData", { ...apiData, slotConfig });
+
+    await submitForm({ ...apiData, slotConfig });
   };
 
   useEffect(() => {
@@ -181,6 +229,10 @@ const CreateService = () => {
       router.push("/admin/services");
     }
   }, [result]);
+
+  const onError = (error) => {
+    console.log("error", error);
+  };
 
   return (
     <div className="space-y-6">
@@ -192,8 +244,11 @@ const CreateService = () => {
       <Card className="shadow-md">
         <CardContent>
           <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form
+              onSubmit={handleSubmit(onSubmit, onError)}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Name */}
                 <FormField
                   control={control}
@@ -209,49 +264,412 @@ const CreateService = () => {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-5">
-                  {/* Base Price */}
-                  <FormField
-                    control={control}
-                    name="basePrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Base Price (₹)</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={control}
+                  name="timeFormat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time Format</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select time format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="12-hour">12 Hour</SelectItem>
+                          <SelectItem value="24-hour">24 Hour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="consultation">
+                            Consultation
+                          </SelectItem>
+                          <SelectItem value="nursing">Nursing</SelectItem>
+                          <SelectItem value="equipment">Equipment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {category === "nursing" && (
                   <FormField
                     control={control}
-                    name="cities"
+                    name="nursingType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Cities</FormLabel>
-                        <FormControl>
-                          <MultiSelect
-                            label="Select Cities"
-                            options={cities}
-                            value={field.value || []}
-                            onChange={field.onChange}
-                            isLoading={isLoading}
-                          />
-                        </FormControl>
+                        <FormLabel>Nursing Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select nursing type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hourly">Hourly</SelectItem>
+                            <SelectItem value="full-day">Full Day</SelectItem>
+                            <SelectItem value="full-night">
+                              Full Night
+                            </SelectItem>
+                            <SelectItem value="12-hour">12 Hour</SelectItem>
+                            <SelectItem value="24-hour">24 Hour</SelectItem>
+                            <SelectItem value="null">None</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
+                )}
+
+                {category === "consultation" && (
+                  <div className="border p-4 rounded space-y-4 col-span-3">
+                    <FormField
+                      control={form.control}
+                      name="consultationSlots.enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between">
+                          <FormLabel>Consultation Enabled</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="consultationSlots.startTime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Time</FormLabel>
+                            <FormControl>
+                              <Input type="time" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="consultationSlots.endTime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Time</FormLabel>
+                            <FormControl>
+                              <Input type="time" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="consultationSlots.slotDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Slot Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {category === "nursing" && (
+                  <div className="border p-4 rounded space-y-4 col-span-3">
+                    {/* Enabled Switch */}
+                    <FormField
+                      control={form.control}
+                      name="nursingSlots.enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between">
+                          <FormLabel>Nursing Slots Enabled</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Shift Types */}
+                      <FormField
+                        control={form.control}
+                        name="nursingSlots.shiftTypes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Shift Types</FormLabel>
+                            <FormControl>
+                              <MultiSelect
+                                label="Select Shift Type"
+                                options={shiftTypesOptions}
+                                value={field.value || []}
+                                onChange={field.onChange}
+                                isLoading={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Min Duration */}
+                      <FormField
+                        control={form.control}
+                        name="nursingSlots.minDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Min Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Max Duration */}
+                      <FormField
+                        control={form.control}
+                        name="nursingSlots.maxDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Max Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Switches Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* 24x7 */}
+                      <FormField
+                        control={form.control}
+                        name="nursingSlots.available24x7"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between border p-3 rounded">
+                            <FormLabel>Available 24x7</FormLabel>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Allow Custom Duration */}
+                      <FormField
+                        control={form.control}
+                        name="nursingSlots.allowCustomDuration"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between border p-3 rounded">
+                            <FormLabel>Allow Custom Duration</FormLabel>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {category === "equipment" && (
+                  <div className="border p-4 rounded space-y-4 col-span-3">
+                    {/* Enabled Switch */}
+                    <FormField
+                      control={form.control}
+                      name="equipmentBooking.enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between">
+                          <FormLabel>Equipment Booking Enabled</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Min Duration */}
+                      <FormField
+                        control={form.control}
+                        name="equipmentBooking.minDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Min Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Max Duration */}
+                      <FormField
+                        control={form.control}
+                        name="equipmentBooking.maxDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Max Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Available 24x7 */}
+                      <FormField
+                        control={form.control}
+                        name="equipmentBooking.available24x7"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between border p-3 rounded">
+                            <FormLabel>Available 24x7</FormLabel>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* <div className="grid grid-cols-2 gap-5"> */}
+                {/* Base Price */}
+                <FormField
+                  control={control}
+                  name="basePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Base Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="cities"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Cities</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          label="Select Cities"
+                          options={cities}
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          isLoading={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* </div> */}
 
                 {/* Description */}
                 <FormField
                   control={control}
                   name="description"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem className="md:col-span-3">
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea
@@ -301,7 +719,7 @@ const CreateService = () => {
                   control={control}
                   name="modes"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem className="md:col-span-">
                       <FormLabel>Modes</FormLabel>
                       <div className="flex gap-3 mt-2">
                         {["Home Service", "Visit Provider Location"].map(
@@ -426,91 +844,90 @@ const CreateService = () => {
                     </FormItem>
                   )}
                 />
+              </div>
+              {/* Icon & Image Uploads */}
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={control}
+                  name="icon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Service Icon</FormLabel>
+                      <FormControl>
+                        <div
+                          {...getRootIconProps()}
+                          className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
+                        >
+                          <input {...getInputIconProps()} />
+                          <div className="flex flex-col items-center gap-2">
+                            <UploadCloud />
+                            <span className="text-sm">
+                              Drop or click to upload icon
+                            </span>
+                          </div>
+                        </div>
+                      </FormControl>
+                      {iconPreview ? (
+                        <div className="mt-2">
+                          <img
+                            src={iconPreview}
+                            alt="icon preview"
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                        </div>
+                      ) : null}
+                      <FormDescription>
+                        PNG/SVG recommended. Max 2MB (demo).
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                {/* Icon & Image Uploads */}
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={control}
-                    name="icon"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Service Icon</FormLabel>
-                        <FormControl>
-                          <div
-                            {...getRootIconProps()}
-                            className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
-                          >
-                            <input {...getInputIconProps()} />
-                            <div className="flex flex-col items-center gap-2">
-                              <UploadCloud />
-                              <span className="text-sm">
-                                Drop or click to upload icon
-                              </span>
-                            </div>
+                <FormField
+                  control={control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Service Image</FormLabel>
+                      <FormControl>
+                        <div
+                          {...getRootImageProps()}
+                          className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
+                        >
+                          <input {...getInputImageProps()} />
+                          <div className="flex flex-col items-center gap-2">
+                            <UploadCloud />
+                            <span className="text-sm">
+                              Drop or click to upload image
+                            </span>
                           </div>
-                        </FormControl>
-                        {iconPreview ? (
-                          <div className="mt-2">
-                            <img
-                              src={iconPreview}
-                              alt="icon preview"
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                          </div>
-                        ) : null}
-                        <FormDescription>
-                          PNG/SVG recommended. Max 2MB (demo).
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={control}
-                    name="image"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Service Image</FormLabel>
-                        <FormControl>
-                          <div
-                            {...getRootImageProps()}
-                            className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
-                          >
-                            <input {...getInputImageProps()} />
-                            <div className="flex flex-col items-center gap-2">
-                              <UploadCloud />
-                              <span className="text-sm">
-                                Drop or click to upload image
-                              </span>
-                            </div>
-                          </div>
-                        </FormControl>
-                        {imagePreview ? (
-                          <div className="mt-2">
-                            <img
-                              src={imagePreview}
-                              alt="image preview"
-                              className="w-full h-40 object-cover rounded"
-                            />
-                          </div>
-                        ) : field.value ? (
-                          <div className="mt-2">
-                            <img
-                              src={field.value}
-                              alt="image"
-                              className="w-full h-40 object-cover rounded"
-                            />
-                          </div>
-                        ) : null}
-                        <FormDescription>
-                          Landscape images look best. (demo only)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        </div>
+                      </FormControl>
+                      {imagePreview ? (
+                        <div className="mt-2">
+                          <img
+                            src={imagePreview}
+                            alt="image preview"
+                            className="w-full h-40 object-cover rounded"
+                          />
+                        </div>
+                      ) : field.value ? (
+                        <div className="mt-2">
+                          <img
+                            src={field.value}
+                            alt="image"
+                            className="w-full h-40 object-cover rounded"
+                          />
+                        </div>
+                      ) : null}
+                      <FormDescription>
+                        Landscape images look best. (demo only)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="flex gap-3 justify-end">
                 <Button

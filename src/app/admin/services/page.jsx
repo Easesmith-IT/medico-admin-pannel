@@ -72,9 +72,11 @@ const Services = () => {
     queryKeys: ["city"],
   });
 
+  console.log("data", data);
+
   useEffect(() => {
     if (data) {
-      setServices(data?.data || []);
+      setServices(data?.data?.services || []);
       setPageCount(data?.totalPages || 0);
     }
   }, [data]);
@@ -200,7 +202,7 @@ const Services = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {services.map((service, index) => (
+            {services?.map((service, index) => (
               <Service key={service?._id || index} service={service} />
             ))}
 

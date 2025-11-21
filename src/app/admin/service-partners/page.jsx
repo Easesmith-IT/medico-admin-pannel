@@ -64,12 +64,12 @@ const Doctors = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
         <H1>Service Partners</H1>
-        {/* <Button asChild variant="medico">
-          <Link href="/admin/doctors/add">
+        <Button variant="medico" asChild>
+          <Link href={"/admin/service-partners/add"}>
             <PlusIcon />
-            <span>Add Doctor</span>
+            Add Service Partner
           </Link>
-        </Button> */}
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row justify-between gap-4">

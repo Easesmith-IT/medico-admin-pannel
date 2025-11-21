@@ -25,7 +25,7 @@ export const Service = ({ service }) => {
   };
 
   const { mutateAsync, isPending, data, error } = useApiMutation({
-    url: `/service/${service._id}/toggle-active`,
+    url: `/service/${service._id}/toggle-status`,
     method: PATCH,
     invalidateKey: ["service"],
   });
@@ -54,7 +54,7 @@ export const Service = ({ service }) => {
       <TableCell className="flex items-center gap-3">
         <Avatar>
           {/* replace with real asset path or remote url */}
-          <AvatarImage src={`/images/${service.icon}`} alt={service.name} />
+          <AvatarImage src={service.icon} alt={service.name} />
           <AvatarFallback>{service.name.slice(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
