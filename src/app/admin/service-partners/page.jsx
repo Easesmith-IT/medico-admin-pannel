@@ -31,32 +31,63 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { buildQuery } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
 
-const Doctors = () => {
+const ServiceProviders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState("all");
+  const [approvalStatus, setApprovalStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [doctors, setDoctors] = useState([]);
-  const [limit, setLimit] = useState(10);
+  const [serviceProviders, setServiceProviders] = useState([]);
+  const [limit, setLimit] = useState("10");
+  const [city, setCity] = useState("");
 
   const handleReset = () => {
+    setSearchQuery("");
     setStatus("all");
+    setApprovalStatus("all");
+    setPage(1);
+    setLimit("10");
+    setCity("");
   };
 
+  const { data: cityData, isLoading: isCityLoading } = useApiQuery({
+    url: `/city/getAllCities`,
+    queryKeys: ["city"],
+  });
+
+  const debouncedSearch = useDebounce(searchQuery, 1000);
+
+  const query = buildQuery({
+    search: debouncedSearch,
+    cityId: city,
+    isActive: status,
+    approvalStatus,
+    page,
+    limit,
+  });
+
   const { data, isLoading, error } = useApiQuery({
-    url: `/admin/doctors?status=${
-      status === "all" ? "" : status
-    }&page=${page}&limit=${limit}&search=${searchQuery}`,
-    queryKeys: ["service-partners", status, page, searchQuery, limit],
+    url: `/serviceProvider/getAllServiceProviders?${query}`,
+    queryKeys: [
+      "service-provider",
+      status,
+      page,
+      debouncedSearch,
+      limit,
+      approvalStatus,
+      city,
+    ],
   });
 
   console.log("data", data);
 
   useEffect(() => {
     if (data) {
-      setDoctors(data?.data?.doctors || []);
-      setPageCount(data?.totalPages || 0);
+      setServiceProviders(data?.data || []);
+      setPageCount(data?.pagination?.totalPages || 0);
     }
   }, [data]);
 
@@ -72,38 +103,100 @@ const Doctors = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-4">
         {/* Search Input */}
-        <div></div>
-        <div className="grow hidden">
+        <div>
           <Label htmlFor="search" className="sr-only">
             Search
           </Label>
           <div className="relative">
-            <Search className="absolute left-3 top-1 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-2 h-5 w-5 text-muted-foreground" />
             <Input
               id="search"
-              placeholder="Search by name, email, or phone..."
+              placeholder="Search service provider..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-white w-96"
             />
           </div>
         </div>
 
         {/* Filter Buttons */}
+
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select onValueChange={(value) => setStatus(value)} value={status}>
+            <label className="text-sm font-medium mb-1 block">City</label>
+            <Select
+              disabled={isCityLoading}
+              value={city}
+              key={city}
+              onValueChange={(value) => setCity(value)}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select specialization" />
+                <SelectValue placeholder="Select City" />
+              </SelectTrigger>
+              <SelectContent>
+                {cityData?.data?.map((c) => (
+                  <SelectItem key={c._id} value={c._id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+                {cityData && cityData.data.length === 0 && (
+                  <div disabled>No cities found</div>
+                )}
+                {/* <SelectItem value="all">All</SelectItem> */}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              Approval Status
+            </label>
+            <Select
+              onValueChange={(value) => setApprovalStatus(value)}
+              value={approvalStatus}
+            >
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Select approval status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Under Review">Under Review</SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="Suspended">Suspended</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Status</label>
+            <Select onValueChange={(value) => setStatus(value)} value={status}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="true">Active</SelectItem>
+                <SelectItem value="true">Active</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Limit</label>
+            <Select value={limit} onValueChange={(value) => setLimit(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="30">30</SelectItem>
+                <SelectItem value="40">40</SelectItem>
+                <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -128,16 +221,19 @@ const Doctors = () => {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead>Age</TableHead>
               <TableHead>Specialization</TableHead>
-              <TableHead>Current Workplace</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Verification Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {doctors.map((doctor) => (
-              <ServicePartner key={doctor._id || doctor.id} doctor={doctor} />
+            {serviceProviders.map((servicePartner) => (
+              <ServicePartner
+                key={servicePartner._id || servicePartner.id}
+                servicePartner={servicePartner}
+              />
             ))}
             {isLoading &&
               Array.from({ length: 5 }).map((_, index) => (
@@ -145,7 +241,7 @@ const Doctors = () => {
               ))}
           </TableBody>
         </Table>
-        {doctors?.length === 0 && !isLoading && (
+        {serviceProviders?.length === 0 && !isLoading && (
           <DataNotFound name="Service Partners" />
         )}
       </div>
@@ -183,4 +279,4 @@ const Doctors = () => {
   );
 };
 
-export default Doctors;
+export default ServiceProviders;

@@ -2,6 +2,7 @@
 
 import {
   BuildingIcon,
+  CalendarCheckIcon,
   CreditCardIcon,
   FolderOpenIcon,
   HistoryIcon,
@@ -76,6 +77,11 @@ const menuItems = [
         title: "Services",
         icon: SettingsIcon,
         url: "/admin/services",
+      },
+      {
+        title: "Appointments",
+        icon: CalendarCheckIcon,
+        url: "/admin/appointments",
       },
     ],
   },

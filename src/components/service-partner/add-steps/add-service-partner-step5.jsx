@@ -57,7 +57,7 @@ export const AddServicePartnerStep5 = () => {
               <FormItem>
                 <FormLabel>Account Number</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

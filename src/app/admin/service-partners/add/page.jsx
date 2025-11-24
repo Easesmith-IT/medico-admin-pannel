@@ -12,13 +12,25 @@ import { Stepper } from "@/components/service-partner/add-steps/stepper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { fullSchema } from "@/schemas/ServiceProviderSchema";
-import { useState } from "react";
+import {
+  addressSchema,
+  bankAvailabilitySchema,
+  documentsSchema,
+  finalStepSchema,
+  fullSchema,
+  personalContactSchema,
+  professionalServiceSchema,
+} from "@/schemas/ServiceProviderSchema";
+import { useEffect, useState } from "react";
 import { AddServicePartnerStep2 } from "@/components/service-partner/add-steps/add-service-partner-step2";
 import { AddServicePartnerStep3 } from "@/components/service-partner/add-steps/add-service-partner-step3";
 import { AddServicePartnerStep4 } from "@/components/service-partner/add-steps/add-service-partner-step4";
 import { AddServicePartnerStep5 } from "@/components/service-partner/add-steps/add-service-partner-step5";
 import { AddServicePartnerStep6 } from "@/components/service-partner/add-steps/add-service-partner-step6";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { POST } from "@/constants/apiMethods";
+import { Spinner } from "@/components/ui/spinner";
+import { useRouter } from "next/navigation";
 
 const defaultValues = {
   firstName: "",
@@ -89,7 +101,8 @@ const defaultValues = {
 };
 
 const AddServicePartner = () => {
-  const [step, setStep] = useState(5);
+  const [step, setStep] = useState(0);
+  const router = useRouter();
 
   const form = useForm({
     defaultValues,
@@ -105,6 +118,8 @@ const AddServicePartner = () => {
     register,
     watch,
     setValue,
+    trigger,
+    formState,
   } = form;
 
   const steps = [
@@ -116,59 +131,73 @@ const AddServicePartner = () => {
     { id: "final", label: "Service Cities & Misc" },
   ];
 
-  const validateStep = (index) => {
-    try {
-      const values = getValues();
-      switch (index) {
-        case 0:
-          personalContactSchema.parse(values);
-          break;
-        case 1:
-          addressSchema.parse(values);
-          break;
-        case 2:
-          professionalServiceSchema.parse(values);
-          break;
-        case 3:
-          documentsSchema.parse(values);
-          break;
-        case 4:
-          bankAvailabilitySchema.parse(values);
-          break;
-        case 5:
-          finalStepSchema.parse(values);
-          break;
-        default:
-          break;
-      }
-      return true;
-    } catch (err) {
-      if (err && err.errors) {
-        err.errors.forEach((e) => {
-          if (e.path && e.path.length) {
-            const field = e.path.join(".");
-            setError(field, { type: "manual", message: e.message });
-          }
-        });
-      }
-      return false;
+  const onNext = async () => {
+    console.log("error", formState?.errors);
+
+    let schema;
+    switch (step) {
+      case 0:
+        schema = personalContactSchema;
+        break;
+      case 1:
+        schema = addressSchema;
+        break;
+      case 2:
+        schema = professionalServiceSchema;
+        break;
+      case 3:
+        schema = documentsSchema;
+        break;
+      case 4:
+        schema = bankAvailabilitySchema;
+        break;
+      case 5:
+        schema = finalStepSchema;
+        break;
+      default:
+        console.warn("Invalid step:", step);
+        break;
+    }
+
+    const valid = await trigger(Object.keys(schema.shape));
+    if (valid) {
+      setStep(step + 1);
     }
   };
 
-  const onNext = () => {
-    // if (validateStep(step)) {
-    setStep((s) => Math.min(s + 1, steps.length - 1));
-    // }
-  };
+  // const onNext = () => {
+  //   if (validateStep(step)) {
+  //     setStep((s) => Math.min(s + 1, steps.length - 1));
+  //   }
+  // };
 
   const onBack = () => setStep((s) => Math.max(s - 1, 0));
+  const onError = (error) => {
+    console.log("error", error);
+  };
 
-  const onSubmit = (data) => {
+  const {
+    mutateAsync: submitForm,
+    isPending: isSubmitFormLoading,
+    data: result,
+  } = useApiMutation({
+    url: "/serviceProvider/createservice-provider",
+    method: POST,
+    invalidateKey: ["service-provider"],
+  });
+
+  const onSubmit = async (data) => {
     // Final submit: data is validated by zodResolver already
     console.log("FINAL PAYLOAD", data);
-    // TODO: call your API here, e.g. axios.post('/api/service-providers', data)
-    // Show success toast / redirect
+    await submitForm(data);
   };
+
+  useEffect(() => {
+    if (result) {
+      router.push("/admin/service-partners");
+    }
+  }, [result]);
+  
 
   return (
     <div className="space-y-6">
@@ -182,46 +211,50 @@ const AddServicePartner = () => {
 
       <Stepper steps={steps} step={step} />
 
-      <Card>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
+          <Card>
+            <CardContent>
               {step === 0 && <AddServicePartnerStep1 />}
               {step === 1 && <AddServicePartnerStep2 />}
               {step === 2 && <AddServicePartnerStep3 />}
               {step === 3 && <AddServicePartnerStep4 />}
               {step === 4 && <AddServicePartnerStep5 />}
               {step === 5 && <AddServicePartnerStep6 />}
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      {/* Navigation Buttons */}
-      <div className="flex items-center justify-between">
-        <div>
-          {step > 0 && (
-            <Button
-              variant="outline"
-              type="button"
-              onClick={onBack}
-              className="mr-2"
-            >
-              Back
-            </Button>
-          )}
-        </div>
+          {/* Navigation Buttons */}
+          <div className="flex items-center justify-between">
+            <div>
+              {step > 0 && (
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={onBack}
+                  className="mr-2"
+                >
+                  Back
+                </Button>
+              )}
+            </div>
 
-        <div className="flex items-center gap-2">
-          {step < steps.length - 1 && (
-            <Button type="button" onClick={onNext}>
-              Next
-            </Button>
-          )}
+            <div className="flex items-center gap-2">
+              {step < steps.length - 1 && (
+                <Button type="button" onClick={onNext}>
+                  Next
+                </Button>
+              )}
 
-          {step === steps.length - 1 && <Button type="submit">Submit</Button>}
-        </div>
-      </div>
+              {step === steps.length - 1 && (
+                <Button disabled={isSubmitFormLoading} type="submit">
+                  {isSubmitFormLoading ? <Spinner /> : "Submit"}
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };

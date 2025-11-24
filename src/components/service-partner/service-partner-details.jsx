@@ -1,222 +1,182 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  ShieldCheck,
-  Building2,
-  Stethoscope,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Info } from "../shared/info";
 
-export const ServicePartnerDetails = ({ doctor }) => {
-  if (!doctor) return <p>No Service Partner data found.</p>;
-  const {address}= doctor;
-
+export const ServicePartnerDetails = ({ provider }) => {
   return (
     <div className="space-y-6">
-      {/* Personal Info */}
-      <Card className="mt-5">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={doctor.profilePhoto} alt={doctor.firstName} />
-              <AvatarFallback>{doctor.firstName?.[0] ?? "D"}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-xl">{doctor.firstName} {doctor.lastName}</CardTitle>
-              <p className="text-muted-foreground capitalize">
-                {doctor.specialization}
-              </p>
-              <div className="flex gap-2 mt-1">
-                <Badge variant={doctor.isActive ? "default" : "secondary"}>
-                  {doctor.isActive ? "Active" : "Inactive"}
-                </Badge>
-                <Badge
-                  variant={
-                    doctor.verificationStatus === "approved"
-                      ? "success"
-                      : doctor.verificationStatus === "pending"
-                      ? "outline"
-                      : "destructive"
-                  }
-                >
-                  {doctor.verificationStatus}
-                </Badge>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4 sm:mt-0">
-            <Star className="text-yellow-500" />
-            <p>
-              {doctor.averageRating.toFixed(1)} ({doctor.totalReviews})
-            </p>
-          </div>
-        </CardHeader>
+      {/* <BackLink href="/admin/service-providers" /> */}
 
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <span>{doctor.email}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span>{doctor.phone}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {address?.street}, {address?.city}, {address?.state}, {address?.pincode}, {address?.country}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-            <span>Medical Reg. No: {doctor.medicalRegistrationNumber}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Professional Details */}
+      {/* Header */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Stethoscope className="h-5 w-5" /> Professional Details
+          <CardTitle className="flex justify-between items-center">
+            <span>Service Provider Details</span>
+            <Badge>{provider.approvalStatus}</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <p>
-            <strong>Specialization:</strong> {doctor.specialization}
-          </p>
-          <p>
-            <strong>Issuing Council:</strong> {doctor.issuingMedicalCouncil}
-          </p>
-          <p>
-            <strong>Experience:</strong> {doctor.yearsOfExperience} years
-          </p>
-          <p>
-            <strong>Consultation Fee:</strong> ₹{doctor.consultationFees}
-          </p>
-          {doctor.subSpecialties?.length > 0 && (
-            <p>
-              <strong>Sub-specialties:</strong>{" "}
-              {doctor.subSpecialties.join(", ")}
-            </p>
-          )}
-          <p>
-            <strong>Bio:</strong> {doctor.professionalBio}
-          </p>
+      </Card>
+
+      {/* Personal Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info
+            label="Name"
+            value={`${provider.firstName} ${provider.lastName}`}
+          />
+          <Info label="Owner Name" value={provider.ownerName || "—"} />
+          <Info label="Age" value={provider.age} />
+          <Info label="Gender" value={provider.gender} />
+          <Info
+            label="DOB"
+            value={new Date(provider.dateOfBirth).toLocaleDateString()}
+          />
         </CardContent>
       </Card>
 
-      {/* Education */}
+      {/* Contact */}
       <Card>
         <CardHeader>
-          <CardTitle>Education</CardTitle>
+          <CardTitle className="text-lg">Contact Information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p>
-            <strong>University:</strong> {doctor.university}
-          </p>
-          <p>
-            <strong>Graduation Year:</strong> {doctor.graduationYear}
-          </p>
-          {doctor.degrees?.length > 0 && (
-            <p>
-              <strong>Degrees:</strong> {doctor.degrees.join(", ")}
-            </p>
-          )}
-          {doctor.certifications?.length > 0 && (
-            <p>
-              <strong>Certifications:</strong>{" "}
-              {doctor.certifications.join(", ")}
-            </p>
-          )}
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Mobile" value={provider.mobile} />
+          <Info label="Alternate" value={provider.alternateNumber || "—"} />
+          <Info label="Landline" value={provider.landline || "—"} />
+          <Info label="Email" value={provider.email} />
         </CardContent>
       </Card>
 
-      {/* Clinics */}
-      {doctor.clinics?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" /> Clinics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {doctor.clinics.map((clinic, i) => (
-              <div key={i} className="border rounded-lg p-3 space-y-2">
-                <p className="font-semibold">{clinic.clinicName}</p>
-                <p className="text-sm text-muted-foreground">
-                  {clinic.address?.street}, {clinic.address?.city}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {clinic.contactInfo?.phone} |{" "}
-                  <strong>Email:</strong> {clinic.contactInfo?.email}
-                </p>
-                {clinic.operatingHours?.length > 0 && (
-                  <div>
-                    <p className="font-semibold mt-2">Operating Hours:</p>
-                    <ul className="list-disc list-inside">
-                      {clinic.operatingHours.map((oh, j) => (
-                        <li key={j}>
-                          {oh.day}:{" "}
-                          {oh.slots.map((s, k) => (
-                            <span key={k}>
-                              {s.startTime} - {s.endTime}
-                              {k !== oh.slots.length - 1 ? ", " : ""}
-                            </span>
-                          ))}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Verification */}
+      {/* Current Address */}
       <Card>
         <CardHeader>
-          <CardTitle>Verification</CardTitle>
+          <CardTitle className="text-lg">Current Address</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p>
-            <strong>Status:</strong> {doctor.verificationStatus}
-          </p>
-          {doctor.rejectionReason && (
-            <p>
-              <strong>Reason:</strong> {doctor.rejectionReason}
-            </p>
-          )}
-          {doctor.verifiedAt && (
-            <p>
-              <strong>Verified At:</strong>{" "}
-              {new Date(doctor.verifiedAt).toLocaleDateString()}
-            </p>
-          )}
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Street" value={provider.currentAddress.street} />
+          <Info label="Locality" value={provider.currentAddress.locality} />
+          <Info label="City" value={provider.currentAddress.city} />
+          <Info label="State" value={provider.currentAddress.state} />
+          <Info label="Pincode" value={provider.currentAddress.pincode} />
+          <Info
+            label="Landmark"
+            value={provider.currentAddress.landmark || "—"}
+          />
         </CardContent>
       </Card>
 
-      {/* Social */}
+      {/* Services */}
       <Card>
         <CardHeader>
-          <CardTitle>Social Stats</CardTitle>
+          <CardTitle className="text-lg">Services Offered</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-6">
-          <p>
-            <strong>Followers:</strong> {doctor.followersCount}
-          </p>
-          <p>
-            <strong>Active:</strong> {doctor.isActive ? "Yes" : "No"}
-          </p>
+        <CardContent className="space-y-4">
+          {provider.services.map((s, i) => (
+            <div
+              key={i}
+              className="border rounded-lg p-4 grid grid-cols-2 gap-4"
+            >
+              <Info label="Service" value={s.serviceName} />
+              <Info label="Specialization" value={s.specialization || "—"} />
+              <Info label="Experience" value={`${s.experienceYears} years`} />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Professional Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Professional Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Qualification" value={provider.qualification} />
+          <Info label="Reg. Number" value={provider.registrationNumber} />
+          <Info label="Council" value={provider.registrationCouncil} />
+          <Info
+            label="Experience"
+            value={`${provider.yearsOfExperience} years`}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Bank Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Bank Details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info
+            label="Account Holder"
+            value={provider.bankDetails.accountHolderName}
+          />
+          <Info
+            label="Account No."
+            value={provider.bankDetails.accountNumber}
+          />
+          <Info label="IFSC" value={provider.bankDetails.ifscCode} />
+          <Info label="Bank" value={provider.bankDetails.bankName || "—"} />
+          <Info label="Branch" value={provider.bankDetails.branchName || "—"} />
+          <Info label="UPI" value={provider.bankDetails.upiId || "—"} />
+        </CardContent>
+      </Card>
+
+      {/* Availability */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Availability</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Days" value={provider.availability.days.join(", ")} />
+          <Info
+            label="Time Slots"
+            value={provider.availability.timeSlots
+              .map((t) => `${t.startTime} - ${t.endTime}`)
+              .join(", ")}
+          />
+          <Info
+            label="Available 24x7"
+            value={provider.availability.available24x7 ? "Yes" : "No"}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Emergency Contact */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Emergency Contact</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Name" value={provider.emergencyContact.name} />
+          <Info
+            label="Relation"
+            value={provider.emergencyContact.relationship}
+          />
+          <Info label="Mobile" value={provider.emergencyContact.mobile} />
+        </CardContent>
+      </Card>
+
+      {/* Meta Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Meta Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <Info label="Languages" value={provider.languages.join(", ")} />
+          <Info label="About" value={provider.about || "—"} />
+          <Info
+            label="Created At"
+            value={new Date(provider.createdAt).toLocaleString()}
+          />
+          <Info
+            label="Updated At"
+            value={new Date(provider.updatedAt).toLocaleString()}
+          />
         </CardContent>
       </Card>
     </div>

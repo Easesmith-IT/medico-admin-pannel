@@ -16,7 +16,7 @@ import { DELETE } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useRouter } from "next/navigation";
 
-export const ServicePartner = ({ doctor }) => {
+export const ServicePartner = ({ servicePartner }) => {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const router = useRouter();
 
@@ -25,66 +25,79 @@ export const ServicePartner = ({ doctor }) => {
   };
 
   const onView = () => {
-    router.push(`/admin/service-partners/${doctor?._id}`);
+    router.push(`/admin/service-partners/${servicePartner?._id}`);
   };
 
   const onEdit = () => {
-    router.push(`/admin/service-partners/${doctor?._id}/update`);
+    router.push(`/admin/service-partners/${servicePartner?._id}/update`);
   };
 
-  const { mutateAsync: deleteDoctor, isPending } = useApiMutation({
-    url: `/admin/doctors/${doctor?._id}`,
+  const { mutateAsync: deleteServicePartner, isPending } = useApiMutation({
+    url: `/admin//${servicePartner?._id}`,
     method: DELETE,
-    invalidateKey: ["doctors"],
+    invalidateKey: ["service-providers"],
   });
 
-  const handleDeleteDoctor = async () => {
-    await deleteDoctor();
+  const handleDeleteServicePartner = async () => {
+    await deleteServicePartner();
   };
 
   return (
     <>
       <TableRow>
-        <TableCell className="font-medium">{doctor.firstName}</TableCell>
-        <TableCell>{doctor.email}</TableCell>
-        <TableCell>{doctor.phone}</TableCell>
-        <TableCell>{doctor.specialization}</TableCell>
-        <TableCell>{doctor.currentWorkplace}</TableCell>
-        <TableCell className="capitalize">{doctor.gender}</TableCell>
+        {/* Name */}
+        <TableCell className="font-medium">
+          {servicePartner?.firstName} {servicePartner?.lastName}
+        </TableCell>
+
+        {/* Email */}
+        <TableCell>{servicePartner?.email}</TableCell>
+
+        {/* Phone */}
+        <TableCell>{servicePartner?.mobile}</TableCell>
+
+        {/* Age */}
+        <TableCell>{servicePartner?.age || "—"}</TableCell>
+
+        {/* Specialization (from services array) */}
+        <TableCell>
+          {servicePartner?.services?.[0]?.specialization || "—"}
+        </TableCell>
+
+        {/* Gender */}
+        <TableCell className="capitalize">{servicePartner?.gender}</TableCell>
+
+        {/* Verification Status */}
         <TableCell>
           <Badge
-            variant={
-              doctor.verificationStatus === "pending"
-                ? "secondary"
-                : doctor.verificationStatus === "rejected"
-                ? "destructive"
-                : "success"
-            }
+            variant={"secondary"}
             className="capitalize"
           >
-            {doctor.verificationStatus}
+            {servicePartner?.approvalStatus}
           </Badge>
         </TableCell>
+
+        {/* Actions */}
         <TableCell className="text-right">
           <Actions onDelete={onDelete} onEdit={onEdit} onView={onView} />
-           {/* <MoreHorizontal className="h-4 w-4" /> */}
         </TableCell>
       </TableRow>
+
       {isAlertModalOpen && (
         <ConfirmModal
-          header="Delete Doctor"
-          description="Are you sure you want to delete this doctor? This action cannot be undone."
+          header="Delete Service Partner"
+          description="Are you sure you want to delete this service partner? This action cannot be undone."
           isModalOpen={isAlertModalOpen}
           setIsModalOpen={setIsAlertModalOpen}
           disabled={isPending}
-          onConfirm={handleDeleteDoctor}
+          onConfirm={handleDeleteServicePartner}
         />
       )}
     </>
   );
 };
 
-ServicePartner.Skeleton = function DoctorSkeleton() {
+ServicePartner.Skeleton = function ServicePartnerSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -109,7 +122,7 @@ ServicePartner.Skeleton = function DoctorSkeleton() {
         <Skeleton className="w-full h-5" />
       </TableCell>
       <TableCell className="text-right">
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="w-8 h-5" />
       </TableCell>
     </TableRow>
   );

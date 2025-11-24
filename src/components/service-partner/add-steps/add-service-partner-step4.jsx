@@ -193,7 +193,7 @@ export const AddServicePartnerStep4 = () => {
           </div>
 
           <div className="mt-3">
-            <FormItem>
+            {/* <FormItem>
               <FormLabel>Upload Identity Document (PDF)</FormLabel>
               <div className="flex items-center gap-3">
                 <input
@@ -208,6 +208,7 @@ export const AddServicePartnerStep4 = () => {
                 <Button type="button" asChild>
                   <label htmlFor="identity-doc">Upload PDF</label>
                 </Button>
+                <FormMessage></FormMessage>
                 <div className="text-sm">
                   {filenameFor("identityProof.documentUrl")}
                 </div>
@@ -224,7 +225,61 @@ export const AddServicePartnerStep4 = () => {
               <FormDescription>
                 Accepted: PDF. Store as File — upload handled on submit.
               </FormDescription>
-            </FormItem>
+            </FormItem> */}
+
+            <FormField
+              control={control}
+              name="identityProof.documentUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Upload Identity Document (PDF)</FormLabel>
+
+                  <FormControl>
+                    <div className="flex items-center gap-3">
+                      {/* Hidden actual input */}
+                      <input
+                        id="identity-doc"
+                        type="file"
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          field.onChange(file); // 🔥 store File in RHF
+                        }}
+                      />
+
+                      {/* Button acting as label */}
+                      <Button type="button" asChild>
+                        <label htmlFor="identity-doc">Upload PDF</label>
+                      </Button>
+
+                      {/* Show filename */}
+                      {field.value && (
+                        <div className="text-sm">{field.value.name}</div>
+                      )}
+
+                      {/* Remove button */}
+                      {field.value && (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => field.onChange(null)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </FormControl>
+
+                  <FormDescription>
+                    Accepted: PDF. File is stored in form state and uploaded on
+                    submit.
+                  </FormDescription>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
       </div>
@@ -470,6 +525,23 @@ export const AddServicePartnerStep4 = () => {
                 )}
               />
 
+              <FormField
+                control={control}
+                name={`professionalCertificates.${idx}.expiryDate`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expiry Date</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="flex flex-col justify-end gap-2">
                 <div>
                   <input
@@ -636,6 +708,22 @@ export const AddServicePartnerStep4 = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>From</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`experienceCertificates.${idx}.to`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>To</FormLabel>
                     <FormControl>
                       <DatePicker
                         value={field.value}

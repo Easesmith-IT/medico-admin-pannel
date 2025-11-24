@@ -19,6 +19,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import PatientDetailsSkeleton from "@/components/patient/patient-details-skeleton";
 import { format } from "date-fns/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Info } from "@/components/shared/info";
 
 const PatientDetailsPage = () => {
   const params = useParams();
@@ -212,16 +213,5 @@ const PatientDetailsPage = () => {
     </div>
   );
 };
-
-function Info({ label, value }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-base font-medium text-foreground">
-        {value || "Not provided"}
-      </p>
-    </div>
-  );
-}
 
 export default PatientDetailsPage;

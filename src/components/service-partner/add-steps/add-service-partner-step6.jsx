@@ -24,7 +24,7 @@ import MultiSelect from "@/components/shared/MultiSelect";
 import { useEffect, useState } from "react";
 
 export const AddServicePartnerStep6 = () => {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
 
   const [cities, setCities] = useState([]);
   const selectedCities = watch("serviceCities") || [];
@@ -34,6 +34,10 @@ export const AddServicePartnerStep6 = () => {
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
+
+  const printData = () => {
+    console.log("form values", getValues());
+  };
 
   useEffect(() => {
     if (data) {

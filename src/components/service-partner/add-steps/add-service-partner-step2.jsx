@@ -105,7 +105,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -221,7 +221,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -336,7 +336,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

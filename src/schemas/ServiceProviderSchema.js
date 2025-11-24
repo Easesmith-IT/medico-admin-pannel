@@ -108,7 +108,9 @@ export const personalContactSchema = z.object({
     .int()
     .min(18)
     .max(70),
-  dateOfBirth: z.string().min(1, "Required"),
+  dateOfBirth: z.date({
+    required_error: "Date of birth is required",
+  }),
   gender: z.enum(["Male", "Female", "Other"]),
   mobile: z.string().regex(/^[0-9]{10}$/, "Mobile must be 10 digits"),
   alternateNumber: z.string().optional(),
@@ -132,7 +134,7 @@ export const addressSchema = z.object({
     city: z.string(),
     state: z.string(),
     country: z.string().default("India"),
-    pincode: z.string().regex(/^[0-9]{6}$/, "Pincode must be 6 digits"),
+    pincode: z.string().regex(/^[0-9]{6}$/, "Pincode must be 6 digits").optional(),
     landmark: z.string().optional(),
     sameAsCurrent: z.boolean().optional(),
   }),
@@ -152,7 +154,7 @@ export const professionalServiceSchema = z.object({
   qualification: z.string().min(1),
   registrationNumber: z.string().min(1),
   registrationCouncil: z.string().min(1),
-  yearsOfExperience: z.number().min(0),
+  yearsOfExperience: z.coerce.number().min(0),
   services: z
     .array(
       z.object({
@@ -169,14 +171,14 @@ export const documentsSchema = z.object({
   identityProof: z
     .object({
       type: z.enum(["Aadhar", "PAN", "Voter ID", "Passport"]),
-      documentUrl: z.string().optional(),
+      documentUrl: z.any().optional(),
       documentNumber: z.string().optional(),
     })
     .optional(),
   addressProof: z
     .object({
       type: z.enum(["Aadhar", "Utility Bill", "Rent Agreement", "Passport"]),
-      documentUrl: z.string().optional(),
+      documentUrl: z.any().optional(),
     })
     .optional(),
   educationalCertificates: z
@@ -184,8 +186,8 @@ export const documentsSchema = z.object({
       z.object({
         degree: z.string(),
         institution: z.string().optional(),
-        year: z.number().optional(),
-        certificateUrl: z.string().optional(),
+        year: z.coerce.number().optional(),
+        certificateUrl: z.any().optional(),
       })
     )
     .optional(),
@@ -194,17 +196,17 @@ export const documentsSchema = z.object({
       z.object({
         certificateName: z.string(),
         issuingAuthority: z.string().optional(),
-        issueDate: z.string().optional(),
-        expiryDate: z.string().optional(),
-        certificateUrl: z.string().optional(),
+        issueDate: z.date().optional(),
+        expiryDate: z.date().optional(),
+        certificateUrl: z.any().optional(),
       })
     )
     .optional(),
   registrationCertificate: z
     .object({
-      certificateUrl: z.string().optional(),
-      issueDate: z.string().optional(),
-      expiryDate: z.string().optional(),
+      certificateUrl: z.any().optional(),
+      issueDate: z.date().optional(),
+      expiryDate: z.date().optional(),
     })
     .optional(),
   experienceCertificates: z
@@ -212,25 +214,25 @@ export const documentsSchema = z.object({
       z.object({
         organization: z.string().optional(),
         role: z.string().optional(),
-        from: z.string().optional(),
-        to: z.string().optional(),
-        certificateUrl: z.string().optional(),
+        from: z.date().optional(),
+        to: z.date().optional(),
+        certificateUrl: z.any().optional(),
       })
     )
     .optional(),
   policeVerification: z
     .object({
-      certificateUrl: z.string().optional(),
-      issueDate: z.string().optional(),
+      certificateUrl: z.any().optional(),
+      issueDate: z.date().optional(),
     })
     .optional(),
-  profilePhoto: z.string().optional(),
+  profilePhoto: z.any().optional(),
 });
 
 export const bankAvailabilitySchema = z.object({
   bankDetails: z.object({
     accountHolderName: z.string().min(1),
-    accountNumber: z.string().min(6),
+    accountNumber: z.coerce.number().min(6),
     ifscCode: z.string().min(4),
     bankName: z.string().optional(),
     branchName: z.string().optional(),
@@ -276,9 +278,18 @@ export const finalStepSchema = z.object({
   isAvailable: z.boolean().optional(),
 });
 
-export const fullSchema = personalContactSchema
-  .extend(addressSchema.shape)
-  .extend(professionalServiceSchema.shape)
-  .extend(documentsSchema.shape)
-  .extend(bankAvailabilitySchema.shape)
-  .extend(finalStepSchema.shape);
+// export const fullSchema = personalContactSchema
+//   .extend(addressSchema.shape)
+//   .extend(professionalServiceSchema.shape)
+//   .extend(documentsSchema.shape)
+//   .extend(bankAvailabilitySchema.shape)
+//   .extend(finalStepSchema.shape);
+
+export const fullSchema = z.object({
+  ...personalContactSchema.shape,
+  ...addressSchema.shape,
+  ...professionalServiceSchema.shape,
+  ...documentsSchema.shape,
+  ...bankAvailabilitySchema.shape,
+  ...finalStepSchema.shape,
+});
