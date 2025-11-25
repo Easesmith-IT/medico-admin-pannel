@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Service } from "@/components/service/service";
@@ -27,6 +27,11 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { buildQuery } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Services = () => {
   const [city, setCity] = useState("");
@@ -39,15 +44,9 @@ const Services = () => {
 
   const handleReset = () => {
     setCity("");
+    setStatus("all");
+    setLimit("10");
   };
-
-  // const { data, isLoading, error, refetch } = useApiQuery({
-  //   url: `/service/services/${city}`,
-  //   queryKeys: ["service", city],
-  //   options: {
-  //     enabled: false,
-  //   },
-  // });
 
   const debouncedSearch = useDebounce(search, 1000);
 
@@ -77,7 +76,8 @@ const Services = () => {
   useEffect(() => {
     if (data) {
       setServices(data?.data?.services || []);
-      setPageCount(data?.totalPages || 0);
+      // setPageCount(data?.totalPages || 0);
+      setPageCount(data?.pagination?.pages || 1);
     }
   }, [data]);
 
@@ -155,6 +155,7 @@ const Services = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <label className="text-sm font-medium mb-1 block">Limit</label>
             <Select value={limit} onValueChange={(value) => setLimit(value)}>
@@ -162,8 +163,6 @@ const Services = () => {
                 <SelectValue placeholder="Select Limit" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="5">5</SelectItem>
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
                 <SelectItem value="30">30</SelectItem>
@@ -173,7 +172,7 @@ const Services = () => {
             </Select>
           </div>
 
-          {/* <Tooltip>
+          <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="outline" onClick={handleReset}>
                 <RotateCcwIcon />
@@ -182,7 +181,7 @@ const Services = () => {
             <TooltipContent>
               <p>Reset Filters</p>
             </TooltipContent>
-          </Tooltip> */}
+          </Tooltip>
         </div>
       </div>
 

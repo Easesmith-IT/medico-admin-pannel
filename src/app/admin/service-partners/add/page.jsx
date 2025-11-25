@@ -110,17 +110,7 @@ const AddServicePartner = () => {
     mode: "onTouched",
   });
 
-  const {
-    control,
-    handleSubmit,
-    setError,
-    getValues,
-    register,
-    watch,
-    setValue,
-    trigger,
-    formState,
-  } = form;
+  const { handleSubmit, trigger, formState } = form;
 
   const steps = [
     { id: "personal", label: "Personal & Contact" },
@@ -189,7 +179,16 @@ const AddServicePartner = () => {
   const onSubmit = async (data) => {
     // Final submit: data is validated by zodResolver already
     console.log("FINAL PAYLOAD", data);
-    await submitForm(data);
+    const documents = {
+      addressProof: data.addressProof,
+      educationalCertificates: data.educationalCertificates,
+      experienceCertificates: data.experienceCertificates,
+      identityProof: data.identityProof,
+      policeVerification: data.policeVerification,
+      professionalCertificates: data.professionalCertificates,
+      registrationCertificate: data.registrationCertificate,
+    };
+    await submitForm({ ...data, documents });
   };
 
   useEffect(() => {
@@ -197,7 +196,6 @@ const AddServicePartner = () => {
       router.push("/admin/service-partners");
     }
   }, [result]);
-  
 
   return (
     <div className="space-y-6">

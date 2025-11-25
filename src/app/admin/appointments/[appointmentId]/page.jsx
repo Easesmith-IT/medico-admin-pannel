@@ -1,88 +1,36 @@
 "use client";
 
 import { BookingDetailsSkeleton } from "@/components/booking/booking-details-skeleton";
+import { UpdateBookingModal } from "@/components/booking/update-booking-modal";
 import { BackLink } from "@/components/shared/back-link";
+import { ConfirmModal } from "@/components/shared/confirm-modal";
 import { Info } from "@/components/shared/info";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PUT } from "@/constants/apiMethods";
 import { appointmentStatusColors } from "@/constants/status";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { useApiQuery } from "@/hooks/useApiQuery";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const BookingDetails = () => {
   const params = useParams();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  const booking = {
-    _id: "bk1001",
-
-    patientId: {
-      _id: "pt001",
-      firstName: "Amit",
-      lastName: "Sharma",
-      phone: "9876543210",
-      age: 32,
-    },
-
-    serviceId: {
-      _id: "sv001",
-      name: "General Physician Consultation",
-      description: "Basic health consultation at home",
-    },
-
-    category: "consultation",
-
-    modes: ["Home Service", "Visit Provider Location"],
-
-    servicePartnerId: {
-      _id: "dp001",
-      firstName: "Dr. Rohan",
-      lastName: "Kapoor",
-      specialization: "General Physician",
-    },
-
-    appointmentDate: "2025-01-14T00:00:00.000Z",
-
-    slotTime: {
-      startTime: "10:00",
-      endTime: "10:30",
-    },
-
-    duration: 30,
-
-    status: "Approved",
-
-    notes: "Please bring previous prescriptions.",
-
-    pricing: {
-      basePrice: 500,
-      equipmentCharges: 0,
-      subtotal: 500,
-      taxPercentage: 18,
-      taxAmount: 90,
-      totalAmount: 590,
-    },
-
-    createdBy: {
-      userId: "pt001",
-      userModel: "Patient",
-    },
-
-    createdAt: "2025-01-10T09:15:00.000Z",
-    updatedAt: "2025-01-12T14:30:00.000Z",
+  const handleBookingStatus = async () => {
+    setIsModalOpen(true);
   };
+
+  const { data, isLoading, error } = useApiQuery({
+    url: `/booking/bookings/${params.appointmentId}`,
+    queryKeys: ["bookings", params.appointmentId],
+  });
+
+  const booking = data?.data;
+  console.log("booking", booking);
 
   if (isLoading) return <BookingDetailsSkeleton />;
 
@@ -103,10 +51,18 @@ const BookingDetails = () => {
     createdBy,
     createdAt,
     updatedAt,
+    statusReason,
   } = booking;
 
   return (
     <div>
+      {isModalOpen && (
+        <UpdateBookingModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+      )}
+
       <div className="space-y-6">
         {/* Back Button */}
         {/* <Link href="/dashboard/bookings">
@@ -115,7 +71,14 @@ const BookingDetails = () => {
           </Button>
         </Link> */}
 
-        <BackLink href="/admin/appointments" />
+        <div className="flex justify-between gap-4">
+          <BackLink href="/admin/appointments" />
+          {status !== "Cancelled" && status !== "Rejected" && (
+            <Button onClick={handleBookingStatus} variant="medico">
+              Update Booking Status
+            </Button>
+          )}
+        </div>
 
         {/* Header */}
         <Card>
@@ -140,11 +103,9 @@ const BookingDetails = () => {
             <CardTitle className="text-lg">Patient Information</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <Info
-              label="Name"
-              value={`${patientId.firstName} ${patientId.lastName}`}
-            />
-            <Info label="Patient ID" value={patientId._id} />
+            <Info label="Name" value={patientId?.firstName} />
+            <Info label="Email" value={patientId?.email} />
+            <Info label="Phone" value={patientId?.phone} />
           </CardContent>
         </Card>
 
@@ -154,20 +115,20 @@ const BookingDetails = () => {
             <CardTitle className="text-lg">Service Information</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <Info label="Service" value={serviceId.name} />
+            <Info label="Service" value={serviceId?.name} />
             <Info label="Category" value={category || "—"} />
             <Info
               label="Modes Available"
               value={modes?.length ? modes.join(", ") : "—"}
             />
-            <Info
+            {/* <Info
               label="Assigned Partner"
               value={
                 servicePartnerId
                   ? `${servicePartnerId.firstName} ${servicePartnerId.lastName}`
                   : "Not Assigned"
               }
-            />
+            /> */}
           </CardContent>
         </Card>
 
@@ -196,15 +157,27 @@ const BookingDetails = () => {
             <CardTitle className="text-lg">Pricing Summary</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <Info label="Base Price" value={pricing?.basePrice ?? "—"} />
+            <Info
+              label="Base Price"
+              value={String(pricing?.basePrice) ?? "—"}
+            />
             <Info
               label="Equipment Charges"
-              value={pricing?.equipmentCharges ?? "—"}
+              value={String(pricing?.equipmentCharges) ?? "—"}
             />
-            <Info label="Subtotal" value={pricing?.subtotal ?? "—"} />
-            <Info label="Tax (%)" value={pricing?.taxPercentage ?? "—"} />
-            <Info label="Tax Amount" value={pricing?.taxAmount ?? "—"} />
-            <Info label="Total Amount" value={pricing?.totalAmount ?? "—"} />
+            <Info label="Subtotal" value={String(pricing?.subtotal) ?? "—"} />
+            <Info
+              label="Tax (%)"
+              value={String(pricing?.taxPercentage) ?? "—"}
+            />
+            <Info
+              label="Tax Amount"
+              value={String(pricing?.taxAmount) ?? "—"}
+            />
+            <Info
+              label="Total Amount"
+              value={String(pricing?.totalAmount) ?? "—"}
+            />
           </CardContent>
         </Card>
 
@@ -223,14 +196,11 @@ const BookingDetails = () => {
               label="Updated At"
               value={new Date(updatedAt).toLocaleString()}
             />
+            <div className="col-span-2">
+              <Info label="Reason" value={statusReason} />
+            </div>
           </CardContent>
         </Card>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4">
-          <Button variant="outline">Cancel Booking</Button>
-          <Button>Approve Booking</Button>
-        </div>
       </div>
     </div>
   );

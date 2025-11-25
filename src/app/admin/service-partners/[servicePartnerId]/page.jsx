@@ -119,7 +119,7 @@ const ServicePartnerPage = () => {
 
   const { data, isLoading, error } = useApiQuery({
     url: `/serviceProvider/service-provider/${params.servicePartnerId}`,
-    queryKeys: ["service-provider"],
+    queryKeys: ["service-provider", params.servicePartnerId],
   });
 
   console.log("data", data);

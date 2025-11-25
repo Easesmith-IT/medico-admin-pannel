@@ -11,7 +11,7 @@ const DoctorDetailsPage = () => {
 
   const { data, isLoading, error } = useApiQuery({
     url: `/admin/doctors/${params.doctorId}`,
-    queryKeys: ["doctors"],
+    queryKeys: ["doctors", params.doctorId],
   });
 
   console.log("data", data);

@@ -26,6 +26,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { POST } from "@/constants/apiMethods";
+import { shiftTypesOptions } from "@/constants/service";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { serviceSchema } from "@/schemas/ServicesSchema";
@@ -100,15 +101,6 @@ function DurationChips({ values = [], selected = [], onChange }) {
     </div>
   );
 }
-
-const shiftTypesOptions = [
-  { label: "Hourly", value: "hourly" },
-  { label: "8 Hour", value: "8-hour" },
-  { label: "12 Hour", value: "12-hour" },
-  { label: "24 Hour", value: "24-hour" },
-  { label: "Day Shift", value: "day-shift" },
-  { label: "Night Shift", value: "night-shift" },
-];
 
 const CreateService = () => {
   const [imagePreview, setImagePreview] = useState("");

@@ -40,8 +40,6 @@ export const AddServicePartnerStep4 = () => {
     name: "experienceCertificates",
   });
 
-  const watchAll = watch();
-
   // Profile photo (image preview)
   const [photoPreview, setPhotoPreview] = useState(null);
 
@@ -90,7 +88,6 @@ export const AddServicePartnerStep4 = () => {
   // Helper to display filename for a given path inside documents
   function filenameFor(path) {
     const val = watch(path);
-    console.log("val", val);
 
     if (!val) return "";
     if (typeof val === "string") return val.split("/").pop();
@@ -112,7 +109,7 @@ export const AddServicePartnerStep4 = () => {
           <h4 className="font-medium mb-2">Profile Photo</h4>
           <div
             {...getRootPhotoProps()}
-            className="border rounded p-3 cursor-pointer min-h-[96px] flex items-center justify-center"
+            className="border rounded p-3 cursor-pointer min-h-24 flex items-center justify-center"
           >
             <input {...getInputPhotoProps()} />
             <div className="text-center">

@@ -33,12 +33,12 @@ export const serviceSchema = z
     }),
 
     nursingSlots: z.object({
-      enabled: z.boolean(),
-      shiftTypes: z.array(z.string()),
-      minDuration: z.number().int().min(1),
-      maxDuration: z.number().int().min(1),
-      available24x7: z.boolean(),
-      allowCustomDuration: z.boolean(),
+      enabled: z.boolean().optional(),
+      shiftTypes: z.array(z.string()).optional(),
+      minDuration: z.number().int().optional(),
+      maxDuration: z.number().int().optional(),
+      available24x7: z.boolean().optional(),
+      allowCustomDuration: z.boolean().optional(),
     }),
 
     equipmentBooking: z.object({
@@ -59,3 +59,8 @@ export const serviceSchema = z
       });
     }
   });
+
+export const UpdateBookingStatusSchema = z.object({
+  status: z.string().min(1, "Status required"),
+  reason: z.string().min(1),
+});

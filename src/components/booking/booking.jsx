@@ -9,8 +9,6 @@ import { Actions } from "../shared/actions";
 import { useRouter } from "next/navigation";
 import { appointmentStatusColors } from "@/constants/status";
 
-
-
 export const Booking = ({ booking }) => {
   const router = useRouter();
 
@@ -19,11 +17,12 @@ export const Booking = ({ booking }) => {
   };
   return (
     <TableRow>
-      <TableCell className="font-medium">
-        {booking.patientId?.firstName}
+      <TableCell>
+        <p>{booking.patientId?.firstName}</p>
+        <p>{booking.patientId?.email}</p>
       </TableCell>
 
-      <TableCell>{booking.serviceId?.name}</TableCell>
+      <TableCell>{booking.serviceId?.name || "NA"}</TableCell>
 
       <TableCell>
         {new Date(booking.appointmentDate).toLocaleDateString("en-IN", {
@@ -49,6 +48,7 @@ export const Booking = ({ booking }) => {
           {booking.status}
         </Badge>
       </TableCell>
+      <TableCell>{booking.category || "NA"}</TableCell>
 
       <TableCell className="text-right">
         <Actions onView={onView} />

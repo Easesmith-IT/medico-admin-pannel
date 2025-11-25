@@ -190,8 +190,6 @@ const ServiceProviders = () => {
                 <SelectValue placeholder="Select Limit" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="5">5</SelectItem>
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
                 <SelectItem value="30">30</SelectItem>
@@ -225,6 +223,7 @@ const ServiceProviders = () => {
               <TableHead>Specialization</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Verification Status</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

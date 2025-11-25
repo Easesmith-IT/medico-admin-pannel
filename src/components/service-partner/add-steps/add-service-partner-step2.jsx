@@ -4,13 +4,65 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 export const AddServicePartnerStep2 = () => {
-  const { control } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
+
+  const sameAsCurrent = watch("permanentAddress.sameAsCurrent");
+
+  const street = watch("currentAddress.street");
+  const locality = watch("currentAddress.locality");
+  const city = watch("currentAddress.city");
+  const state = watch("currentAddress.state");
+  const country = watch("currentAddress.country");
+  const pincode = watch("currentAddress.pincode");
+  const landmark = watch("currentAddress.landmark");
+
+  console.log("sameAsCurrent", sameAsCurrent);
+
+  // useEffect(() => {
+  //   if (sameAsCurrent) {
+  //     setValue("permanentAddress.street", getValues("currentAddress.street"));
+  //     setValue(
+  //       "permanentAddress.locality",
+  //       getValues("currentAddress.locality")
+  //     );
+  //     setValue("permanentAddress.city", getValues("currentAddress.city"));
+  //     setValue("permanentAddress.state", getValues("currentAddress.state"));
+  //     setValue("permanentAddress.country", getValues("currentAddress.country"));
+  //     setValue("permanentAddress.pincode", getValues("currentAddress.pincode"));
+  //     setValue(
+  //       "permanentAddress.landmark",
+  //       getValues("currentAddress.landmark")
+  //     );
+  //   }
+  // }, [sameAsCurrent]);
+
+  useEffect(() => {
+    if (sameAsCurrent) {
+      setValue("permanentAddress.street", street);
+      setValue("permanentAddress.locality", locality);
+      setValue("permanentAddress.city", city);
+      setValue("permanentAddress.state", state);
+      setValue("permanentAddress.country", country);
+      setValue("permanentAddress.pincode", pincode);
+      setValue("permanentAddress.landmark", landmark);
+    }
+  }, [
+    sameAsCurrent,
+    street,
+    locality,
+    city,
+    state,
+    country,
+    pincode,
+    landmark,
+  ]);
 
   return (
     <div>
@@ -137,7 +189,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Street</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -151,7 +203,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Locality</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -165,7 +217,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -179,7 +231,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>State</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -193,7 +245,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Country</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -207,7 +259,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Landmark</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input disabled={sameAsCurrent} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -221,7 +273,7 @@ export const AddServicePartnerStep2 = () => {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input disabled={sameAsCurrent} type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

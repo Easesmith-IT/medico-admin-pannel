@@ -97,7 +97,11 @@ export const AddCityModal = ({ isModalOpen, setIsModalOpen, city = "" }) => {
                 <FormItem>
                   <FormLabel>Latitude</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Enter latitude" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="Enter latitude"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,7 +116,11 @@ export const AddCityModal = ({ isModalOpen, setIsModalOpen, city = "" }) => {
                 <FormItem>
                   <FormLabel>Longitude</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Enter longitude" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="Enter longitude"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

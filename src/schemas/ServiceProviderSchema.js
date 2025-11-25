@@ -103,7 +103,7 @@ export const personalContactSchema = z.object({
   firstName: z.string().min(1, "Required"),
   lastName: z.string().min(1, "Required"),
   ownerName: z.string().optional(),
-  age: z
+  age: z.coerce
     .number({ invalid_type_error: "Age must be a number" })
     .int()
     .min(18)
@@ -134,7 +134,10 @@ export const addressSchema = z.object({
     city: z.string(),
     state: z.string(),
     country: z.string().default("India"),
-    pincode: z.string().regex(/^[0-9]{6}$/, "Pincode must be 6 digits").optional(),
+    pincode: z
+      .string()
+      .regex(/^[0-9]{6}$/, "Pincode must be 6 digits")
+      .optional(),
     landmark: z.string().optional(),
     sameAsCurrent: z.boolean().optional(),
   }),
