@@ -118,7 +118,7 @@ export const ExportAppointmentModal = ({ isModalOpen, setIsModalOpen }) => {
 
             {/* Export Format */}
 
-            <FormField
+            {/* <FormField
               control={control}
               name="format"
               render={({ field }) => (
@@ -138,7 +138,7 @@ export const ExportAppointmentModal = ({ isModalOpen, setIsModalOpen }) => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* Actions */}
             <div className="flex gap-4 items-center">

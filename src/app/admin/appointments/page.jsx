@@ -388,6 +388,7 @@ const Appointments = () => {
               <TableHead>Patient</TableHead>
               <TableHead>Service</TableHead>
               <TableHead>Appointment Date</TableHead>
+              <TableHead>Created Date</TableHead>
               <TableHead>Slot</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead>Status</TableHead>

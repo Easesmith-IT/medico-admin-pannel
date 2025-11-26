@@ -31,6 +31,13 @@ export const Booking = ({ booking }) => {
           year: "numeric",
         })}
       </TableCell>
+      <TableCell>
+        {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })}
+      </TableCell>
 
       <TableCell>
         {booking.slotTime?.startTime} - {booking.slotTime?.endTime}
