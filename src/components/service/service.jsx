@@ -49,7 +49,7 @@ export const Service = ({ service }) => {
 
   const { mutateAsync: deleteService, isPending: isDeleteLoading } =
     useApiMutation({
-      url: `/service/${service?._id}`,
+      url: `/service/service/${service?._id}`,
       method: DELETE,
       invalidateKey: ["service"],
     });
