@@ -18,11 +18,11 @@ export const Booking = ({ booking }) => {
   return (
     <TableRow>
       <TableCell>
-        <p>{booking.patientId?.firstName}</p>
-        <p>{booking.patientId?.email}</p>
+        <p>{booking.patient?.firstName}</p>
+        <p>{booking.patient?.email}</p>
       </TableCell>
 
-      <TableCell>{booking.serviceId?.name || "NA"}</TableCell>
+      <TableCell>{booking.service?.name || "NA"}</TableCell>
 
       <TableCell>
         {new Date(booking.appointmentDate).toLocaleDateString("en-IN", {

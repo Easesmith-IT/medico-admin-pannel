@@ -86,7 +86,7 @@ const Add = ({ defaultValues }) => {
   } = useApiMutation({
     url: "/admin/signup",
     method: POST,
-    invalidateKey: ["admin-signup"],
+    invalidateKey: ["admin"],
   });
 
   const onSubmit = async (values) => {
