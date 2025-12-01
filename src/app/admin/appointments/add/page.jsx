@@ -134,6 +134,8 @@ const AddAppointment = () => {
     await submitForm(apiData);
   };
 
+  console.log("partnerData", partnerData);
+
   useEffect(() => {
     if (result) {
       console.log("result", result);
@@ -143,7 +145,7 @@ const AddAppointment = () => {
 
   return (
     <div className="space-y-6">
-      <BackLink href="/admin/doctors">
+      <BackLink href="/admin/appointments">
         <H1>Create Booking</H1>
       </BackLink>
 
@@ -158,7 +160,7 @@ const AddAppointment = () => {
                   name="serviceId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service ID</FormLabel>
+                      <FormLabel>Service</FormLabel>
                       <FormControl>
                         <Select
                           disabled={isServiceLoading}
@@ -195,7 +197,7 @@ const AddAppointment = () => {
                   name="patientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Patient ID</FormLabel>
+                      <FormLabel>Patient</FormLabel>
                       <FormControl>
                         <Select
                           disabled={isPatientLoading}
@@ -396,7 +398,7 @@ const AddAppointment = () => {
                   name="cityId"
                   render={({ field }) => (
                     <FormItem className="">
-                      <FormLabel>City ID</FormLabel>
+                      <FormLabel>City</FormLabel>
                       <FormControl>
                         <Select
                           disabled={isCityLoading}
@@ -477,7 +479,13 @@ const AddAppointment = () => {
                         return (
                           <div
                             key={partner._id}
-                            onClick={() => field.onChange(partner._id)}
+                            onClick={() => {
+                              if (field.value === partner._id) {
+                                field.onChange(""); // <-- DESELECT
+                              } else {
+                                field.onChange(partner._id); // <-- SELECT
+                              }
+                            }}
                             className={`
                 cursor-pointer border rounded-xl p-4 shadow-sm 
                 transition-all duration-200 
@@ -503,10 +511,7 @@ const AddAppointment = () => {
 
                               <Avatar className="size-14">
                                 <AvatarImage
-                                  src={
-                                    partner?.documents?.profilePhoto ||
-                                    "https://github.com/shadcn.png"
-                                  }
+                                  src={partner?.documents?.profilePhoto}
                                 />
                                 <AvatarFallback>
                                   {partner.firstName ?? "Partner"}

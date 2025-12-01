@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { localPermissions } from "./constants/permissions";
 
-export async function middleware(request) {
+export async function proxy(request) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
 
@@ -10,11 +10,11 @@ export async function middleware(request) {
   // -------------------------------
   const accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
-  const isAuthenticated = request.cookies
-    .get("isAuthenticated")
-    ?.value? JSON.parse(request.cookies.get("isAuthenticated")?.value): false;
+  const isAuthenticated = request.cookies.get("isAuthenticated")?.value
+    ? JSON.parse(request.cookies.get("isAuthenticated")?.value)
+    : false;
   console.log("refreshToken", refreshToken);
-  console.log("accessToken",  accessToken);
+  console.log("accessToken", accessToken);
   console.log("typeof isAuthenticated", typeof isAuthenticated);
 
   // const refreshToken = request.cookies.get("refreshToken")?.value;
@@ -56,7 +56,7 @@ export async function middleware(request) {
     // 🔹 If not logged in → check backend
     if (!isAuthenticated) {
       console.log("isAuthenticated is false");
-      
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/check-auth`,
         {
@@ -64,7 +64,7 @@ export async function middleware(request) {
           headers: { Cookie: `refreshToken=${refreshToken}` },
         }
       );
-      
+
       const data = await res.json();
       console.log("data", data);
 
@@ -73,14 +73,14 @@ export async function middleware(request) {
       }
     }
 
-  //   // 🔹 Permission check
-  //   const permissionKey = localPermissions[section];
-  //   if (
-  //     !permissions?.[permissionKey] ||
-  //     permissions?.[permissionKey] === "none"
-  //   ) {
-  //     return NextResponse.redirect(new URL("/", request.url));
-  //   }
+    //   // 🔹 Permission check
+    //   const permissionKey = localPermissions[section];
+    //   if (
+    //     !permissions?.[permissionKey] ||
+    //     permissions?.[permissionKey] === "none"
+    //   ) {
+    //     return NextResponse.redirect(new URL("/", request.url));
+    //   }
   }
 
   // -------------------------------

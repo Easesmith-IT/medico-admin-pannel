@@ -132,6 +132,7 @@ const Doctors = () => {
               <TableHead>Current Workplace</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Verification Status</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

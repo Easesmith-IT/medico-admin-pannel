@@ -3,12 +3,18 @@ import { Actions } from "../shared/actions";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns/format";
+import { Switch } from "../ui/switch";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { PATCH } from "@/constants/apiMethods";
+import { Spinner } from "../ui/spinner";
 
 export const Patient = ({ patient }) => {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [isActive, setIsActive] = useState(patient?.isActive || false);
+
   const router = useRouter();
 
   const onDelete = () => {
@@ -22,6 +28,23 @@ export const Patient = ({ patient }) => {
   const onEdit = () => {
     router.push(`/admin/patients/${patient?._id}/update`);
   };
+
+  const { mutateAsync, isPending, data, error } = useApiMutation({
+    url: `/admin/patients/${patient._id}/toggle-status`,
+    method: PATCH,
+    invalidateKey: ["patients"],
+  });
+
+  const toggleStatus = async () => {
+    setIsActive((prev) => !prev);
+    await mutateAsync();
+  };
+
+  useEffect(() => {
+    if (error) {
+      setIsActive(patient?.isActive);
+    }
+  }, [error]);
 
   return (
     <TableRow className="hover:bg-muted/30">
@@ -46,11 +69,16 @@ export const Patient = ({ patient }) => {
       <TableCell className="capitalize">{patient.gender || "NA"}</TableCell>
       <TableCell>{patient.bloodGroup || "NA"}</TableCell>
       <TableCell>
-        {patient.isActive ? (
-          <Badge variant="success">Active</Badge>
-        ) : (
-          <Badge variant="secondary">Inactive</Badge>
-        )}
+        <div className="flex flex-col gap-1">
+          <Badge variant={patient.isActive ? "success" : "destructive"}>
+            {isPending ? <Spinner /> : patient.isActive ? "Active" : "Inactive"}
+          </Badge>
+          <Switch
+            checked={isActive}
+            onCheckedChange={toggleStatus}
+            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+          />
+        </div>
       </TableCell>
       <TableCell>
         {patient.createdAt &&

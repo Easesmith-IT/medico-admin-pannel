@@ -207,10 +207,10 @@ const UpdateAppointment = () => {
                   name="serviceId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service ID</FormLabel>
+                      <FormLabel>Service</FormLabel>
                       <FormControl>
                         <Select
-                          disabled={isServiceLoading}
+                          disabled
                           value={field.value}
                           key={field.value}
                           onValueChange={field.onChange}
@@ -241,10 +241,10 @@ const UpdateAppointment = () => {
                   name="patientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Patient ID</FormLabel>
+                      <FormLabel>Patient</FormLabel>
                       <FormControl>
                         <Select
-                          disabled={isPatientLoading}
+                          disabled
                           value={field.value}
                           key={field.value}
                           onValueChange={field.onChange}
@@ -415,7 +415,7 @@ const UpdateAppointment = () => {
                   name="cityId"
                   render={({ field }) => (
                     <FormItem className="">
-                      <FormLabel>City ID</FormLabel>
+                      <FormLabel>City</FormLabel>
                       <FormControl>
                         <Select
                           disabled={isCityLoading}
@@ -489,15 +489,22 @@ const UpdateAppointment = () => {
                       Select Service Provider
                     </FormLabel>
 
-                    {!isPartnerLoading && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                      {partnerData?.data?.map((partner) => {
-                        const selected = field.value === partner._id;
+                    {!isPartnerLoading && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
+                        {partnerData?.data?.map((partner) => {
+                          const selected = field.value === partner._id;
 
-                        return (
-                          <div
-                            key={partner._id}
-                            onClick={() => field.onChange(partner._id)}
-                            className={`
+                          return (
+                            <div
+                              key={partner._id}
+                              onClick={() => {
+                                if (field.value === partner._id) {
+                                  field.onChange(""); // <-- DESELECT
+                                } else {
+                                  field.onChange(partner._id); // <-- SELECT
+                                }
+                              }}
+                              className={`
                 cursor-pointer border rounded-xl p-4 shadow-sm 
                 transition-all duration-200 
                 ${
@@ -507,58 +514,57 @@ const UpdateAppointment = () => {
                 }
                 hover:shadow-md
               `}
-                          >
-                            {/* Top Section */}
-                            <div className="flex items-center gap-3">
-                              {/* Profile Photo */}
-                              <Avatar className="size-14">
-                                <AvatarImage
-                                  src={
-                                    partner?.documents?.profilePhoto ||
-                                    "https://github.com/shadcn.png"
-                                  }
-                                />
-                                <AvatarFallback>
-                                  {partner.firstName ?? "Partner"}
-                                </AvatarFallback>
-                              </Avatar>
+                            >
+                              {/* Top Section */}
+                              <div className="flex items-center gap-3">
+                                {/* Profile Photo */}
+                                <Avatar className="size-14">
+                                  <AvatarImage
+                                    src={
+                                      partner?.documents?.profilePhoto
+                                    }
+                                  />
+                                  <AvatarFallback>
+                                    {partner.firstName ?? "Partner"}
+                                  </AvatarFallback>
+                                </Avatar>
 
-                              <div className="flex flex-col">
-                                {/* Name */}
-                                <h3 className="font-semibold text-gray-900 text-lg">
-                                  {partner.firstName} {partner.lastName}
-                                </h3>
+                                <div className="flex flex-col">
+                                  {/* Name */}
+                                  <h3 className="font-semibold text-gray-900 text-lg">
+                                    {partner.firstName} {partner.lastName}
+                                  </h3>
 
-                                {/* City */}
-                                <p className="text-sm text-gray-600">
-                                  {partner?.currentAddress?.city ||
-                                    "City not available"}
+                                  {/* City */}
+                                  <p className="text-sm text-gray-600">
+                                    {partner?.currentAddress?.city ||
+                                      "City not available"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Middle Section */}
+                              <div className="mt-3 space-y-1 text-sm">
+                                {/* Experience */}
+                                <p className="text-gray-700">
+                                  <span className="font-semibold">
+                                    Experience:
+                                  </span>{" "}
+                                  {partner.yearsOfExperience} yrs
+                                </p>
+
+                                {/* Rating */}
+                                <p className="text-gray-700">
+                                  <span className="font-semibold">Rating:</span>{" "}
+                                  ⭐ {partner?.rating?.average?.toFixed(1) || 0}{" "}
+                                  ({partner?.rating?.totalReviews || 0})
                                 </p>
                               </div>
-                            </div>
 
-                            {/* Middle Section */}
-                            <div className="mt-3 space-y-1 text-sm">
-                              {/* Experience */}
-                              <p className="text-gray-700">
-                                <span className="font-semibold">
-                                  Experience:
-                                </span>{" "}
-                                {partner.yearsOfExperience} yrs
-                              </p>
-
-                              {/* Rating */}
-                              <p className="text-gray-700">
-                                <span className="font-semibold">Rating:</span>{" "}
-                                ⭐ {partner?.rating?.average?.toFixed(1) || 0} (
-                                {partner?.rating?.totalReviews || 0})
-                              </p>
-                            </div>
-
-                            {/* Badge */}
-                            <div className="mt-3">
-                              <span
-                                className={`
+                              {/* Badge */}
+                              <div className="mt-3">
+                                <span
+                                  className={`
                     px-2 py-1 rounded-full text-xs font-semibold
                     ${
                       partner.approvalStatus === "Approved"
@@ -570,21 +576,22 @@ const UpdateAppointment = () => {
                         : "bg-gray-100 text-gray-700"
                     }
                   `}
-                              >
-                                {partner.approvalStatus}
-                              </span>
+                                >
+                                  {partner.approvalStatus}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
 
-                      {/* No Providers */}
-                      {partnerData && partnerData.data.length === 0 && (
-                        <div className="col-span-full text-sm text-muted-foreground">
-                          No service providers found
-                        </div>
-                      )}
-                    </div>}
+                        {/* No Providers */}
+                        {partnerData && partnerData.data.length === 0 && (
+                          <div className="col-span-full text-sm text-muted-foreground">
+                            No service providers found
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {isPartnerLoading && <Spinner />}
 

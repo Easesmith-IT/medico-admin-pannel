@@ -50,6 +50,7 @@ const Cities = () => {
               <TableHead>Name</TableHead>
               <TableHead>Latitude</TableHead>
               <TableHead>Longitude</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
