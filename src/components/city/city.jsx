@@ -9,6 +9,7 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { DELETE, PATCH } from "@/constants/apiMethods";
 import { Badge } from "../ui/badge";
 import { Switch } from "../ui/switch";
+import { Spinner } from "../ui/spinner";
 
 export const City = ({ city }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,18 +40,20 @@ export const City = ({ city }) => {
     data,
     error,
   } = useApiMutation({
-    url: `/admin/cities/${city._id}/toggle-status`,
+    url: `/city/admin/cities/toggle/${city._id}`,
     method: PATCH,
     invalidateKey: ["city"],
   });
 
   const toggleStatus = async () => {
     setIsActive((prev) => !prev);
-    // await togglePatientStatus();
+    await togglePatientStatus();
   };
 
+  console.log("error", error);
   useEffect(() => {
     if (error) {
+      
       setIsActive(city?.isActive);
     }
   }, [error]);
