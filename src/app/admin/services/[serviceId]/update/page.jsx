@@ -1,9 +1,10 @@
 "use client";
 
+import { BackLink } from "@/components/shared/back-link";
 import MultiSelect from "@/components/shared/MultiSelect";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -24,14 +25,13 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { PATCH, POST, PUT } from "@/constants/apiMethods";
+import { PATCH } from "@/constants/apiMethods";
 import { shiftTypesOptions } from "@/constants/service";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { serviceSchema } from "@/schemas/ServicesSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeftIcon, UploadCloud } from "lucide-react";
-import Link from "next/link";
+import { UploadCloud } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -272,10 +272,9 @@ const UpdateService = () => {
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/services" className="flex gap-1 items-center mb-4">
-        <ArrowLeftIcon className="text-3xl cursor-pointer" />
+      <BackLink href="/admin/services">
         <H1>Update Service</H1>
-      </Link>
+      </BackLink>
 
       <Card className="shadow-md">
         <CardContent>
@@ -970,6 +969,7 @@ const UpdateService = () => {
                 <Button
                   type="submit"
                   disabled={formState.isSubmitting || isSubmitFormLoading}
+                  variant="medico"
                 >
                   {formState.isSubmitting || isSubmitFormLoading ? (
                     <Spinner />
