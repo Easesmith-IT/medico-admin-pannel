@@ -124,7 +124,9 @@ const AddAppointment = () => {
   const onSubmit = async (data) => {
     const apiData = {
       ...data,
-      appointmentDate: format(new Date(data.appointmentDate), "yyyy-MM-dd"),
+      appointmentDate:
+        data.appointmentDate &&
+        format(new Date(data.appointmentDate), "yyyy-MM-dd"),
     };
     console.log("Booking Payload:", apiData);
 

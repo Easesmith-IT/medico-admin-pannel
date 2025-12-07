@@ -68,12 +68,13 @@ export const DoctorDetails = ({ doctor }) => {
             <Phone className="h-4 w-4 text-muted-foreground" />
             <span>{doctor.phone}</span>
           </div>
-          <div className="flex items-center gap-2">
+         {address && <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span>
-              {address?.street}, {address?.city}, {address?.state}, {address?.pincode}, {address?.country}
+              {/* {address?.street}, {address?.city}, {address?.state}, {address?.pincode}, {address?.country} */}
+              {address}
             </span>
-          </div>
+          </div>}
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-muted-foreground" />
             <span>Medical Reg. No: {doctor.medicalRegistrationNumber}</span>

@@ -139,7 +139,7 @@ const TreatmentHistory = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
+              <div className="hidden">
                 <label className="text-sm font-medium mb-1 block">Limit</label>
                 <Select
                   value={limit}
@@ -205,7 +205,7 @@ const TreatmentHistory = () => {
                         Booking
                       </Badge>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(item.appointmentDate)}
+                        {item.appointmentDate && formatDate(item.appointmentDate)}
                       </p>
                     </div>
 

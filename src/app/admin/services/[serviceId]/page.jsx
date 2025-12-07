@@ -206,10 +206,10 @@ const ServiceDetails = () => {
             </span>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Created At: {new Date(service.createdAt).toLocaleString()}
+            Created At: {service.createdAt && new Date(service.createdAt).toLocaleString()}
           </p>
           <p className="text-xs text-gray-500">
-            Updated At: {new Date(service.updatedAt).toLocaleString()}
+            Updated At: {service.updatedAt && new Date(service.updatedAt).toLocaleString()}
           </p>
         </div>
       )}

@@ -25,14 +25,14 @@ export const Booking = ({ booking }) => {
       <TableCell>{booking.serviceName || "NA"}</TableCell>
 
       <TableCell>
-        {new Date(booking.appointmentDate).toLocaleDateString("en-IN", {
+        {booking.appointmentDate && new Date(booking.appointmentDate).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
           year: "numeric",
         })}
       </TableCell>
       <TableCell>
-        {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+        {booking.createdAt && new Date(booking.createdAt).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
           year: "numeric",

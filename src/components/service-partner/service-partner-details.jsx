@@ -34,7 +34,7 @@ export const ServicePartnerDetails = ({ provider }) => {
           <Info label="Gender" value={provider.gender} />
           <Info
             label="DOB"
-            value={new Date(provider.dateOfBirth).toLocaleDateString()}
+            value={provider.dateOfBirth && new Date(provider.dateOfBirth).toLocaleDateString()}
           />
         </CardContent>
       </Card>
@@ -171,11 +171,11 @@ export const ServicePartnerDetails = ({ provider }) => {
           <Info label="About" value={provider.about || "—"} />
           <Info
             label="Created At"
-            value={new Date(provider.createdAt).toLocaleString()}
+            value={provider.createdAt && new Date(provider.createdAt).toLocaleString()}
           />
           <Info
             label="Updated At"
-            value={new Date(provider.updatedAt).toLocaleString()}
+            value={provider.updatedAt && new Date(provider.updatedAt).toLocaleString()}
           />
         </CardContent>
       </Card>

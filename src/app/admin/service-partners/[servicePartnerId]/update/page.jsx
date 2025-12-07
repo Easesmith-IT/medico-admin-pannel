@@ -99,7 +99,7 @@ const defaultValues = {
 };
 
 const UpdatePage = () => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(3);
   const router = useRouter();
   const params = useParams();
 
@@ -201,7 +201,7 @@ const UpdatePage = () => {
         lastName,
         ownerName,
         age,
-        dateOfBirth: new Date(dateOfBirth),
+        dateOfBirth: dateOfBirth && new Date(dateOfBirth),
         gender,
         mobile,
         alternateNumber,
@@ -227,26 +227,30 @@ const UpdatePage = () => {
         professionalCertificates: documents.professionalCertificates?.map(
           (item) => ({
             ...item,
-            issueDate: new Date(item?.issueDate),
-            expiryDate: new Date(item?.expiryDate),
+            issueDate: item?.issueDate && new Date(item?.issueDate),
+            expiryDate: item?.expiryDate && new Date(item?.expiryDate),
           })
         ),
         registrationCertificate: {
           ...documents.registrationCertificate,
-          issueDate: new Date(documents.registrationCertificate?.issueDate),
-          expiryDate: new Date(documents.registrationCertificate?.expiryDate),
+          issueDate: documents.registrationCertificate?.issueDate && new Date(documents.registrationCertificate?.issueDate),
+          expiryDate: documents.registrationCertificate?.expiryDate && new Date(documents.registrationCertificate?.expiryDate),
         },
         experienceCertificates: documents.experienceCertificates?.map(
           (item) => ({
             ...item,
-            from: new Date(item?.from),
-            to: new Date(item?.to),
+            from: item?.from && new Date(item?.from),
+            to: item?.to && new Date(item?.to),
           })
         ),
-        policeVerification: {
-          ...documents.policeVerification,
-          issueDate: new Date(documents.policeVerification.issueDate),
-        },
+        policeVerification: documents.policeVerification
+          ? {
+              ...documents.policeVerification,
+              issueDate:
+                documents.policeVerification.issueDate &&
+                new Date(documents.policeVerification.issueDate),
+            }
+          : {},
         profilePhoto: documents.profilePhoto,
 
         bankDetails,

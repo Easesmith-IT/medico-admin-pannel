@@ -140,7 +140,7 @@ const BookingDetails = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <Info
               label="Date"
-              value={new Date(appointmentDate).toLocaleDateString()}
+              value={ appointmentDate && new Date(appointmentDate).toLocaleDateString()}
             />
             <Info
               label="Slot"
@@ -190,11 +190,11 @@ const BookingDetails = () => {
             <Info label="Created By" value={createdBy?.userModel} />
             <Info
               label="Created At"
-              value={new Date(createdAt).toLocaleString()}
+              value={createdAt && new Date(createdAt).toLocaleString()}
             />
             <Info
               label="Updated At"
-              value={new Date(updatedAt).toLocaleString()}
+              value={updatedAt && new Date(updatedAt).toLocaleString()}
             />
             <div className="col-span-2">
               <Info label="Reason" value={statusReason} />

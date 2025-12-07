@@ -76,7 +76,7 @@ export const Doctor = ({ doctor }) => {
           <Badge
             variant={
               doctor.verificationStatus === "pending"
-                ? "secondary"
+                ? "inprogress"
                 : doctor.verificationStatus === "rejected"
                 ? "destructive"
                 : "success"
