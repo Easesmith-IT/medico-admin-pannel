@@ -1,7 +1,8 @@
 import { ConfirmModal } from "@/components/shared/confirm-modal";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, Trash2Icon } from "lucide-react";
+import { format } from "date-fns/format";
+import { BadgeCheckIcon, MessageCircleIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 export const Comment = ({ comment }) => {
@@ -11,14 +12,15 @@ export const Comment = ({ comment }) => {
     setIsAlertModalOpen(true);
   };
 
-  const handleDelete = ()=>{}
+  const handleDelete = () => {};
 
   return (
     <div className="border rounded-xl p-3 flex gap-3">
       <Avatar className="h-8 w-8">
+        <AvatarImage src="https://github.com/shadcn.png" />
         <AvatarFallback>
-          {comment.author
-            .split(" ")
+          {comment?.author
+            ?.split(" ")
             .map((s) => s[0])
             .join("")
             .slice(0, 2)}
@@ -26,9 +28,19 @@ export const Comment = ({ comment }) => {
       </Avatar>
       <div className="flex-1">
         <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">{comment.author}</div>
+          <div className="flex gap-1 items-center">
+            <div className="text-sm font-medium">{comment.author || "USER"} </div>
+            {(comment.userRole === "subadmin" ||
+              comment.userRole === "superadmin") && (
+              <div className="text-[10px] font-semibold bg-blue-600 text-white px-2 py-0.5 flex items-center rounded-full">
+                <BadgeCheckIcon className="size-3 mr-1 -ml-0.5" />
+                <span>Admin</span>
+              </div>
+            )}
+          </div>
           <span className="text-[11px] text-slate-400">
-            {comment.createdAt}
+            {comment?.createdAt &&
+              format(new Date(comment.createdAt), "MMM dd, yyyy hh:mm a")}
           </span>
         </div>
         <p className="text-sm text-slate-700 mt-1">{comment.text}</p>

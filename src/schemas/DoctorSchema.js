@@ -28,3 +28,9 @@ export const doctorSchema = z.object({
   designation: z.string().min(1, "Enter designation"),
   bio: z.string().min(1, "Bio is required"),
 });
+
+
+export const AddCommentSchema = z.object({
+  comment: z.string().min(1, "Required"),
+});
+

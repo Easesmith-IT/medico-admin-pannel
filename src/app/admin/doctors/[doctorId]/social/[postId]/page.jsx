@@ -129,7 +129,7 @@ const PostDetails = () => {
               </div> */}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-5 bg-white">
+            <div className="grid grid-cols-1 lg:grid-cols-[65%_33%] gap-[2%] bg-white">
               {/* Left: content */}
               <div className="flex-[1.4] border-r min-w-0">
                 <ScrollArea className="h-full px-6 py-4 space-y-4">

@@ -5,7 +5,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "../../ui/scroll-area";
 import { Badge } from "../../ui/badge";
 import { Label } from "../../ui/label";
@@ -16,6 +16,8 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { POST } from "@/constants/apiMethods";
 import { useParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { AddCommentModal } from "./add-commentmodal";
+import { useState } from "react";
 
 const statusLabel = {
   published: "Published",
@@ -25,6 +27,7 @@ const statusLabel = {
 
 export const Overview = ({ selectedPost }) => {
   const params = useParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { mutateAsync, isPending, data } = useApiMutation({
     url: "/socialPost/followDoctor",
@@ -34,6 +37,10 @@ export const Overview = ({ selectedPost }) => {
 
   const handleClick = async () => {
     await mutateAsync({ targetDoctorId: selectedPost?.doctor?._id });
+  };
+
+  const handleCommentModal = () => {
+    setIsModalOpen(true);
   };
 
   return (
@@ -56,6 +63,7 @@ export const Overview = ({ selectedPost }) => {
             <div className="flex justify-between items-center gap-5">
               <div className="flex items-center gap-3">
                 <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback>
                     {selectedPost.creator?.name
                       .split(" ")
@@ -152,25 +160,35 @@ export const Overview = ({ selectedPost }) => {
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent
-          value="comments"
-          className="flex-1 px-6 pb-6 pt-2 overflow-hidden"
-        >
-          <ScrollArea className="h-full space-y-3">
+        <TabsContent value="comments" className="flex-1 px-6 pb-6 pt-2">
+          <div className="h-full space-y-3">
             {selectedPost?.comments?.length === 0 && (
               <p className="text-sm text-slate-500 mt-4">
                 No comments yet for this article.
               </p>
             )}
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-h-100 overflow-y-auto">
               {selectedPost?.comments?.map((comment) => (
-                <Comment key={comment.id} comment={comment} />
+                <Comment key={comment._id} comment={comment} />
               ))}
             </div>
-          </ScrollArea>
+
+            <div className="flex justify-end mt-5">
+              <Button onClick={handleCommentModal} className="">
+                Add Comment
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
+
+      {isModalOpen && (
+        <AddCommentModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+      )}
     </div>
   );
 };

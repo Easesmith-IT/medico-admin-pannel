@@ -77,7 +77,7 @@ const Social = () => {
 
   useEffect(() => {
     if (data) {
-      setPosts(data)
+      setPosts(data);
     }
   }, [data]);
 
@@ -188,7 +188,7 @@ const Social = () => {
               <PostCard key={post._id} post={post} setPosts={setPosts} />
             ))}
 
-          {posts?.length === 0 && (
+          {posts?.length === 0 && !isLoading && (
             <p className="text-center text-slate-500 py-10 sm:col-span-2 lg:col-span-3 2xl:col-span-4">
               No posts found.
             </p>
