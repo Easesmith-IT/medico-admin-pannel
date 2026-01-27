@@ -1,8 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,15 +16,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import DatePicker from "../shared/DatePicker";
 import { dateRangeSchema } from "@/schemas/PatientSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import DatePicker from "../shared/DatePicker";
 
 export const ExportAppointmentModal = ({ isModalOpen, setIsModalOpen }) => {
   const [url, setUrl] = useState("");

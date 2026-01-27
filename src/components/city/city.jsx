@@ -1,23 +1,30 @@
+"use client";
+
 import { customId } from "@/lib/utils";
 import { Actions } from "../shared/actions";
 import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
-import { AddCityModal } from "./add-city-modal";
-import { useEffect, useState } from "react";
 import { ConfirmModal } from "../shared/confirm-modal";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { DELETE, PATCH } from "@/constants/apiMethods";
 import { Badge } from "../ui/badge";
 import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/spinner";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CityPolygonModal } from "./city-polygon-modal";
 
 export const City = ({ city }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [isPolygonOpen, setIsPolygonOpen] = useState(false);
   const [isActive, setIsActive] = useState(city?.isActive || false);
 
+  const hasPolygon = city?.area?.coordinates?.[0]?.length > 2;
+
   const onEdit = () => {
-    setIsModalOpen(true);
+    router.push(`/admin/cities/${city?._id}/update`);
   };
 
   const onDelete = () => {
@@ -35,34 +42,52 @@ export const City = ({ city }) => {
   };
 
   const {
-    mutateAsync: togglePatientStatus,
+    mutateAsync: toggleCityStatus,
     isPending: isTogglePending,
-    data,
     error,
   } = useApiMutation({
-    url: `/city/admin/cities/toggle/${city._id}`,
+    url: `/city/admin/cities/toggle/${city?._id}`,
     method: PATCH,
     invalidateKey: ["city"],
   });
 
   const toggleStatus = async () => {
     setIsActive((prev) => !prev);
-    await togglePatientStatus();
+    await toggleCityStatus();
   };
 
   useEffect(() => {
-    if (error) {
-      setIsActive(city?.isActive);
-    }
-  }, [error]);
+    if (error) setIsActive(city?.isActive);
+  }, [error, city?.isActive]);
 
   return (
     <>
       <TableRow>
         <TableCell>{customId(city?._id)}</TableCell>
-        <TableCell className="capitalize">{city.name}</TableCell>
-        <TableCell>{city.latitude}</TableCell>
-        <TableCell>{city.longitude}</TableCell>
+
+        <TableCell className="capitalize">{city?.name}</TableCell>
+
+        {/* <TableCell>{city?.latitude}</TableCell>
+        <TableCell>{city?.longitude}</TableCell> */}
+
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Badge variant={hasPolygon ? "success" : "secondary"}>
+              {hasPolygon ? "Added" : "Not Added"}
+            </Badge>
+
+            {hasPolygon && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsPolygonOpen(true)}
+              >
+                View
+              </Button>
+            )}
+          </div>
+        </TableCell>
+
         <TableCell>
           <div className="flex flex-col gap-1">
             <Badge variant={city.isActive ? "success" : "destructive"}>
@@ -74,6 +99,7 @@ export const City = ({ city }) => {
                 "Inactive"
               )}
             </Badge>
+
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
@@ -81,23 +107,24 @@ export const City = ({ city }) => {
             />
           </div>
         </TableCell>
+
         <TableCell className="text-right">
           <Actions onDelete={onDelete} onEdit={onEdit} />
         </TableCell>
       </TableRow>
 
-      {isModalOpen && (
-        <AddCityModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
+      {isPolygonOpen && (
+        <CityPolygonModal
           city={city}
+          isOpen={isPolygonOpen}
+          onClose={() => setIsPolygonOpen(false)}
         />
       )}
 
       {isAlertModalOpen && (
         <ConfirmModal
           header="Delete City"
-          description="Are you sure you want to delete this city? This action cannot be undone."
+          description="Are you sure you want to delete this city?"
           isModalOpen={isAlertModalOpen}
           setIsModalOpen={setIsAlertModalOpen}
           disabled={isPending}
@@ -111,9 +138,12 @@ export const City = ({ city }) => {
 City.Skeleton = function CitySkeleton() {
   return (
     <TableRow>
-      <TableCell>
+      {/* <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell> */}
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>

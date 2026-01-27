@@ -1,7 +1,10 @@
-import z from "zod";
+import { z } from "zod";
 
 export const AddCitySchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
+  name: z.string().min(1, "City name is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  geoFence: z
+    .array(z.tuple([z.number(), z.number()]))
+    .min(3, "Please draw city boundary"),
 });

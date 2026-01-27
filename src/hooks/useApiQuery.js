@@ -13,7 +13,7 @@ const fetchApi = async ({ url, params, axiosOptions }, retryCount = 0) => {
     return response.data;
   } catch (error) {
     const isExtensionError = error.message?.includes(
-      "Request interrupted by browser extension"
+      "Request interrupted by browser extension",
     );
 
     // Retry if it's an extension error and we haven't exceeded max retries
@@ -21,10 +21,10 @@ const fetchApi = async ({ url, params, axiosOptions }, retryCount = 0) => {
       console.warn(
         `Extension interference detected, retrying... (${
           retryCount + 1
-        }/${maxRetries})`
+        }/${maxRetries})`,
       );
       await new Promise((resolve) =>
-        setTimeout(resolve, 1000 * (retryCount + 1))
+        setTimeout(resolve, 1000 * (retryCount + 1)),
       ); // Exponential backoff
       return fetchApi({ url, params }, retryCount + 1);
     }
@@ -44,7 +44,7 @@ export function useApiQuery({
   const router = useRouter();
 
   return useQuery({
-    queryKey: [params, ...queryKeys], // Ensures caching based on query params
+    queryKey: [...queryKeys, params],
     // queryFn: () => fetchApi({ url, params, axiosOptions }),
     queryFn: async () => {
       try {

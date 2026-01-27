@@ -1,11 +1,9 @@
 "use client";
 
+import { City } from "@/components/city/city";
+import DataNotFound from "@/components/shared/DataNotFound";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
-import { useApiQuery } from "@/hooks/useApiQuery";
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,9 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { City } from "@/components/city/city";
-import DataNotFound from "@/components/shared/DataNotFound";
-import { AddCityModal } from "@/components/city/add-city-modal";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const Cities = () => {
   const [cities, setCities] = useState([]);
@@ -36,9 +35,11 @@ const Cities = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <H1>Cities</H1>
-        <Button variant="medico" onClick={() => setIsModalOpen(true)}>
-          <PlusIcon />
-          Add City
+        <Button asChild variant="medico">
+          <Link href="/admin/cities/add">
+            <PlusIcon />
+            Add City
+          </Link>
         </Button>
       </div>
 
@@ -48,8 +49,9 @@ const Cities = () => {
             <TableRow>
               <TableHead className="w-10">ID</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Latitude</TableHead>
-              <TableHead>Longitude</TableHead>
+              {/* <TableHead>Latitude</TableHead>
+              <TableHead>Longitude</TableHead> */}
+              <TableHead>Polygon</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -70,13 +72,6 @@ const Cities = () => {
           <DataNotFound name="Cities" />
         )}
       </div>
-
-      {isModalOpen && (
-        <AddCityModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-        />
-      )}
     </div>
   );
 };
