@@ -1,5 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
+const CityPolygonModal = dynamic(
+  () => import("./city-polygon-modal").then((mod) => mod.CityPolygonModal),
+  { ssr: false },
+);
+
+
 import { customId } from "@/lib/utils";
 import { Actions } from "../shared/actions";
 import { Skeleton } from "../ui/skeleton";
@@ -13,13 +21,7 @@ import { Spinner } from "../ui/spinner";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-// import { CityPolygonModal } from "./city-polygon-modal";
-import dynamic from "next/dynamic";
 
-const CityPolygonModal = dynamic(
-  () => import("./city-polygon-modal"),
-  { ssr: false }
-);
 
 export const City = ({ city }) => {
   const router = useRouter();
