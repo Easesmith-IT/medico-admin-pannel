@@ -5,6 +5,7 @@ import { adaptCrashForList } from "@/components/crash-report/crashListAdapter";
 import { CrashTable } from "@/components/crash-report/CrashTable";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { buildQuery } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const CrashReports = () => {
@@ -14,37 +15,32 @@ const CrashReports = () => {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
-  /* ===============================
-     API QUERY (React Query)
-  =============================== */
+  const query = buildQuery({
+    environment,
+    severity,
+    userType,
+    page,
+  });
+
   const { data, isLoading } = useApiQuery({
-    url: `/crash-report/get`,
+    url: `/crash-report/get?${query}`,
     queryKeys: ["crash-reports", environment, severity, userType, page],
-    config: {
-      params: {
-        environment,
-        severity,
-        userType,
-        page,
-      },
-    },
     enabled: true,
   });
 
   console.log("crash data", data);
-  
 
-  /* ===============================
-     DERIVED DATA
-  =============================== */
+  useEffect(() => {
+    if (data?.data) {
+      const totalPages = data?.meta?.totalPages || 0;
+      setPageCount(totalPages || 1);
+    }
+  }, [data]);
+
   const crashReports = data?.data?.map(adaptCrashForList) || [];
 
-  const totalPages = data?.meta?.totalPages || 0;
   const totalCrashes = data?.meta?.total || 0;
 
-  /* ===============================
-     RESET PAGE ON FILTER CHANGE
-  =============================== */
   useEffect(() => {
     setPage(1);
   }, [environment, severity, userType]);
