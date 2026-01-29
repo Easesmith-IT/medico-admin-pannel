@@ -3,21 +3,14 @@
 import {
   BuildingIcon,
   CalendarCheckIcon,
-  CreditCardIcon,
-  FolderOpenIcon,
-  HistoryIcon,
+  FileWarningIcon,
   HospitalIcon,
-  KeyIcon,
-  LayoutDashboard,
   LayoutDashboardIcon,
-  LogOutIcon,
   SettingsIcon,
-  ShieldCheckIcon,
-  StarIcon,
   StethoscopeIcon,
   UserCheckIcon,
   UserCogIcon,
-  UsersIcon,
+  UsersIcon
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,13 +18,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenuItem
 } from "./ui/sidebar";
 
 const menuItems = [
@@ -82,6 +74,11 @@ const menuItems = [
         title: "Appointments",
         icon: CalendarCheckIcon,
         url: "/admin/appointments",
+      },
+      {
+        title: "Crash Reports",
+        icon: FileWarningIcon,
+        url: "/admin/crash-report",
       },
     ],
   },
