@@ -29,7 +29,7 @@ export function CrashRow({ crash }) {
           {crash.platform} · {crash.version}
         </div> */}
       </TableCell>
-      <TableCell>{crash.userType}</TableCell>
+      <TableCell>{crash.userType || "-"}</TableCell>
       <TableCell>
         {crash.timeAgo}
         <div className="text-xs text-muted-foreground">{crash.timestamp}</div>

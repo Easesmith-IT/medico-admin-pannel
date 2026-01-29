@@ -17,8 +17,8 @@ export function CrashTable({ crashes, isLoading }) {
           <TableRow>
             <TableHead>Error Id</TableHead>
             <TableHead>Severity</TableHead>
-            <TableHead>Error</TableHead>
             <TableHead>Environment</TableHead>
+            <TableHead>Error</TableHead>
             <TableHead>Source</TableHead>
             <TableHead>User</TableHead>
             <TableHead>Time</TableHead>

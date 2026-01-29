@@ -76,7 +76,7 @@ const CrashDetailPage = () => {
           {crash.appName} · {crash.appVersion}
         </InfoBox>
 
-        <InfoBox title="User Type">{crash.userType}</InfoBox>
+        <InfoBox title="User Type">{crash.userType || "-"}</InfoBox>
       </div>
 
       <div className="grid grid-cols-3 gap-5">
