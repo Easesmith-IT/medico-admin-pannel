@@ -129,7 +129,8 @@
   [role="button"]:not([disabled]) {
     cursor: pointer;
   }
-     .table-container {
-       @apply  border bg-white w-full max-w-[1110px];
-     }
+
+  .table-container {
+    @apply border bg-white w-full max-w-[1110px];
+  }
 }

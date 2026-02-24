@@ -77,13 +77,13 @@ const CrashDetailPage = () => {
         </InfoBox>
 
         <InfoBox title="User Type">{crash.userType || "-"}</InfoBox>
+        <InfoBox title="Source">{crash.source || "-"}</InfoBox>
       </div>
 
       <div className="grid grid-cols-3 gap-5">
         <InfoBox title="Error Name">{crash.errorName || "-"}</InfoBox>
         <InfoBox title="Screen Name">{crash.screenName || "-"}</InfoBox>
         <InfoBox title="Error Id">{crash.errorId || "-"}</InfoBox>
-        <InfoBox title="Source">{crash.source || "-"}</InfoBox>
       </div>
 
       {/* Request Info */}

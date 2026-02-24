@@ -6,6 +6,7 @@ import {
   FileWarningIcon,
   HospitalIcon,
   LayoutDashboardIcon,
+  LayoutGridIcon,
   SettingsIcon,
   StethoscopeIcon,
   UserCheckIcon,
@@ -74,6 +75,11 @@ const menuItems = [
         title: "Appointments",
         icon: CalendarCheckIcon,
         url: "/admin/appointments",
+      },
+      {
+        title: "Categories",
+        icon: LayoutGridIcon,
+        url: "/admin/categories",
       },
       {
         title: "Crash Reports",
