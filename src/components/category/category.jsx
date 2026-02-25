@@ -21,7 +21,8 @@ export const Category = ({ category }) => {
   const [isUpdateCategoryModalOpen, setIsUpdateCategoryModalOpen] =
     useState(false);
 
-  const handleModalOpen = () => setIsUpdateCategoryModalOpen((prev) => !prev);
+  const onView = () => router.push(`/admin/categories/${category?._id}`);
+  const onEdit = () => router.push(`/admin/categories/${category?._id}/update`);
 
   const onDelete = () => {
     setIsAlertModalOpen(true);
@@ -86,20 +87,13 @@ export const Category = ({ category }) => {
         <TableCell>
           {new Date(category.createdAt).toLocaleDateString()}
         </TableCell>
-        <TableCell>{category.createdBy || "NA"}</TableCell>
+        {/* <TableCell>{category.createdBy || "NA"}</TableCell> */}
 
         <TableCell className="text-right">
-          <Actions onDelete={onDelete} onEdit={handleModalOpen} />
+          <Actions onView={onView} onDelete={onDelete} onEdit={onEdit} />
         </TableCell>
       </TableRow>
 
-      {isUpdateCategoryModalOpen && (
-        <AddCategoryModal
-          open={isUpdateCategoryModalOpen}
-          onClose={handleModalOpen}
-          data={category}
-        />
-      )}
 
       {isAlertModalOpen && (
         <ConfirmModal
@@ -127,9 +121,9 @@ Category.Skeleton = function CategorySkeleton() {
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>
-      <TableCell>
+      {/* <TableCell>
         <Skeleton className="w-full h-5" />
-      </TableCell>
+      </TableCell> */}
       <TableCell className="text-right">
         <Skeleton className="w-full h-5" />
       </TableCell>

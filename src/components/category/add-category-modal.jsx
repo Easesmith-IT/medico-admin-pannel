@@ -56,7 +56,7 @@ const AddCategoryModal = ({ open, onClose, data }) => {
 
   const { mutateAsync: updateCategory, isPending: isUpdateCategoryPending } =
     useApiMutation({
-      url: `/items/update/${data._id}`,
+      url: `/items/update/${data?._id}`,
       method: PUT,
       invalidateKey: ["category"],
     });

@@ -15,7 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { buildQuery } from "@/lib/utils";
 import { PlusIcon, Search } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const dummyCategories = [
@@ -65,7 +67,6 @@ const dummyCategories = [
 
 const CategoriesPage = () => {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [pageCount, setpageCount] = useState(0);
   const [limit] = useState(10);
@@ -74,9 +75,15 @@ const CategoriesPage = () => {
 
   const handleModalOpen = () => setIsAddCategoryModalOpen((prev) => !prev);
 
+  const query = buildQuery({
+    page,
+    limit,
+    search,
+  });
+
   const { data, refetch, isLoading } = useApiQuery({
-    url: `/items/getAllCategories`,
-    queryKeys: ["categories"],
+    url: `/items/getAllCategories?${query}`,
+    queryKeys: ["category", search, page, limit],
   });
 
   console.log("data", data);
@@ -92,9 +99,11 @@ const CategoriesPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between">
         <H1>Categories</H1>
-        <Button variant="medico" onClick={handleModalOpen}>
-          <PlusIcon />
-          <span>Add Category</span>
+        <Button asChild variant="medico">
+          <Link href={"/admin/categories/add"}>
+            <PlusIcon />
+            <span>Add Category</span>
+          </Link>
         </Button>
       </div>
       <div className="lg:col-span-2">
@@ -122,7 +131,7 @@ const CategoriesPage = () => {
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead>Created By</TableHead>
+              {/* <TableHead>Created By</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
