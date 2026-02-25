@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams } from "next/navigation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InfoBox, InfoCard, InfoRow } from "@/components/crash-report";
+import { InfoBox, InfoCard, InfoRow } from "@/components/crash-report/index";
 
 const CrashDetailPage = () => {
   const { crashId } = useParams();
@@ -28,9 +28,7 @@ const CrashDetailPage = () => {
   // Loading state
   // ----------------------------
   if (isLoading) {
-    return (
-        <Skeleton className="h-40 w-full" />
-    );
+    return <Skeleton className="h-40 w-full" />;
   }
 
   // ----------------------------
@@ -38,9 +36,9 @@ const CrashDetailPage = () => {
   // ----------------------------
   if (!crash) {
     return (
-        <div className="text-sm text-muted-foreground">
-          Crash report not found
-        </div>
+      <div className="text-sm text-muted-foreground">
+        Crash report not found
+      </div>
     );
   }
 
