@@ -152,12 +152,12 @@ export const ServicePartnerDetails = ({ provider }) => {
           <CardTitle className="text-lg">Emergency Contact</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <Info label="Name" value={provider.emergencyContact.name} />
+          <Info label="Name" value={provider?.emergencyContact?.name || "-"} />
           <Info
             label="Relation"
-            value={provider.emergencyContact.relationship}
+            value={provider?.emergencyContact?.relationship || "-"}
           />
-          <Info label="Mobile" value={provider.emergencyContact.mobile} />
+          <Info label="Mobile" value={provider?.emergencyContact?.mobile || ""} />
         </CardContent>
       </Card>
 

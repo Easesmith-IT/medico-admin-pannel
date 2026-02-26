@@ -61,10 +61,10 @@ const TreatmentHistory = () => {
 
   console.log("data", data);
 
-  const patient = data?.data?.patient;
+  const patient = data?.data?.patient || null;
   const timeline = data?.data?.timeline || [];
-  const summary = data?.data?.summary;
-  const snapshot = data?.data?.medicalSnapshot;
+  const summary = data?.data?.summary || null;
+  const snapshot = data?.data?.medicalSnapshot || null;
 
   const formatDate = (d) =>
     new Date(d).toLocaleDateString("en-US", {
@@ -290,9 +290,9 @@ const TreatmentHistory = () => {
                 <h4 className="font-semibold text-sm mb-1">
                   Recent Treatments
                 </h4>
-                {snapshot.recentTreatments.length ? (
+                {snapshot?.recentTreatments?.length ? (
                   <ul className="list-disc text-sm text-muted-foreground pl-5">
-                    {snapshot.recentTreatments.map((t, idx) => (
+                    {snapshot?.recentTreatments?.map((t, idx) => (
                       <li key={idx}>{t}</li>
                     ))}
                   </ul>
@@ -308,9 +308,9 @@ const TreatmentHistory = () => {
                 <h4 className="font-semibold text-sm mb-1">
                   Active Medications
                 </h4>
-                {snapshot.activeMedications.length ? (
+                {snapshot?.activeMedications?.length ? (
                   <ul className="list-disc text-sm text-muted-foreground pl-5">
-                    {snapshot.activeMedications.map((m, idx) => (
+                    {snapshot?.activeMedications.map((m, idx) => (
                       <li key={idx}>{m}</li>
                     ))}
                   </ul>
@@ -328,7 +328,7 @@ const TreatmentHistory = () => {
                 <h4 className="font-semibold text-sm mb-1">
                   Ongoing Conditions
                 </h4>
-                {snapshot.ongoingConditions.length ? (
+                {snapshot?.ongoingConditions.length ? (
                   <ul className="list-disc text-sm text-muted-foreground pl-5">
                     {snapshot.ongoingConditions.map((c, idx) => (
                       <li key={idx}>{c}</li>
