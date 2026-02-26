@@ -99,7 +99,7 @@ const defaultValues = {
 };
 
 const UpdatePage = () => {
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(0);
   const router = useRouter();
   const params = useParams();
 
