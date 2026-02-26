@@ -121,9 +121,12 @@ Category.Skeleton = function CategorySkeleton() {
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>
-      {/* <TableCell>
+      <TableCell>
         <Skeleton className="w-full h-5" />
-      </TableCell> */}
+      </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
       <TableCell className="text-right">
         <Skeleton className="w-full h-5" />
       </TableCell>

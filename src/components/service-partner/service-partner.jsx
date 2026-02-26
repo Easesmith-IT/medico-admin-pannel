@@ -168,8 +168,11 @@ ServicePartner.Skeleton = function ServicePartnerSkeleton() {
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>
+      <TableCell>
+        <Skeleton className="w-full h-5" />
+      </TableCell>
       <TableCell className="text-right">
-        <Skeleton className="w-8 h-5" />
+        <Skeleton className="w-8 h-5 text-right" />
       </TableCell>
     </TableRow>
   );
