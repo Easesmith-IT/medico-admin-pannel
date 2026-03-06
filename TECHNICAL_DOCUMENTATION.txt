@@ -1,0 +1,555 @@
+Admin Panel – Technical Documentation
+
+Developer Handover & Collaboration Guide for medico-admin-panel
+
+------------------------------------------------------------
+1. Project Overview
+------------------------------------------------------------
+
+Purpose
+
+This admin panel is the internal operations console for the Medico platform. It enables administrators and operations teams to manage core entities and workflows in the system, including:
+
+- Doctors, patients, hospitals, and service partners
+- Medical services and appointments
+- Cities and geo-fenced service areas
+- Crash/error reports from the web client
+
+The application is a Next.js 16 App Router–based frontend that talks to a separate backend configured via NEXT_PUBLIC_BACKEND_URL.
+
+Main Features
+
+- Admin authentication via an email/password login screen and backend-issued cookies.
+- Dashboard analytics for high-level operational metrics (see /admin/dashboard).
+- Doctor management: CRUD for doctors and their social activity.
+- Patient management: profiles, bookings, medications, and treatment history.
+- Appointment management: listing, details, create/update flows.
+- Service and service-partner management: configuring services and multi-step onboarding of service partners.
+- City and geo-fence management: defining serviceable cities and drawing polygons on a map for coverage.
+- Hospital management: managing hospitals linked to doctors/services.
+- Crash reporting: automatic error capture from API hooks into a /crash-report/create backend endpoint and review screens in /admin/crash-report.
+
+
+------------------------------------------------------------
+2. Technology Stack
+------------------------------------------------------------
+
+Layer            → Technology
+------------------------------------------------------------
+Framework        → Next.js 16.0.10 (App Router, React Server Components where applicable)
+Language         → JavaScript (ESNext)
+UI Library       → Tailwind CSS v4, shadcn-style Radix UI wrappers, lucide-react icons
+Forms            → react-hook-form + zod (@hookform/resolvers/zod)
+State/Data       → @tanstack/react-query for server state; local component state via hooks
+API Client       → axios with a shared axiosInstance
+Authentication   → Backend-issued cookies + Next.js middleware (proxy.js)
+Mapping          → leaflet, react-leaflet, react-leaflet-draw
+Charts           → recharts
+Notifications    → sonner
+Styling          → Tailwind CSS + custom utility classes in globals.css
+Deployment       → Any Node.js hosting (e.g. Vercel, Render, AWS); no provider-specific code
+
+
+------------------------------------------------------------
+3. System Architecture
+------------------------------------------------------------
+
+High Level Architecture
+
+Admin Panel (Next.js 16 / React 19)
+        |
+        v
+Axios Client (axiosInstance)
+        |
+        v
+Backend REST API (NEXT_PUBLIC_BACKEND_URL)
+        |
+        v
+Database and Services (separate backend repo)
+
+Architecture Principles
+
+- App Router–first: All routes live under src/app using the new Next.js routing model.
+- Separation of concerns: shared logic in hooks/, validation in schemas/, constants in constants/, reusable UI in components/.
+- API-driven: all data mutations and reads go through the REST API via axiosInstance, useApiQuery, or useApiMutation.
+- Error and crash observability: all API hooks integrate with useCrashReporter to send detailed error payloads to the backend.
+- Auth at the edge: Next.js middleware (src/proxy.js + middleware config) enforces authentication and basic access rules for /admin/* routes.
+
+
+------------------------------------------------------------
+4. Project Folder Structure
+------------------------------------------------------------
+
+High-level layout (frontend only – backend lives elsewhere):
+
+project-root
+├─ src/
+│  ├─ app/                     → Next.js routes (App Router)
+│  │  ├─ (auth)/(login)/      → Public login page
+│  │  └─ admin/               → Auth-protected admin routes
+│  │     ├─ dashboard/
+│  │     ├─ doctors/
+│  │     ├─ patients/
+│  │     ├─ appointments/
+│  │     ├─ services/
+│  │     ├─ service-partners/
+│  │     ├─ cities/
+│  │     ├─ hospitals/
+│  │     └─ crash-report/
+│  ├─ components/              → Feature and UI components
+│  │  ├─ doctor/
+│  │  ├─ patient/
+│  │  ├─ booking/
+│  │  ├─ service/
+│  │  ├─ service-partner/
+│  │  ├─ city/
+│  │  ├─ crash-report/
+│  │  ├─ shared/               → Reusable generic components (pagination, combobox, etc.)
+│  │  └─ ui/                   → Low-level UI primitives (buttons, inputs, cards, etc.)
+│  ├─ hooks/                   → Custom hooks (API hooks, crash reporter)
+│  ├─ schemas/                 → zod validation schemas for forms
+│  ├─ constants/               → Status constants, service constants, permission maps
+│  ├─ lib/                     → Utilities (axiosInstance, utils, cookies, query client)
+│  ├─ providers/               → App-wide providers (React Query)
+│  ├─ data/                    → Mock/static data for some views
+│  └─ app/globals.css          → Global Tailwind and custom styles
+├─ public/                     → Static assets (for example logos/medico-logo.svg)
+├─ package.json
+└─ TECHNICAL_DOCUMENTATION.md
+
+Folder Explanation
+
+app           → All routes and layouts; admin routes are protected by middleware based on auth cookies.
+components    → Reusable and feature-specific React components, organized roughly by domain.
+components/ui → Base UI building blocks (buttons, forms, inputs, sidebar, etc.), mostly Radix wrappers.
+hooks         → Cross-cutting custom hooks like useApiQuery, useApiMutation, and useCrashReporter.
+schemas       → zod schemas defining shape and validation for doctor, patient, city, service forms, etc.
+constants     → Config and enums such as status codes, service categories, and permission lookup tables.
+lib           → Framework-agnostic helpers (axios client, cookie helpers, utility functions, query client).
+providers     → Application-level providers (currently for React Query client).
+data          → Static seed data for local rendering (for example posts for doctor social views).
+
+
+------------------------------------------------------------
+5. Environment Setup
+------------------------------------------------------------
+
+Clone Repository
+
+git clone <repository-url>
+cd medico-admin-panel
+
+Install Dependencies
+
+npm install
+
+Environment Variables
+
+Create a .env.local file in the project root with at least:
+
+NEXT_PUBLIC_BACKEND_URL=<https://api.medico.example.com>
+NEXT_PUBLIC_IMAGE_URL=<https://cdn.medico.example.com>
+NODE_ENV=development
+
+NEXT_PUBLIC_BACKEND_URL → Base URL for all admin API calls, used by axiosInstance and middleware checks.
+NEXT_PUBLIC_IMAGE_URL   → Public base URL used to render media for doctor social posts and other assets.
+NODE_ENV                → Standard Node environment flag; also included in crash reports via useCrashReporter.
+
+If the backend issues additional cookies or uses more environment-specific URLs, add them here following the same NEXT_PUBLIC_* convention.
+
+
+------------------------------------------------------------
+6. Running the Project
+------------------------------------------------------------
+
+Development
+
+npm run dev
+
+This starts the Next.js dev server (default at http://localhost:3000). The login page is at /, and successful login redirects to /admin/dashboard.
+
+Production Build
+
+npm run build
+npm run start
+
+Use these commands in your deployment pipeline to generate and serve the optimized production build.
+
+
+------------------------------------------------------------
+7. Authentication Flow
+------------------------------------------------------------
+
+Authentication is handled jointly by the login page, the backend, cookies, and the Next.js middleware in src/proxy.js.
+
+High-Level Flow
+
+Login Page (/)
+    |
+    v
+POST /admin/login  (via useApiMutation + axiosInstance)
+    |
+    v
+Backend sets cookies (accessToken, refreshToken, isAuthenticated, userInfo)
+    |
+    v
+Next.js middleware (proxy.js) checks cookies for /admin/*
+    |
+    v
+If not authenticated:
+    └─ POST /admin/check-auth using refreshToken cookie
+         |
+         ├─ If still unauthenticated → redirect to "/"
+         └─ If authenticated         → allow /admin/* route
+
+Implementation Notes
+
+- The login UI uses react-hook-form + zod (AdminLoginSchema) for validation.
+- The useApiMutation hook wraps axiosInstance, handles toast messaging, crash reporting, and redirect on 401.
+- The middleware (proxy) reads accessToken, refreshToken, and isAuthenticated cookies. For /admin/* routes, if isAuthenticated is false, it calls POST /admin/check-auth on the backend.
+- If the user is already authenticated and visits /, they are redirected to /admin/dashboard.
+
+Logout and token refresh flows are handled on the backend side; the frontend assumes validity of cookies and responds to 401 by redirecting the user back to /.
+
+
+------------------------------------------------------------
+8. Data and Domain Models (Frontend Perspective)
+------------------------------------------------------------
+
+The frontend does not define the database, but it models several core entities via zod schemas and form structures.
+
+Doctors (schemas/DoctorSchema.js)
+
+- Basic fields: firstName, lastName, email, phone, dob, gender.
+- Professional info: registrationNo, council, specialization, experience, fees.
+- Address: nested object with street, city, state, country, pincode.
+- Education: degrees[], university, graduationYear.
+- Profile: workplace, designation, bio.
+
+Patients (schemas/PatientSchema.js)
+
+- Personal info: firstName, email, phone, dateOfBirth, gender, bloodGroup, profilePhoto.
+- Address: nested address schema with street, city, state, country, pincode.
+- Emergency contact: name, phone, relation.
+- Supporting schemas: dateRangeSchema (with start/end date validation), medicationSchema.
+
+Other Schemas
+
+- Categories: CategorySchema.js – defines name, slug, and related metadata for service categories.
+- Cities: CitySchema.js – fields for name, state, and geo-fencing parameters.
+- Services and Service Providers: ServicesSchema.js, ServiceProviderSchema.js – define service metadata and provider details.
+
+These schemas reflect what is expected by the backend; always align changes with the backend contracts.
+
+
+------------------------------------------------------------
+9. Permission System
+------------------------------------------------------------
+
+The admin panel is designed for Role-Based Access Control (RBAC), though some enforcement is currently backend-heavy with frontend hooks in place.
+
+Permission Configuration
+
+- src/constants/permissions.js defines:
+  - A list of permissions with { label, value } pairs for UI usage.
+  - A localPermissions map that links URL sections (for example dashboard, admins) to permission keys.
+- The middleware (proxy.js) contains commented-out code that was intended to:
+  - Read userInfo from cookies.
+  - Infer route section from pathname.
+  - Deny access if the user lacks the mapped permission.
+
+Effective Behavior
+
+- Authentication is enforced for all /admin/* routes via cookies and backend check-auth.
+- Fine-grained permissions (per-module read/write) are expected to be enforced by the backend and, in future, by reviving the commented permission check logic in the middleware and/or conditionally rendering UI.
+
+When extending permissions, update:
+
+- The backend’s permission model.
+- constants/permissions.js for labels and mapping.
+- Any UI that needs to hide/show actions based on permissions.
+
+
+------------------------------------------------------------
+10. API Integration
+------------------------------------------------------------
+
+Axios Instance
+
+All HTTP requests go through src/lib/axiosInstance.js:
+
+- baseURL       → process.env.NEXT_PUBLIC_BACKEND_URL
+- withCredentials → true (cookies are always sent)
+- timeout       → 30000 ms
+
+Data Fetching – useApiQuery
+
+- Wrapper around @tanstack/react-query’s useQuery.
+- Parameters:
+  - url, queryKeys, params, options, axiosOptions
+  - Crash reporting options: reportCrash, screenName, severity, userType
+- Behavior:
+  - Calls axiosInstance.get(url, { params, ...axiosOptions }).
+  - Normalizes errors and attaches status and raw error object.
+  - On 401, redirects to /.
+  - When reportCrash is true, sends a structured error payload via useCrashReporter.
+
+Mutations – useApiMutation
+
+- Wrapper around useMutation using axiosInstance({ url, method, ...config }).
+- Parameters:
+  - url, method, invalidateKey, config, reportCrash, screenName, severity, userType, isToast.
+- Behavior:
+  - On success: shows a success toast and invalidates queries under invalidateKey if provided.
+  - On error: shows an error toast and optionally reports a crash.
+  - On 401: redirects to /.
+  - On settled: updates a cached ["isLoggedIn"] state based on the isAuthenticated cookie.
+
+When adding new APIs:
+
+- Use useApiQuery for GET/list/detail endpoints.
+- Use useApiMutation for POST/PUT/PATCH/DELETE actions.
+- Pass screenName and a meaningful invalidateKey so crash logs and cache invalidation work correctly.
+
+
+------------------------------------------------------------
+11. State Management
+------------------------------------------------------------
+
+The project primarily uses React Query for server state and React component state for local UI concerns.
+
+- React Query setup: src/lib/queryClient.js and src/providers/ReactQueryProvider.jsx.
+- Server state: fetched via useApiQuery, mutated via useApiMutation.
+- Client state: transient UI state (dialog open/closed, filters, pagination controls) is managed via useState and custom hooks co-located with components.
+
+There is no global Redux or Zustand store; introducing one should only be considered if multiple independent modules need to share complex derived state beyond what React Query offers.
+
+
+------------------------------------------------------------
+12. UI Design System
+------------------------------------------------------------
+
+Color and Theme
+
+Colors are defined via Tailwind config and globals.css. Key conventions in the UI:
+
+- Primary: brand-colored actions and highlights (for example bg-main, text-primary-purple).
+- Backgrounds: use Tailwind grays for light/dark mode backgrounds.
+- Status colors: derived from status constants and Tailwind semantic colors for success/warning/error.
+
+Components
+
+- Core building blocks (buttons, cards, inputs, forms, checkboxes, sidebar) live under components/ui.
+- Complex feature UIs (for example booking widgets, city geo-fence map, service-partner stepper) are in domain-specific folders.
+- Form components (Form, FormField, FormItem, FormLabel, FormMessage) closely follow shadcn patterns and integrate with react-hook-form.
+
+Typography largely uses system fonts or Tailwind defaults; adapt globals.css and Tailwind config if the design system is updated.
+
+
+------------------------------------------------------------
+13. Routing Structure
+------------------------------------------------------------
+
+Key routes (App Router):
+
+Route                                        → Page / Purpose
+------------------------------------------------------------
+/                                            → Admin login screen
+/admin/dashboard                            → Main analytics/overview dashboard
+/admin/doctors                              → Doctor listing
+/admin/doctors/add                          → Create doctor
+/admin/doctors/[doctorId]                  → Doctor detail
+/admin/doctors/[doctorId]/update           → Edit doctor
+/admin/doctors/[doctorId]/social           → Doctor social activity overview
+/admin/doctors/[doctorId]/social/[postId]  → Doctor social post detail
+/admin/patients                             → Patient listing
+/admin/patients/[patientId]                → Patient profile
+/admin/patients/[patientId]/update         → Edit patient
+/admin/patients/[patientId]/bookings       → Patient bookings list
+/admin/patients/[patientId]/bookings/add   → Add patient booking
+/admin/appointments                         → Appointment listing
+/admin/appointments/add                     → Create appointment
+/admin/appointments/[appointmentId]        → Appointment detail
+/admin/appointments/[appointmentId]/update → Edit appointment
+/admin/services                             → Services listing
+/admin/services/add                         → Create service
+/admin/services/[serviceId]                → Service detail
+/admin/services/[serviceId]/update         → Edit service
+/admin/service-partners                     → Service-partner listing
+/admin/service-partners/add                 → Multi-step service-partner onboarding
+/admin/service-partners/[servicePartnerId]  → Service-partner detail
+/admin/service-partners/[servicePartnerId]/update → Edit service-partner
+/admin/cities                               → Cities and service areas list
+/admin/cities/add                           → Create city and define geo-fence
+/admin/cities/[cityId]/update              → Edit city and geo-fence
+/admin/hospitals                            → Hospital listing
+/admin/admins                               → Admin users list
+/admin/admins/add                           → Create admin user
+/admin/crash-report                         → Crash reports listing and filters
+/admin/crash-report/[crashId]              → Crash report detail
+
+All /admin/* routes share a common layout defined in src/app/admin/layout.jsx (sidebar, header, content shell).
+
+
+------------------------------------------------------------
+14. How to Add a New Module
+------------------------------------------------------------
+
+Example: adding a “Promotions” module.
+
+1. Create routes
+   - Add new route files under src/app/admin/promotions:
+     - page.jsx                    → list of promotions.
+     - [promotionId]/page.jsx      → detail view.
+     - add/page.jsx                → create screen.
+     - [promotionId]/update/page.jsx → edit screen.
+
+2. Create domain components
+   - Under src/components/promotion/ add:
+     - promotion.jsx               → table/list view.
+     - PromotionForm.jsx           → create/edit form.
+
+3. Add validation schema
+   - Under src/schemas/PromotionSchema.js create a zod schema to match the backend’s payload.
+
+4. Wire APIs
+   - Use useApiQuery for listing (/admin/promotions) and detail.
+   - Use useApiMutation for create/update/delete endpoints.
+   - Choose invalidateKey such as ["promotions"] so lists refetch after mutations.
+
+5. Integrate into navigation
+   - Add appropriate links and permission checks in the sidebar component (components/app-sidebar.jsx and related ui/sidebar items).
+
+Follow existing modules (for example services, service-partners) as patterns for UX and code structure.
+
+
+------------------------------------------------------------
+15. Error Handling
+------------------------------------------------------------
+
+- Axios-level:
+  - All requests go through axiosInstance.
+  - API hooks wrap errors into a custom Error object with status and raw fields.
+- React Query:
+  - useApiQuery and useApiMutation rely on React Query’s retry behavior and error boundaries where configured.
+- User feedback:
+  - useApiMutation shows success and error toasts using sonner.
+  - Some list/detail components also show inline error states or skeletons while loading.
+- Authentication errors:
+  - 401 responses automatically redirect the user back to /.
+- Crash reporting:
+  - All failed queries/mutations can emit crash reports via useCrashReporter, ensuring server-side visibility into frontend failures.
+
+When adding new network logic, always go through the shared hooks so errors are handled consistently.
+
+
+------------------------------------------------------------
+16. Logging and Monitoring
+------------------------------------------------------------
+
+The frontend integrates a custom crash reporting mechanism:
+
+- useCrashReporter posts to /crash-report/create via axiosInstance.
+- Each report includes:
+  - App metadata: name ("Admin Panel"), version, environment (NODE_ENV).
+  - Error details: name, message, stack, HTTP details (URL, method, status, response message).
+  - Device info: OS (parsed from navigator.userAgent), browser string, and optional device overrides.
+  - User context: userId, userType.
+  - Request context: URL, method, params/body.
+
+These reports feed into the admin crash-report module (/admin/crash-report), which supports:
+
+- Filtering by severity, date, screen, and other criteria.
+- Viewing individual crash details to assist debugging.
+
+No third-party services like Sentry or LogRocket are wired yet; integrating them is straightforward if needed.
+
+
+------------------------------------------------------------
+17. Deployment
+------------------------------------------------------------
+
+There is no hard coupling to any hosting provider; a typical deployment flow:
+
+1. Build the app:
+   npm run build
+
+2. Deploy:
+   - Vercel: Connect the Git repo, set environment variables (NEXT_PUBLIC_BACKEND_URL, NEXT_PUBLIC_IMAGE_URL, etc.), and let Vercel build and deploy.
+   - Custom Node host (AWS, Render, etc.): Run npm run build followed by npm run start behind a reverse proxy.
+
+Ensure:
+
+- Production environment variables point to the correct backend and CDN.
+- The backend and frontend share the same cookie domain/path configuration so middleware-based auth works.
+
+
+------------------------------------------------------------
+18. Development Workflow
+------------------------------------------------------------
+
+Branching Strategy (Suggested)
+
+The repository does not enforce a branching strategy, but the following works well:
+
+main          → production-ready code
+develop       → integration branch for upcoming release
+feature/*     → new features (for example feature/city-geo-fence)
+bugfix/*      → bug fixes (for example bugfix/fix-doctor-form-validation)
+
+For each feature:
+
+1. Branch from develop (or main if develop is not used).
+2. Implement UI, hook up APIs, and update schemas.
+3. Add or update documentation if behavior changes.
+4. Open a PR and request review.
+
+
+------------------------------------------------------------
+19. Coding Standards
+------------------------------------------------------------
+
+General Rules
+
+- Prefer functional components with hooks (useState, useEffect, custom hooks) over class components.
+- Use useApiQuery / useApiMutation instead of calling axios directly.
+- Put reusable logic into custom hooks in hooks/ or shared components in components/shared or components/ui.
+- Keep forms strongly validated using zod schemas and react-hook-form.
+- Avoid duplication; follow existing patterns for routing, loading skeletons, and error states.
+
+Naming Conventions
+
+Item                → Convention
+------------------------------------------------------------
+React components    → PascalCase (for example DoctorList)
+Hooks               → useSomething
+Variables           → camelCase
+Constants           → UPPER_SNAKE_CASE
+Files (components)  → kebab-case or camelCase matching dominant folder style
+
+
+------------------------------------------------------------
+20. Known Issues / Gaps
+------------------------------------------------------------
+
+Some items to be aware of when working in this codebase:
+
+- Middleware permission checks based on localPermissions are present but commented out; fine-grained RBAC is largely backend-driven for now.
+- Certain cookie-handling and login flows (setAuthCookies, userInfo parsing) have commented-out sections, reflecting ongoing work to centralize auth logic.
+- The current crash reporting URLs and payload shape assume the backend implements /crash-report/create; keep front and back in sync when evolving this endpoint.
+
+Keep this section updated as you discover more behavior in staging/production.
+
+
+------------------------------------------------------------
+21. Future Improvements
+------------------------------------------------------------
+
+Potential roadmap items:
+
+- Fully re-enable and refine RBAC checks in middleware and UI, driven by backend permissions.
+- Introduce global search across entities (doctors, patients, hospitals, services).
+- Add real-time updates for appointments and crash reports via WebSockets or Server-Sent Events.
+- Tighten form UX with autosave, better error summaries, and accessibility improvements.
+- Integrate third-party monitoring (for example Sentry) for richer performance and error tracing.
+
