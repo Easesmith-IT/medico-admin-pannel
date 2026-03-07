@@ -143,7 +143,7 @@ const CreateService = () => {
       setImagePreview(url);
       setValue("image", file);
     },
-    [setValue]
+    [setValue],
   );
 
   const onDropIcon = useCallback(
@@ -156,7 +156,7 @@ const CreateService = () => {
       setIconPreview(url);
       setValue("icon", file);
     },
-    [setValue]
+    [setValue],
   );
 
   const { getRootProps: getRootImageProps, getInputProps: getInputImageProps } =
@@ -181,18 +181,12 @@ const CreateService = () => {
 
   // ===== Submit handler =====
   const onSubmit = async (values) => {
-    console.log("values",values);
-    
+    console.log("values", values);
+
     const slotConfig = {};
-    if (category === "consultation") {
-      slotConfig.consultationSlots = values.consultationSlots;
-    }
-    if (category === "nursing") {
-      slotConfig.nursingSlots = values.nursingSlots;
-    }
-    if (category === "equipment") {
-      slotConfig.equipmentBooking = values.equipmentBooking;
-    }
+    slotConfig.consultationSlots = values.consultationSlots;
+    slotConfig.nursingSlots = values.nursingSlots;
+    slotConfig.equipmentBooking = values.equipmentBooking;
 
     const formData = new FormData();
     // Scalar and string fields (API expects these as form fields)
@@ -203,7 +197,10 @@ const CreateService = () => {
     formData.append("basePrice", String(values.basePrice ?? ""));
     formData.append("equipmentCharges", String(values.equipmentCharges ?? 0));
     formData.append("taxPercentage", String(values.taxPercentage ?? 18));
-    formData.append("supportsDuration", values.supportsDuration === true || values.supportsDuration === "true");
+    formData.append(
+      "supportsDuration",
+      values.supportsDuration === true || values.supportsDuration === "true",
+    );
     formData.append("paymentMode", values.paymentMode ?? "Both");
     formData.append("timeFormat", values.timeFormat ?? "24-hour");
     // JSON fields (backend uses parseJson)
@@ -345,85 +342,171 @@ const CreateService = () => {
                 )}
 
                 {/* {category === "consultation" && ( */}
-                  <div className="border p-4 rounded space-y-4 col-span-3">
+                <div className="border p-4 rounded space-y-4 col-span-3">
+                  <FormField
+                    control={form.control}
+                    name="consultationSlots.enabled"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between">
+                        <FormLabel>Consultation Enabled</FormLabel>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="consultationSlots.enabled"
+                      name="consultationSlots.startTime"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between">
-                          <FormLabel>Consultation Enabled</FormLabel>
+                        <FormItem>
+                          <FormLabel>Start Time</FormLabel>
                           <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Input type="time" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="consultationSlots.startTime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Start Time</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={form.control}
+                      name="consultationSlots.endTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>End Time</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={form.control}
-                        name="consultationSlots.endTime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>End Time</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="consultationSlots.slotDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Slot Duration (minutes)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="consultationSlots.slotDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Slot Duration (minutes)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
+                </div>
                 {/* )} */}
 
                 {/* {category === "nursing" && ( */}
-                  <div className="border p-4 rounded space-y-4 col-span-3">
-                    {/* Enabled Switch */}
+                <div className="border p-4 rounded space-y-4 col-span-3">
+                  {/* Enabled Switch */}
+                  <FormField
+                    control={form.control}
+                    name="nursingSlots.enabled"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between">
+                        <FormLabel>Nursing Slots Enabled</FormLabel>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Shift Types */}
                     <FormField
                       control={form.control}
-                      name="nursingSlots.enabled"
+                      name="nursingSlots.shiftTypes"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between">
-                          <FormLabel>Nursing Slots Enabled</FormLabel>
+                        <FormItem>
+                          <FormLabel>Shift Types</FormLabel>
+                          <FormControl>
+                            <MultiSelect
+                              label="Select Shift Type"
+                              options={shiftTypesOptions}
+                              value={field.value || []}
+                              onChange={field.onChange}
+                              isLoading={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Min Duration */}
+                    <FormField
+                      control={form.control}
+                      name="nursingSlots.minDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Min Duration (minutes)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Max Duration */}
+                    <FormField
+                      control={form.control}
+                      name="nursingSlots.maxDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Duration (minutes)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Switches Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* 24x7 */}
+                    <FormField
+                      control={form.control}
+                      name="nursingSlots.available24x7"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between border p-3 rounded">
+                          <FormLabel>Available 24x7</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value}
@@ -435,122 +518,98 @@ const CreateService = () => {
                       )}
                     />
 
-                    {/* Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {/* Shift Types */}
-                      <FormField
-                        control={form.control}
-                        name="nursingSlots.shiftTypes"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Shift Types</FormLabel>
-                            <FormControl>
-                              <MultiSelect
-                                label="Select Shift Type"
-                                options={shiftTypesOptions}
-                                value={field.value || []}
-                                onChange={field.onChange}
-                                isLoading={isLoading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Min Duration */}
-                      <FormField
-                        control={form.control}
-                        name="nursingSlots.minDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Min Duration (minutes)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Max Duration */}
-                      <FormField
-                        control={form.control}
-                        name="nursingSlots.maxDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Max Duration (minutes)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {/* Switches Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* 24x7 */}
-                      <FormField
-                        control={form.control}
-                        name="nursingSlots.available24x7"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between border p-3 rounded">
-                            <FormLabel>Available 24x7</FormLabel>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Allow Custom Duration */}
-                      <FormField
-                        control={form.control}
-                        name="nursingSlots.allowCustomDuration"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between border p-3 rounded">
-                            <FormLabel>Allow Custom Duration</FormLabel>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    {/* Allow Custom Duration */}
+                    <FormField
+                      control={form.control}
+                      name="nursingSlots.allowCustomDuration"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between border p-3 rounded">
+                          <FormLabel>Allow Custom Duration</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
+                </div>
                 {/* )} */}
 
                 {/* {category === "equipment" && ( */}
-                  <div className="border p-4 rounded space-y-4 col-span-3">
-                    {/* Enabled Switch */}
+                <div className="border p-4 rounded space-y-4 col-span-3">
+                  {/* Enabled Switch */}
+                  <FormField
+                    control={form.control}
+                    name="equipmentBooking.enabled"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between">
+                        <FormLabel>Equipment Booking Enabled</FormLabel>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Min Duration */}
                     <FormField
                       control={form.control}
-                      name="equipmentBooking.enabled"
+                      name="equipmentBooking.minDuration"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between">
-                          <FormLabel>Equipment Booking Enabled</FormLabel>
+                        <FormItem>
+                          <FormLabel>Min Duration (minutes)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Max Duration */}
+                    <FormField
+                      control={form.control}
+                      name="equipmentBooking.maxDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Duration (minutes)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Available 24x7 */}
+                    <FormField
+                      control={form.control}
+                      name="equipmentBooking.available24x7"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between border p-3 rounded">
+                          <FormLabel>Available 24x7</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value}
@@ -561,70 +620,8 @@ const CreateService = () => {
                         </FormItem>
                       )}
                     />
-
-                    {/* Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {/* Min Duration */}
-                      <FormField
-                        control={form.control}
-                        name="equipmentBooking.minDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Min Duration (minutes)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Max Duration */}
-                      <FormField
-                        control={form.control}
-                        name="equipmentBooking.maxDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Max Duration (minutes)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Available 24x7 */}
-                      <FormField
-                        control={form.control}
-                        name="equipmentBooking.available24x7"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between border p-3 rounded">
-                            <FormLabel>Available 24x7</FormLabel>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
                   </div>
+                </div>
                 {/* )} */}
 
                 {/* <div className="grid grid-cols-2 gap-5"> */}
@@ -735,13 +732,13 @@ const CreateService = () => {
                                     field.onChange([...(field.value || []), m]);
                                   else
                                     field.onChange(
-                                      field.value.filter((x) => x !== m)
+                                      field.value.filter((x) => x !== m),
                                     );
                                 }}
                               />
                               {m}
                             </label>
-                          )
+                          ),
                         )}
                       </div>
                       <FormMessage />
@@ -804,7 +801,7 @@ const CreateService = () => {
                                 const next = exists
                                   ? field.value.filter((x) => x !== d)
                                   : [...(field.value || []), d].sort(
-                                      (a, b) => a - b
+                                      (a, b) => a - b,
                                     );
                                 field.onChange(next);
                               }}
