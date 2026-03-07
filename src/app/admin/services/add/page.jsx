@@ -181,38 +181,46 @@ const CreateService = () => {
 
   // ===== Submit handler =====
   const onSubmit = async (values) => {
-    console.log({ values });
-
-    const formData = new FormData();
-
-    Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(`${key}[]`, v));
-        } else {
-          formData.append(key, value);
-        }
-      }
-    });
-
-    const apiData = { ...values, consultationSlots: null, nursingSlots: null };
+    console.log("values",values);
+    
     const slotConfig = {};
-
     if (category === "consultation") {
       slotConfig.consultationSlots = values.consultationSlots;
     }
-
     if (category === "nursing") {
       slotConfig.nursingSlots = values.nursingSlots;
     }
-
     if (category === "equipment") {
       slotConfig.equipmentBooking = values.equipmentBooking;
     }
 
-    console.log("apiData", { ...apiData, slotConfig });
+    const formData = new FormData();
+    // Scalar and string fields (API expects these as form fields)
+    formData.append("name", values.name ?? "");
+    formData.append("category", values.category ?? "");
+    formData.append("nursingType", values.nursingType ?? "");
+    formData.append("description", values.description ?? "");
+    formData.append("basePrice", String(values.basePrice ?? ""));
+    formData.append("equipmentCharges", String(values.equipmentCharges ?? 0));
+    formData.append("taxPercentage", String(values.taxPercentage ?? 18));
+    formData.append("supportsDuration", values.supportsDuration === true || values.supportsDuration === "true");
+    formData.append("paymentMode", values.paymentMode ?? "Both");
+    formData.append("timeFormat", values.timeFormat ?? "24-hour");
+    // JSON fields (backend uses parseJson)
+    formData.append("modes", JSON.stringify(values.modes ?? []));
+    formData.append("cities", JSON.stringify(values.cities ?? []));
+    formData.append("slotConfig", JSON.stringify(slotConfig));
 
-    await submitForm({ ...apiData, slotConfig });
+    // Service image: append file so backend receives req.files.image[0]
+    if (values.image instanceof File) {
+      formData.append("image", values.image);
+    }
+    // Service icon: append file so backend receives req.files.icon[0]
+    if (values.icon instanceof File) {
+      formData.append("icon", values.icon);
+    }
+
+    await submitForm(formData);
   };
 
   useEffect(() => {
@@ -336,7 +344,7 @@ const CreateService = () => {
                   />
                 )}
 
-                {category === "consultation" && (
+                {/* {category === "consultation" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     <FormField
                       control={form.control}
@@ -405,9 +413,9 @@ const CreateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
-                {category === "nursing" && (
+                {/* {category === "nursing" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     {/* Enabled Switch */}
                     <FormField
@@ -532,9 +540,9 @@ const CreateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
-                {category === "equipment" && (
+                {/* {category === "equipment" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     {/* Enabled Switch */}
                     <FormField
@@ -617,7 +625,7 @@ const CreateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
                 {/* <div className="grid grid-cols-2 gap-5"> */}
                 {/* Base Price */}

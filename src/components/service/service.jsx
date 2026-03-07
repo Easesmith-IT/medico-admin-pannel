@@ -65,7 +65,7 @@ export const Service = ({ service }) => {
         <TableCell className="flex items-center gap-3">
           <Avatar>
             {/* replace with real asset path or remote url */}
-            <AvatarImage src={service.icon} alt={service.name} />
+            <AvatarImage src={service.image} alt={service.name} />
             <AvatarFallback>{service.name.slice(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">

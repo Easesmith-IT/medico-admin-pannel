@@ -13,6 +13,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "thumbs.dreamstime.com",
       },
+       {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+      },
     ],
   },
   /* config options here */

@@ -177,18 +177,182 @@ const AddServicePartner = () => {
   });
 
   const onSubmit = async (data) => {
-    // Final submit: data is validated by zodResolver already
-    console.log("FINAL PAYLOAD", data);
-    const documents = {
-      addressProof: data.addressProof,
-      educationalCertificates: data.educationalCertificates,
-      experienceCertificates: data.experienceCertificates,
-      identityProof: data.identityProof,
-      policeVerification: data.policeVerification,
-      professionalCertificates: data.professionalCertificates,
-      registrationCertificate: data.registrationCertificate,
-    };
-    await submitForm({ ...data, documents });
+    const formData = new FormData();
+
+    /* -----------------------
+       NORMAL FIELDS
+    -----------------------*/
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (
+        key !== "profilePhoto" &&
+        key !== "identityProof" &&
+        key !== "addressProof" &&
+        key !== "educationalCertificates" &&
+        key !== "professionalCertificates" &&
+        key !== "registrationCertificate" &&
+        key !== "experienceCertificates" &&
+        key !== "policeVerification"
+      ) {
+        if (typeof value === "object" && value !== null) {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+
+    /* -----------------------
+       PROFILE PHOTO
+    -----------------------*/
+
+    if (data.profilePhoto instanceof File) {
+      formData.append("profilePhoto", data.profilePhoto);
+    }
+
+    /* -----------------------
+       IDENTITY PROOF
+    -----------------------*/
+
+    if (data.identityProof) {
+      if (data.identityProof.documentUrl instanceof File) {
+        formData.append("identityProofFile", data.identityProof.documentUrl);
+      }
+
+      formData.append(
+        "identityProof",
+        JSON.stringify({
+          type: data.identityProof.type,
+          documentNumber: data.identityProof.documentNumber,
+        })
+      );
+    }
+
+    /* -----------------------
+       ADDRESS PROOF
+    -----------------------*/
+
+    if (data.addressProof) {
+      if (data.addressProof.documentUrl instanceof File) {
+        formData.append("addressProofFile", data.addressProof.documentUrl);
+      }
+
+      formData.append(
+        "addressProof",
+        JSON.stringify({
+          type: data.addressProof.type,
+        })
+      );
+    }
+
+    /* -----------------------
+       EDUCATIONAL CERTIFICATES
+    -----------------------*/
+
+    if (data.educationalCertificates?.length) {
+      const meta = data.educationalCertificates.map((cert) => ({
+        degree: cert.degree,
+        institution: cert.institution,
+        year: cert.year,
+      }));
+
+      formData.append("educationalCertificates", JSON.stringify(meta));
+
+      data.educationalCertificates.forEach((cert) => {
+        if (cert.certificateUrl instanceof File) {
+          formData.append("educationalCertificatesFiles", cert.certificateUrl);
+        }
+      });
+    }
+
+    /* -----------------------
+       PROFESSIONAL CERTIFICATES
+    -----------------------*/
+
+    if (data.professionalCertificates?.length) {
+      const meta = data.professionalCertificates.map((cert) => ({
+        certificateName: cert.certificateName,
+        issuingAuthority: cert.issuingAuthority,
+        issueDate: cert.issueDate,
+        expiryDate: cert.expiryDate,
+      }));
+
+      formData.append("professionalCertificates", JSON.stringify(meta));
+
+      data.professionalCertificates.forEach((cert) => {
+        if (cert.certificateUrl instanceof File) {
+          formData.append("professionalCertificatesFiles", cert.certificateUrl);
+        }
+      });
+    }
+
+    /* -----------------------
+       REGISTRATION CERTIFICATE
+    -----------------------*/
+
+    if (data.registrationCertificate) {
+      if (data.registrationCertificate.certificateUrl instanceof File) {
+        formData.append(
+          "registrationCertificateFile",
+          data.registrationCertificate.certificateUrl
+        );
+      }
+
+      formData.append(
+        "registrationCertificate",
+        JSON.stringify({
+          issueDate: data.registrationCertificate.issueDate,
+          expiryDate: data.registrationCertificate.expiryDate,
+        })
+      );
+    }
+
+    /* -----------------------
+       EXPERIENCE CERTIFICATES
+    -----------------------*/
+
+    if (data.experienceCertificates?.length) {
+      const meta = data.experienceCertificates.map((cert) => ({
+        organization: cert.organization,
+        role: cert.role,
+        from: cert.from,
+        to: cert.to,
+      }));
+
+      formData.append("experienceCertificates", JSON.stringify(meta));
+
+      data.experienceCertificates.forEach((cert) => {
+        if (cert.certificateUrl instanceof File) {
+          formData.append("experienceCertificatesFiles", cert.certificateUrl);
+        }
+      });
+    }
+
+    /* -----------------------
+       POLICE VERIFICATION
+    -----------------------*/
+
+    if (data.policeVerification) {
+      if (data.policeVerification.certificateUrl instanceof File) {
+        formData.append(
+          "policeVerificationFile",
+          data.policeVerification.certificateUrl
+        );
+      }
+
+      formData.append(
+        "policeVerification",
+        JSON.stringify({
+          issueDate: data.policeVerification.issueDate,
+        })
+      );
+    }
+
+    /* -----------------------
+       SEND REQUEST
+    -----------------------*/
+
+    await submitForm(formData);
   };
 
   useEffect(() => {

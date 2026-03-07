@@ -106,12 +106,10 @@ const UpdateService = () => {
     setValue,
     formState,
     reset,
-    getValues,
   } = form;
 
   const category = watch("category");
   const supportsDuration = watch("supportsDuration");
-  console.log("getValues", getValues());
 
   const { data, isLoading } = useApiQuery({
     url: `/city/getAllCities`,
@@ -132,8 +130,6 @@ const UpdateService = () => {
     url: `/service/getServiceById/${params.serviceId}`,
     queryKeys: ["service", params.serviceId],
   });
-
-  console.log("serviceData", serviceData);
 
   useEffect(() => {
     if (serviceData) {
@@ -172,8 +168,8 @@ const UpdateService = () => {
           available24x7: false,
           allowCustomDuration: false,
         },
-        icon: "",
-        image: "",
+        icon: service?.icon || "",
+        image: service?.image || "",
       });
     }
   }, [serviceData]);
@@ -192,8 +188,6 @@ const UpdateService = () => {
 
   const onDropIcon = useCallback(
     (acceptedFiles) => {
-      console.log("acceptedFiles", acceptedFiles);
-
       if (!acceptedFiles?.length) return;
       const file = acceptedFiles[0];
       const url = URL.createObjectURL(file);
@@ -225,50 +219,52 @@ const UpdateService = () => {
 
   // ===== Submit handler =====
   const onSubmit = async (values) => {
-    console.log({ values });
+    const slotConfig = {};
+      slotConfig.consultationSlots = values.consultationSlots;
+      slotConfig.nursingSlots = values.nursingSlots;
+      slotConfig.equipmentBooking = values.equipmentBooking;
 
     const formData = new FormData();
+    // Scalar and string fields
+    formData.append("name", values.name ?? "");
+    formData.append("category", values.category ?? "");
+    formData.append("nursingType", values.nursingType ?? "");
+    formData.append("description", values.description ?? "");
+    formData.append("basePrice", String(values.basePrice ?? ""));
+    formData.append("equipmentCharges", String(values.equipmentCharges ?? 0));
+    formData.append("taxPercentage", String(values.taxPercentage ?? 18));
+    formData.append("supportsDuration", values.supportsDuration === true || values.supportsDuration === "true");
+    formData.append("paymentMode", values.paymentMode ?? "Both");
+    formData.append("timeFormat", values.timeFormat ?? "24-hour");
+    // JSON fields (backend uses parseJson)
+    formData.append("modes", JSON.stringify(values.modes ?? []));
+    formData.append("cities", JSON.stringify(values.cities ?? []));
+    formData.append("slotConfig", JSON.stringify(slotConfig));
 
-    Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(`${key}[]`, v));
-        } else {
-          formData.append(key, value);
-        }
-      }
-    });
-
-    const apiData = { ...values, consultationSlots: null, nursingSlots: null };
-    const slotConfig = {};
-
-    if (category === "consultation") {
-      slotConfig.consultationSlots = values.consultationSlots;
+    // Service image: append file so backend receives req.files.image[0]
+    if (values.image instanceof File) {
+      formData.append("image", values.image);
+    } else if (typeof values.image === "string" && values.image) {
+      formData.append("image", values.image); // existing URL when no new upload
     }
 
-    if (category === "nursing") {
-      slotConfig.nursingSlots = values.nursingSlots;
+    // Service icon: append file so backend receives req.files.icon[0]
+    if (values.icon instanceof File) {
+      formData.append("icon", values.icon);
+    } else if (typeof values.icon === "string" && values.icon) {
+      formData.append("icon", values.icon); // existing URL when no new upload
     }
 
-    if (category === "equipment") {
-      slotConfig.equipmentBooking = values.equipmentBooking;
-    }
-
-    console.log("apiData", { ...apiData, slotConfig });
-
-    await submitForm(values);
+    await submitForm(formData);
   };
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push("/admin/services");
     }
   }, [result]);
 
-  const onError = (error) => {
-    console.log("error", error);
-  };
+  const onError = () => {};
 
   return (
     <div className="space-y-6">
@@ -380,7 +376,7 @@ const UpdateService = () => {
                   />
                 )}
 
-                {category === "consultation" && (
+                {/* {category === "consultation" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     <FormField
                       control={form.control}
@@ -449,9 +445,9 @@ const UpdateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
-                {category === "nursing" && (
+                {/* {category === "nursing" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     {/* Enabled Switch */}
                     <FormField
@@ -576,9 +572,9 @@ const UpdateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
-                {category === "equipment" && (
+                {/* {category === "equipment" && ( */}
                   <div className="border p-4 rounded space-y-4 col-span-3">
                     {/* Enabled Switch */}
                     <FormField
@@ -661,7 +657,7 @@ const UpdateService = () => {
                       />
                     </div>
                   </div>
-                )}
+                {/* )} */}
 
                 {/* <div className="grid grid-cols-2 gap-5"> */}
                 {/* Base Price */}
@@ -908,6 +904,14 @@ const UpdateService = () => {
                           <img
                             src={iconPreview}
                             alt="icon preview"
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                        </div>
+                      ) : field.value ? (
+                        <div className="mt-2">
+                          <img
+                            src={field.value}
+                            alt="icon"
                             className="w-20 h-20 object-cover rounded"
                           />
                         </div>

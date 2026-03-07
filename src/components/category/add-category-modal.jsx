@@ -39,7 +39,7 @@ const categorySchema = z.object({
   description: z.string().optional(),
 });
 
-const AddCategoryModal = ({ open, onClose, data }) => {
+const AddCategoryModal = ({ open, onClose, data, refresh }) => {
   const form = useForm({
     resolver: zodResolver(categorySchema),
     defaultValues: {

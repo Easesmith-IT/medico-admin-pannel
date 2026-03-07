@@ -55,7 +55,11 @@ export function useApiMutation({
       }
 
       if (invalidateKey) {
-        queryClient.invalidateQueries(invalidateKey);
+        // queryClient.invalidateQueries(invalidateKey);
+        queryClient.invalidateQueries({
+          queryKey: invalidateKey,
+          exact: false,
+        });
       }
     },
 
