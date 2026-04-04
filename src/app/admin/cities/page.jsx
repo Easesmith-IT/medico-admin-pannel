@@ -31,6 +31,7 @@ const Cities = () => {
     }
   }, [data]);
 
+  console.log("data", data);
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

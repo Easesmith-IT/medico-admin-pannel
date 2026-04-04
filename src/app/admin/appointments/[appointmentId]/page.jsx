@@ -102,7 +102,7 @@ const BookingDetails = () => {
               <Badge
                 className={cn(
                   "px-2 py-1 rounded-full text-xs",
-                  appointmentStatusColors[status]
+                  appointmentStatusColors[status],
                 )}
               >
                 {status}
@@ -143,6 +143,15 @@ const BookingDetails = () => {
                   : "Not Assigned"
               }
             /> */}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Service Partner Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <Info label="Email" value={servicePartnerId?.email} />
           </CardContent>
         </Card>
 
