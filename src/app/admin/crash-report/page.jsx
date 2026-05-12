@@ -1,80 +1,95 @@
 "use client";
+export const dynamic = "force-dynamic";
+
+import { useMemo } from "react";
 
 import { CrashFilters } from "@/components/crash-report/CrashFilters";
-import { adaptCrashForList } from "@/components/crash-report/crashListAdapter";
 import { CrashTable } from "@/components/crash-report/CrashTable";
+import { adaptCrashForList } from "@/components/crash-report/crashListAdapter";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
 import { buildQuery } from "@/lib/utils";
-import { useEffect, useState } from "react";
 
-const CrashReports = () => {
-  const [environment, setEnvironment] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [userType, setUserType] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
+const defaults = {
+  environment: "all",
+  severity: "all",
+  userType: "all",
+  page: 1,
+  limit: "10",
+};
+
+const CrashReportsPage = () => {
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
 
   const query = buildQuery({
-    environment,
-    severity,
-    userType,
-    page,
+    environment: params.environment,
+    severity: params.severity,
+    userType: params.userType,
+    page: params.page,
+    limit: params.limit,
   });
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/crash-report/get?${query}`,
-    queryKeys: ["crash-reports", environment, severity, userType, page],
-    enabled: true,
+    queryKeys: [
+      "crash-report",
+      params.environment,
+      params.severity,
+      params.userType,
+      params.page,
+      params.limit,
+    ],
   });
 
-  console.log("crash data", data);
+  const crashes = useMemo(
+    () => (data?.data || []).map(adaptCrashForList),
+    [data?.data]
+  );
 
-  useEffect(() => {
-    if (data?.data) {
-      const totalPages = data?.meta?.totalPages || 0;
-      setPageCount(totalPages || 1);
-    }
-  }, [data]);
-
-  const crashReports = data?.data?.map(adaptCrashForList) || [];
-
-  const totalCrashes = data?.meta?.total || 0;
-
-  useEffect(() => {
-    setPage(1);
-  }, [environment, severity, userType]);
+  const pageCount = data?.meta?.totalPages || 0;
+  const total = data?.meta?.total || 0;
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold">Crash Reports</h1>
+      <header className="space-y-1">
+        <H1>Crash Reports</H1>
         <p className="text-sm text-muted-foreground">
-          Total Crashes: <span className="font-mono">{totalCrashes}</span>
+          Total Crashes: <span className="font-mono">{total}</span>
         </p>
       </header>
 
-      <div className="space-y-6">
+      <FilterBar>
         <CrashFilters
-          environment={environment}
-          setEnvironment={setEnvironment}
-          severity={severity}
-          setSeverity={setSeverity}
-          userType={userType}
-          setUserType={setUserType}
+          filters={params}
+          onChange={(updates) => updateParams(updates)}
+          onReset={resetParams}
         />
+      </FilterBar>
 
-        <CrashTable crashes={crashReports} isLoading={isLoading} />
-
-        <PaginationComp
-          page={page}
-          pageCount={pageCount}
-          setPage={setPage}
-          className="mt-8 mb-5"
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load crash reports"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
         />
-      </div>
+      ) : null}
+
+      <CrashTable crashes={crashes} isLoading={isLoading} />
+
+      <PaginationComp
+        page={params.page}
+        pageCount={pageCount}
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
+      />
     </div>
   );
 };
 
-export default CrashReports;
+export default CrashReportsPage;

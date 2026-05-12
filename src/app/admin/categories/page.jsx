@@ -1,9 +1,13 @@
 "use client";
+export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 
-import AddCategoryModal from "@/components/category/add-category-modal";
 import { Category } from "@/components/category/category";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
+import { StateView } from "@/components/shared/state-view";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,158 +19,125 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
 import { buildQuery } from "@/lib/utils";
-import { PlusIcon, Search } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 
-const dummyCategories = [
-  {
-    _id: "65f1a1b2c3d4e5f601",
-    name: "Medicine",
-    description:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quos, aspernatur quasi, dolorem excepturi saepe alias autem veritatis qui consectetur reprehenderit odio rem deleniti veniam ab assumenda, provident dolorum nemo aliquam!",
-    isActive: true,
-    createdAt: "2024-01-10T10:30:00.000Z",
-    createdBy: "Admin",
-  },
-  {
-    _id: "65f1a1b2c3d4e5f602",
-    name: "Equipment",
-    description:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quos, aspernatur quasi, dolorem excepturi saepe alias autem veritatis qui consectetur reprehenderit odio rem deleniti veniam ab assumenda, provident dolorum nemo aliquam!",
-    isActive: false,
-    createdAt: "2024-01-12T14:15:00.000Z",
-    createdBy: "Admin",
-  },
-  {
-    _id: "65f1a1b2c3d4e5f603",
-    name: "Surgical Items",
-    description:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quos, aspernatur quasi, dolorem excepturi saepe alias autem veritatis qui consectetur reprehenderit odio rem deleniti veniam ab assumenda, provident dolorum nemo aliquam!",
-    isActive: true,
-    createdAt: "2024-01-15T09:20:00.000Z",
-  },
-  {
-    _id: "65f1a1b2c3d4e5f604",
-    name: "Diagnostics",
-    isActive: true,
-    createdBy: "Admin",
-    createdAt: "2024-01-18T16:45:00.000Z",
-  },
-  {
-    _id: "65f1a1b2c3d4e5f605",
-    name: "Personal Care",
-    description:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quos, aspernatur quasi, dolorem excepturi saepe alias autem veritatis qui consectetur reprehenderit odio rem deleniti veniam ab assumenda, provident dolorum nemo aliquam!",
-    isActive: false,
-    createdBy: "Admin",
-    createdAt: "2024-01-20T11:10:00.000Z",
-  },
-];
+const defaults = {
+  search: "",
+  page: 1,
+  limit: "10",
+};
 
 const CategoriesPage = () => {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageCount, setpageCount] = useState(0);
-  const [limit] = useState(10);
-  const [categories, setCategories] = useState([]);
-  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
-
-  const handleModalOpen = () => setIsAddCategoryModalOpen((prev) => !prev);
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
+  const debouncedSearch = useDebounce(params.search, 600);
 
   const query = buildQuery({
-    page,
-    limit,
-    search,
+    page: params.page,
+    limit: params.limit,
+    search: debouncedSearch,
   });
 
-  const { data, refetch, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/items/getAllCategories?${query}`,
-    queryKeys: ["category", search, page, limit],
+    queryKeys: ["category", debouncedSearch, params.page, params.limit],
   });
 
-  console.log("data", data);
-
-  useEffect(() => {
-    if (data) {
-      setCategories(data?.data?.categories || []);
-      setpageCount(data?.totalPages || 0);
-    }
-  }, [data]);
+  const categories = data?.data?.categories || [];
+  const pageCount = data?.totalPages || 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between">
+      <div className="flex flex-wrap justify-between gap-4">
         <H1>Categories</H1>
         <Button asChild variant="medico">
-          <Link href={"/admin/categories/add"}>
+          <Link href="/admin/categories/add">
             <PlusIcon />
             <span>Add Category</span>
           </Link>
         </Button>
       </div>
-      <div className="lg:col-span-2">
-        <label htmlFor="search" className="text-sm font-medium mb-1 block">
-          Search
-        </label>
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 size-4  text-muted-foreground" />
-          <Input
-            id="search"
-            placeholder="Search by name, email, phone..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 w-lg bg-white"
-          />
+
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="category-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="category-search"
+                placeholder="Search category..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="bg-white pl-9"
+              />
+            </div>
+          </div>
+
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
         </div>
-      </div>
+      </FilterBar>
+
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load categories"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
 
       <div className="table-container">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-10">ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
-              {/* <TableHead>Created By</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories?.map((category, index) => (
+            {categories.map((category, index) => (
               <Category key={category?._id || index} category={category} />
             ))}
 
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <Category.Skeleton key={index} />
-              ))}
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <Category.Skeleton key={index} />
+                ))
+              : null}
           </TableBody>
         </Table>
-        {categories?.length === 0 && !isLoading && (
-          <DataNotFound name="Categories" />
-        )}
+        {categories.length === 0 && !isLoading ? (
+          <DataNotFound
+            name="Categories"
+            actionLabel="Add Category"
+            actionHref="/admin/categories/add"
+          />
+        ) : null}
       </div>
 
       <PaginationComp
-        page={page}
+        page={params.page}
         pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
       />
-
-      {isAddCategoryModalOpen && (
-        <AddCategoryModal
-          open={isAddCategoryModalOpen}
-          onClose={handleModalOpen}
-          refresh={refetch}
-        />
-      )}
     </div>
   );
 };
 
 export default CategoriesPage;
+

@@ -51,8 +51,6 @@ export function useApiQuery({
   const router = useRouter();
   const { reportCrash: sendCrash } = useCrashReporter();
   const userInfo = readCookie("userInfo");
-  console.log("userInfo", userInfo);
-  
 
   return useQuery({
     queryKey: [...queryKeys, params],
@@ -62,9 +60,6 @@ export function useApiQuery({
         return await fetchApi({ url, params, axiosOptions });
       } catch (error) {
         const status = error?.status;
-
-        console.log("error-log", error);
-        
 
         // ----------------------------
         // 🔐 Auth handling

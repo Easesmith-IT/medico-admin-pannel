@@ -4,16 +4,19 @@ import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
 import { useEffect, useState } from "react";
+import { getDisplayName } from "@/lib/display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns/format";
 import { Switch } from "../ui/switch";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { PATCH } from "@/constants/apiMethods";
 import { Spinner } from "../ui/spinner";
+import { customId } from "@/lib/utils";
 
 export const Patient = ({ patient }) => {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [isActive, setIsActive] = useState(patient?.isActive || false);
+  const fullName = getDisplayName(patient, { fallback: "N/A" });
 
   const router = useRouter();
 
@@ -48,35 +51,40 @@ export const Patient = ({ patient }) => {
 
   return (
     <TableRow className="hover:bg-muted/30">
-      <TableCell>
+      <TableCell
+        className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+        onClick={onView}
+      >
+        <span title={patient?._id}>{customId(patient?._id)}</span>
+      </TableCell>
+      <TableCell className="cursor-pointer" onClick={onView}>
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage
               src={patient.profilePhoto || "https://github.com/shadcn.png"}
             />
-            <AvatarFallback>{patient.firstName?.[0] ?? "P"}</AvatarFallback>
+            <AvatarFallback>{fullName?.[0] ?? "P"}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">{patient.firstName}</p>
+            <p className="font-semibold text-[#0F172A] hover:text-[#1D4ED8]">{fullName}</p>
             <p className="text-xs text-muted-foreground">
               {patient?.address?.city}
             </p>
           </div>
         </div>
       </TableCell>
-      <TableCell>{patient.email}</TableCell>
       <TableCell>{patient.phone}</TableCell>
       <TableCell className="capitalize">{patient.gender || "NA"}</TableCell>
       <TableCell>{patient.bloodGroup || "NA"}</TableCell>
       <TableCell>
         <div className="flex flex-col gap-1">
-          <Badge variant={patient.isActive ? "success" : "destructive"}>
-            {isPending ? <Spinner /> : patient.isActive ? "Active" : "Inactive"}
+          <Badge variant={isActive ? "success" : "destructive"}>
+            {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
           </Badge>
           <Switch
             checked={isActive}
             onCheckedChange={toggleStatus}
-            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
           />
         </div>
       </TableCell>

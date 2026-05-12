@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "../../ui/scroll-area";
 import { Badge } from "../../ui/badge";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
@@ -57,9 +56,9 @@ export const Overview = ({ selectedPost }) => {
 
         <TabsContent
           value="overview"
-          className="flex-1 px-6 pb-6 pt-2 overflow-hidden"
+          className="flex-1 px-6 pb-6 pt-2"
         >
-          <ScrollArea className="h-full space-y-4">
+          <div className="space-y-4">
             <div className="flex justify-between items-center gap-5">
               <div className="flex items-center gap-3">
                 <Avatar>
@@ -168,7 +167,7 @@ export const Overview = ({ selectedPost }) => {
                 Delete Article
               </Button>
             </div> */}
-          </ScrollArea>
+          </div>
         </TabsContent>
 
         <TabsContent value="comments" className="flex-1 px-6 pb-6 pt-2">
@@ -179,7 +178,7 @@ export const Overview = ({ selectedPost }) => {
               </p>
             )}
 
-            <div className="flex flex-col gap-3 max-h-100 overflow-y-auto">
+            <div className="flex flex-col gap-3">
               {selectedPost?.comments?.map((comment) => (
                 <Comment key={comment._id} comment={comment} />
               ))}

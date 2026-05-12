@@ -33,6 +33,8 @@ import { POST } from "@/constants/apiMethods";
 import { useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
 
 export default function AddDoctor() {
   const form = useForm({
@@ -64,6 +66,7 @@ export default function AddDoctor() {
       bio: "",
     },
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const router = useRouter();
 
@@ -83,7 +86,6 @@ export default function AddDoctor() {
   });
 
   const onSubmit = async (data) => {
-    console.log("Doctor Data:", data);
     const apiData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -117,7 +119,6 @@ export default function AddDoctor() {
 
   useEffect(() => {
     if (result) {
-      console.log("add doctor result", result);
       router.push("/admin/doctors");
     }
   }, [result]);
@@ -416,7 +417,7 @@ export default function AddDoctor() {
               </Section>
             </CardContent>
 
-            <div className="p-6 md:p-8 pt-0 flex justify-end">
+            <FormFooter className="p-6 md:p-8 pt-0 flex justify-end">
               <Button
                 variant="medico"
                 type="submit"
@@ -424,7 +425,7 @@ export default function AddDoctor() {
               >
                 {isSubmitFormLoading ? <Spinner /> : "Create Doctor"}
               </Button>
-            </div>
+            </FormFooter>
           </form>
         </Form>
       </Card>

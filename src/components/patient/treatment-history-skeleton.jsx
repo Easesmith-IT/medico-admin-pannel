@@ -37,7 +37,7 @@ export default function TreatmentHistorySkeleton() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 h-[500px] overflow-y-auto pr-2">
+            <div className="space-y-4 pr-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}

@@ -22,7 +22,9 @@ export const Booking = ({ booking }) => {
 
   return (
     <TableRow>
-      <TableCell>{booking.serviceName || "NA"}</TableCell>
+      <TableCell className="cursor-pointer font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+        {booking.serviceName || "NA"}
+      </TableCell>
 
       <TableCell>
         {booking.appointmentDate && new Date(booking.appointmentDate).toLocaleDateString("en-IN", {

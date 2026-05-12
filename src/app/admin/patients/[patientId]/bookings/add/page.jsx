@@ -33,10 +33,13 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { buildQuery, generateTimeRange } from "@/lib/utils";
 import { format } from "date-fns/format";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CustomCombobox } from "@/components/shared/custom-combobox";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
+import { PatientSummaryCard } from "@/components/shared/patient-summary-card";
 
 // -------------------------------
 // ZOD SCHEMA
@@ -44,6 +47,8 @@ import { CustomCombobox } from "@/components/shared/custom-combobox";
 const bookingSchema = z.object({
   serviceId: z.string().min(1, "Required"),
   patientId: z.string().min(1, "Required"),
+  addressId: z.string().min(1, "Required"),
+  treatmentSelection: z.string().min(1, "Required"),
   cityId: z.string().optional(),
   appointmentDate: z.date().min(1, "Required"),
   startTime: z.string().min(1, "Required"),
@@ -51,63 +56,49 @@ const bookingSchema = z.object({
   //   duration: z.coerce.number().min(1),
   servicePartnerId: z.string().optional(),
   notes: z.string().optional(),
-  category: z.enum(["nursing", "consultation", "therapy", "other"]),
+  category: z.enum(["nursing", "consultation", "equipment"]),
   modes: z.string(),
 });
 
-const addressList = [
-  {
-    _id: "675df82c",
-    street: "MG Road",
-    city: "Bengaluru",
-    state: "Karnataka",
-    country: "India",
-    pincode: "560001",
-    isDefault: true,
-  },
-  {
-    _id: "675df8de",
-    street: "Park Street",
-    city: "Kolkata",
-    state: "West Bengal",
-    country: "India",
-    pincode: "700016",
-  },
-];
+const objectIdRegex = /^[a-f\d]{24}$/i;
+
+const asText = (value) => {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+};
+
+const resolveLocationValue = (value, lookup = {}) => {
+  if (!value) return "Not provided";
+  if (typeof value === "object") {
+    return value.name || value.label || "Not provided";
+  }
+  const text = asText(value);
+  if (!text) return "Not provided";
+  if (lookup[text]) return lookup[text];
+  if (objectIdRegex.test(text)) return "Not provided";
+  return text;
+};
 
 // -------------------------------
 // COMPONENT
 // -------------------------------
 const AddAppointment = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState("10");
-  const [pageCount, setPageCount] = useState(10);
+  const page = 1;
   const [search, setSearch] = useState("");
   const [patients, setPatients] = useState([]);
-
-  const [isAddressLoading, setIsAddressLoading] = useState(true);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsAddressLoading(false);
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, []);
+  const [treatmentOptions, setTreatmentOptions] = useState([]);
 
   const router = useRouter();
   const params = useParams();
   const [timeOptions, setTimeOptions] = useState([]);
 
-  console.log("search", search);
-  console.log("patients", patients);
   const form = useForm({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       serviceId: "",
       patientId: params.patientId || "",
+      addressId: "",
+      treatmentSelection: "",
       appointmentDate: "",
       startTime: "",
       endTime: "",
@@ -118,11 +109,14 @@ const AddAppointment = () => {
       modes: "",
     },
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const { control, handleSubmit, watch } = form;
 
+  const patientId = watch("patientId");
   const serviceId = watch("serviceId");
   const cityId = watch("cityId");
+  const selectedAddressId = watch("addressId");
 
   const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
     url: `/admin/services/names`,
@@ -132,7 +126,6 @@ const AddAppointment = () => {
   const handleServiceChange = (id) => {
     const serviceDoc = serviceData.data.find((item) => item._id === id);
     const { consultationSlots } = serviceDoc?.slotConfig;
-    console.log("consultationSlots", consultationSlots);
 
     const timeOptions = generateTimeRange(
       consultationSlots?.startTime,
@@ -151,22 +144,146 @@ const AddAppointment = () => {
     queryKeys: ["patients", page, search],
   });
 
-  console.log("patientData", patientData);
 
   useEffect(() => {
     if (patientData) {
       const modifiedPatients = patientData?.data?.map((item) => ({
         value: item._id,
-        label: item.firstName,
+        label: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || "Unknown Patient",
+        fullName:
+          [item.firstName, item.lastName].filter(Boolean).join(" ").trim() ||
+          "Unknown Patient",
+        patientId: `#ID-${String(item._id).slice(0, 4).toUpperCase()}-${String(item._id)
+          .slice(-4)
+          .toUpperCase()}`,
+        phone: item.phone || "Phone not provided",
+        city:
+          item.address?.city ||
+          item.address?.state ||
+          item.address?.country ||
+          "",
       }));
       setPatients(modifiedPatients);
     }
   }, [patientData]);
 
+  const {
+    data: treatmentData,
+    isLoading: isTreatmentLoading,
+    refetch: refetchTreatments,
+  } = useApiQuery({
+    url: `/admin/patients/${patientId}/treatments?serviceId=${serviceId || ""}`,
+    queryKeys: ["patient-treatments", patientId, serviceId],
+    options: { enabled: false },
+  });
+
+  useEffect(() => {
+    if (patientId && serviceId) {
+      refetchTreatments();
+      form.setValue("treatmentSelection", "");
+    } else {
+      setTreatmentOptions([]);
+      form.setValue("treatmentSelection", "");
+    }
+  }, [patientId, serviceId, refetchTreatments, form]);
+
+  useEffect(() => {
+    const treatments = treatmentData?.data || [];
+    const options = treatments.map((item) => ({
+      value: item._id,
+      label: `#${String(item._id).slice(-6).toUpperCase()} • ${item.status} • Sessions ${item.sessionsCount || 0}`,
+    }));
+    setTreatmentOptions(options);
+  }, [treatmentData]);
+
+  const {
+    data: selectedPatientData,
+    isLoading: isSelectedPatientLoading,
+    refetch: refetchSelectedPatient,
+  } = useApiQuery({
+    url: `/admin/patients/${patientId}`,
+    queryKeys: ["patient-profile", patientId],
+    options: { enabled: false },
+  });
+
+  useEffect(() => {
+    if (patientId) {
+      refetchSelectedPatient();
+    }
+  }, [patientId, refetchSelectedPatient]);
+
+  const selectedPatient = selectedPatientData?.data?.patient;
+  const selectedPatientOption = selectedPatient
+    ? {
+        value: selectedPatient._id,
+        label:
+          [selectedPatient.firstName, selectedPatient.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() || "Unknown Patient",
+        fullName:
+          [selectedPatient.firstName, selectedPatient.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() || "Unknown Patient",
+        patientId: `#ID-${String(selectedPatient._id)
+          .slice(0, 4)
+          .toUpperCase()}-${String(selectedPatient._id)
+          .slice(-4)
+          .toUpperCase()}`,
+        phone: selectedPatient.phone || "Phone not provided",
+        city:
+          selectedPatient.address?.city ||
+          selectedPatient.address?.state ||
+          selectedPatient.address?.country ||
+          "",
+      }
+    : null;
+  const patientSelectorItems = selectedPatientOption
+    ? [
+        selectedPatientOption,
+        ...patients.filter((item) => item.value !== selectedPatientOption.value),
+      ]
+    : patients;
+
   const { data: cityData, isLoading: isCityLoading } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
+  const cityLookup = useMemo(() => {
+    const lookup = {};
+    (cityData?.data || []).forEach((city) => {
+      if (city?._id && city?.name) {
+        lookup[String(city._id)] = city.name;
+      }
+    });
+    return lookup;
+  }, [cityData]);
+  const patientAddressOptions = useMemo(() => {
+    const rawAddresses = Array.isArray(selectedPatient?.addresses)
+      ? selectedPatient.addresses
+      : Array.isArray(selectedPatient?.address)
+      ? selectedPatient.address
+      : selectedPatient?.address
+      ? [selectedPatient.address]
+      : [];
+
+    return rawAddresses
+      .map((address, idx) => {
+        const id = address?._id || address?.id || "";
+        return {
+          value: id,
+          isDefault: Boolean(address?.isDefault),
+          street: asText(address?.street) || "Not provided",
+          city: resolveLocationValue(address?.city, cityLookup),
+          state: resolveLocationValue(address?.state, cityLookup),
+          country: resolveLocationValue(address?.country, cityLookup),
+          pincode: asText(address?.pincode) || "Not provided",
+          key: id || `address-${idx}`,
+        };
+      })
+      .filter((address) => Boolean(address.value));
+  }, [selectedPatient, cityLookup]);
 
   const query = buildQuery({
     serviceId,
@@ -200,26 +317,46 @@ const AddAppointment = () => {
   });
 
   const onSubmit = async (data) => {
+    const isCreateTreatment = data.treatmentSelection === "__create_new__";
     const apiData = {
       ...data,
       appointmentDate:
         data.appointmentDate &&
         format(new Date(data.appointmentDate), "yyyy-MM-dd"),
       modes: data.modes ? [data.modes] : [],
+      treatmentId: isCreateTreatment ? undefined : data.treatmentSelection,
+      createNewTreatment: isCreateTreatment,
     };
-    console.log("Booking Payload:", apiData);
+    delete apiData.treatmentSelection;
 
     await submitForm(apiData);
   };
 
-  console.log("partnerData", partnerData);
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push(`/admin/patients/${params.patientId}/bookings`);
     }
   }, [result]);
+
+  useEffect(() => {
+    if (!patientId || !patientAddressOptions.length) {
+      form.setValue("addressId", "");
+      return;
+    }
+
+    if (
+      selectedAddressId &&
+      patientAddressOptions.some((address) => address.value === selectedAddressId)
+    ) {
+      return;
+    }
+
+    const defaultAddress =
+      patientAddressOptions.find((address) => address.isDefault)?.value ||
+      patientAddressOptions[0].value;
+    form.setValue("addressId", defaultAddress || "");
+  }, [patientId, patientAddressOptions, selectedAddressId, form]);
 
   return (
     <div className="space-y-6">
@@ -274,40 +411,62 @@ const AddAppointment = () => {
                   control={control}
                   name="patientId"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2 lg:col-span-3">
                       <FormLabel>Patient</FormLabel>
                       <FormControl>
-                        {/* <Select
-                          disabled={isPatientLoading}
+                        {selectedPatient ? (
+                          <PatientSummaryCard
+                            patient={selectedPatient}
+                            cityLookup={cityLookup}
+                          />
+                        ) : (
+                          <CustomCombobox
+                            items={patientSelectorItems}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Select Patient..."
+                            searchPlaceholder="Search patients..."
+                            variant="patient"
+                            dropdownClassName="w-[420px]"
+                            className="w-full"
+                            search={search}
+                            setSearch={setSearch}
+                            loading={isPatientLoading}
+                            disabled
+                          />
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="treatmentSelection"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Treatment</FormLabel>
+                      <FormControl>
+                        <Select
                           value={field.value}
-                          key={field.value}
                           onValueChange={field.onChange}
+                          disabled={!patientId || !serviceId || isTreatmentLoading}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Patient" />
+                            <SelectValue placeholder="Select treatment or create new" />
                           </SelectTrigger>
                           <SelectContent>
-                            {patientData?.data?.map((item) => (
-                              <SelectItem key={item._id} value={item._id}>
-                                {item.firstName} {item.lastName}
+                            <SelectItem value="__create_new__">
+                              + Create New Treatment
+                            </SelectItem>
+                            {treatmentOptions.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
                               </SelectItem>
                             ))}
-                            {patientData && patientData.data.length === 0 && (
-                              <div disabled>No patients found</div>
-                            )}
                           </SelectContent>
-                        </Select> */}
-                        <CustomCombobox
-                          items={patients}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Select Patient..."
-                          className="w-full"
-                          search={search}
-                          setSearch={setSearch}
-                          loading={isPatientLoading}
-                          disabled
-                        />
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -349,101 +508,11 @@ const AddAppointment = () => {
                 /> */}
               </div>
 
-              <FormField
-                control={control}
-                name="addressId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Select Address
-                    </FormLabel>
-
-                    {!isAddressLoading && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                        {addressList?.map((address) => {
-                          const selected = field.value === address._id;
-
-                          return (
-                            <div
-                              key={address._id}
-                              onClick={() => {
-                                if (field.value === address._id) {
-                                  field.onChange(""); // DESELECT
-                                } else {
-                                  field.onChange(address._id); // SELECT
-                                }
-                              }}
-                              className={`
-                                cursor-pointer border rounded-xl p-4 shadow-sm 
-                                transition-all duration-200
-                                ${
-                                  selected
-                                    ? "border-blue-600 bg-blue-50 shadow-md"
-                                    : "border-gray-300 bg-white"
-                                }
-                                hover:shadow-md
-                              `}
-                            >
-                              {/* Title */}
-                              {/* <h3 className="font-semibold text-gray-900 text-lg mb-2">
-                                {address.title || "Address"}
-                              </h3> */}
-
-                              {/* Address Lines */}
-                              <div className="text-sm text-gray-700 space-y-1">
-                                <p>
-                                  <span className="font-semibold">Street:</span>{" "}
-                                  {address.street}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">City:</span>{" "}
-                                  {address.city}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">State:</span>{" "}
-                                  {address.state}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Country:
-                                  </span>{" "}
-                                  {address.country}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Pincode:
-                                  </span>{" "}
-                                  {address.pincode}
-                                </p>
-                              </div>
-
-                              {/* Default Badge */}
-                              {address.isDefault && (
-                                <div className="mt-3">
-                                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                    Default
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-
-                        {/* Empty State */}
-                        {addressList && addressList.length === 0 && (
-                          <div className="col-span-full text-sm text-muted-foreground">
-                            No saved addresses found
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {isAddressLoading && <Spinner />}
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {patientId && isSelectedPatientLoading && (
+                <div className="flex items-center justify-center py-2">
+                  <Spinner />
+                </div>
+              )}
 
               <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 col-span-4">
                 {/* Appointment Date */}
@@ -614,6 +683,72 @@ const AddAppointment = () => {
                 />
               </div>
 
+              {patientId && (
+                <FormField
+                  control={control}
+                  name="addressId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Address</FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                          {patientAddressOptions.map((address) => {
+                            const isSelected = field.value === address.value;
+                            return (
+                              <button
+                                key={address.key}
+                                type="button"
+                                onClick={() => field.onChange(address.value)}
+                                className={`rounded-2xl border p-4 text-left transition-all duration-200 ${
+                                  isSelected
+                                    ? "border-[#2563EB] bg-[#EFF6FF] shadow-sm"
+                                    : "border-[#E2E8F0] bg-white hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
+                                }`}
+                              >
+                                <div className="space-y-1 text-sm text-[#0F172A]">
+                                  <p>
+                                    <span className="font-semibold">Street:</span>{" "}
+                                    {address.street}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">City:</span>{" "}
+                                    {address.city}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">State:</span>{" "}
+                                    {address.state}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Country:</span>{" "}
+                                    {address.country}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Pincode:</span>{" "}
+                                    {address.pincode}
+                                  </p>
+                                </div>
+                                {address.isDefault && (
+                                  <span className="mt-3 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                    Default
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+
+                          {patientAddressOptions.length === 0 && (
+                            <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-3 text-sm text-[#64748B]">
+                              No saved addresses found for this patient.
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               {serviceId && (
                 <div className="border p-4 rounded-md space-y-5">
                   <FormField
@@ -638,7 +773,7 @@ const AddAppointment = () => {
                                   {item.name}
                                 </SelectItem>
                               ))}
-                              {patientData && patientData.data.length === 0 && (
+                              {cityData && cityData.data.length === 0 && (
                                 <div disabled>No city found</div>
                               )}
                             </SelectContent>
@@ -799,11 +934,11 @@ const AddAppointment = () => {
               />
 
               {/* Submit Button */}
-              <div className="flex gap-3 justify-end">
+              <FormFooter className="flex gap-3 justify-end">
                 <Button type="submit" className="">
                   {isSubmitFormLoading ? <Spinner /> : "Create Booking"}
                 </Button>
-              </div>
+              </FormFooter>
             </form>
           </Form>
         </CardContent>

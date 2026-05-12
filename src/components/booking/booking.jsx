@@ -11,6 +11,9 @@ import { appointmentStatusColors } from "@/constants/status";
 
 export const Booking = ({ booking }) => {
   const router = useRouter();
+  const patientName =
+    `${booking?.patient?.firstName || ""} ${booking?.patient?.lastName || ""}`.trim() || "-";
+  const patientEmail = booking?.patient?.email || "-";
 
   const onView = () => {
     router.push(`/admin/appointments/${booking?._id}`);
@@ -22,12 +25,14 @@ export const Booking = ({ booking }) => {
 
   return (
     <TableRow>
-      <TableCell>
-        <p>{booking.patient?.firstName}</p>
-        <p>{booking.patient?.email}</p>
+      <TableCell className="cursor-pointer" onClick={onView}>
+        <p>{patientName}</p>
+        <p>{patientEmail}</p>
       </TableCell>
 
-      <TableCell>{booking.service?.name || "NA"}</TableCell>
+      <TableCell className="cursor-pointer font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+        {booking.service?.name || "NA"}
+      </TableCell>
 
       <TableCell>
         {booking.appointmentDate &&

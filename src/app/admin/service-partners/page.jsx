@@ -1,13 +1,16 @@
 "use client";
+export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 
-import { Doctor } from "@/components/doctor/doctor";
 import { ServicePartner } from "@/components/service-partner/service-partner";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
+import { StateView } from "@/components/shared/state-view";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,141 +26,115 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { PlusIcon, RotateCcwIcon, Search } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { buildQuery } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
+import { buildQuery } from "@/lib/utils";
+
+const defaults = {
+  search: "",
+  status: "all",
+  approvalStatus: "all",
+  page: 1,
+  limit: "10",
+  city: "",
+};
 
 const ServiceProviders = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState("all");
-  const [approvalStatus, setApprovalStatus] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
-  const [serviceProviders, setServiceProviders] = useState([]);
-  const [limit, setLimit] = useState("10");
-  const [city, setCity] = useState("");
-
-  const handleReset = () => {
-    setSearchQuery("");
-    setStatus("all");
-    setApprovalStatus("all");
-    setPage(1);
-    setLimit("10");
-    setCity("");
-  };
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
+  const debouncedSearch = useDebounce(params.search, 600);
 
   const { data: cityData, isLoading: isCityLoading } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
 
-  const debouncedSearch = useDebounce(searchQuery, 1000);
-
   const query = buildQuery({
     search: debouncedSearch,
-    cityId: city,
-    isActive: status,
-    approvalStatus,
-    page,
-    limit,
+    cityId: params.city,
+    isActive: params.status,
+    approvalStatus: params.approvalStatus,
+    page: params.page,
+    limit: params.limit,
   });
 
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/serviceProvider/getAllServiceProviders?${query}`,
     queryKeys: [
       "service-provider",
-      status,
-      page,
+      params.status,
+      params.page,
       debouncedSearch,
-      limit,
-      approvalStatus,
-      city,
+      params.limit,
+      params.approvalStatus,
+      params.city,
     ],
   });
 
-  console.log("data", data);
-
-  useEffect(() => {
-    if (data) {
-      setServiceProviders(data?.data || []);
-      setPageCount(data?.pagination?.totalPages || 0);
-    }
-  }, [data]);
+  const serviceProviders = data?.data || [];
+  const pageCount = data?.pagination?.totalPages || 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <H1>Service Partners</H1>
         <Button variant="medico" asChild>
-          <Link href={"/admin/service-partners/add"}>
+          <Link href="/admin/service-partners/add">
             <PlusIcon />
             Add Service Partner
           </Link>
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-        {/* Search Input */}
-        <div>
-          <Label htmlFor="search" className="sr-only">
-            Search
-          </Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2 h-5 w-5 text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search service provider..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white w-96"
-            />
-          </div>
-        </div>
-
-        {/* Filter Buttons */}
-
+      <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="partner-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="partner-search"
+                placeholder="Search service provider..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="w-full bg-white pl-9"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="text-sm font-medium mb-1 block">City</label>
+            <label className="mb-1 block text-sm font-medium">City</label>
             <Select
               disabled={isCityLoading}
-              value={city}
-              key={city}
-              onValueChange={(value) => setCity(value)}
+              value={params.city}
+              onValueChange={(value) => updateParams({ city: value, page: 1 })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Select City" />
               </SelectTrigger>
               <SelectContent>
-                {cityData?.data?.map((c) => (
-                  <SelectItem key={c._id} value={c._id}>
-                    {c.name}
+                {cityData?.data?.map((city) => (
+                  <SelectItem key={city._id} value={city._id}>
+                    {city.name}
                   </SelectItem>
                 ))}
-                {cityData && cityData.data.length === 0 && (
-                  <div disabled>No cities found</div>
-                )}
-                {/* <SelectItem value="all">All</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
+
           <div>
-            <label className="text-sm font-medium mb-1 block">
-              Approval Status
-            </label>
+            <label className="mb-1 block text-sm font-medium">Approval Status</label>
             <Select
-              onValueChange={(value) => setApprovalStatus(value)}
-              value={approvalStatus}
+              value={params.approvalStatus}
+              onValueChange={(value) =>
+                updateParams({ approvalStatus: value, page: 1 })
+              }
             >
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Select approval status" />
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Approval status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -169,11 +146,15 @@ const ServiceProviders = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select onValueChange={(value) => setStatus(value)} value={status}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Select status" />
+            <label className="mb-1 block text-sm font-medium">Status</label>
+            <Select
+              value={params.status}
+              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -184,10 +165,13 @@ const ServiceProviders = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">Limit</label>
-            <Select value={limit} onValueChange={(value) => setLimit(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Limit" />
+            <label className="mb-1 block text-sm font-medium">Limit</label>
+            <Select
+              value={params.limit}
+              onValueChange={(value) => updateParams({ limit: value, page: 1 })}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="10" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="10">10</SelectItem>
@@ -198,26 +182,30 @@ const ServiceProviders = () => {
               </SelectContent>
             </Select>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset Filters</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </div>
 
-      {/* Table */}
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
+        </div>
+      </FilterBar>
+
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load service partners"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
+
       <div className="table-container">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">Service Provider ID</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Age</TableHead>
               <TableHead>Specialization</TableHead>
@@ -234,48 +222,30 @@ const ServiceProviders = () => {
                 servicePartner={servicePartner}
               />
             ))}
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <ServicePartner.Skeleton key={index} />
-              ))}
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <ServicePartner.Skeleton key={index} />
+                ))
+              : null}
           </TableBody>
         </Table>
-        {serviceProviders?.length === 0 && !isLoading && (
-          <DataNotFound name="Service Partners" />
-        )}
+        {serviceProviders.length === 0 && !isLoading ? (
+          <DataNotFound
+            name="Service Partners"
+            actionLabel="Add Service Partner"
+            actionHref="/admin/service-partners/add"
+          />
+        ) : null}
       </div>
       <PaginationComp
-        page={page}
+        page={params.page}
         pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
       />
-
-      {/* Pagination */}
-      {/* <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing 1 to 5 of 25 results
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" disabled>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="secondary" size="icon" className="font-medium">
-            1
-          </Button>
-          <Button variant="outline" size="icon">
-            2
-          </Button>
-          <Button variant="outline" size="icon">
-            3
-          </Button>
-          <Button variant="outline" size="icon">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div> */}
     </div>
   );
 };
 
 export default ServiceProviders;
+

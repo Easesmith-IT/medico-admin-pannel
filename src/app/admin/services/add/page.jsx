@@ -37,6 +37,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
 
 const DEFAULT = {
   name: "Nursing",
@@ -128,6 +130,7 @@ const CreateService = () => {
     defaultValues: DEFAULT,
     mode: "onBlur",
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const { control, handleSubmit, watch, setValue, formState, getValues } = form;
 
@@ -148,7 +151,6 @@ const CreateService = () => {
 
   const onDropIcon = useCallback(
     (acceptedFiles) => {
-      console.log("acceptedFiles", acceptedFiles);
 
       if (!acceptedFiles?.length) return;
       const file = acceptedFiles[0];
@@ -181,7 +183,6 @@ const CreateService = () => {
 
   // ===== Submit handler =====
   const onSubmit = async (values) => {
-    console.log("values", values);
 
     const slotConfig = {};
     slotConfig.consultationSlots = values.consultationSlots;
@@ -222,13 +223,11 @@ const CreateService = () => {
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push("/admin/services");
     }
   }, [result]);
 
   const onError = (error) => {
-    console.log("error", error);
   };
 
   return (
@@ -926,7 +925,7 @@ const CreateService = () => {
                   )}
                 />
               </div>
-              <div className="flex gap-3 justify-end">
+              <FormFooter className="flex gap-3 justify-end">
                 <Button
                   type="submit"
                   disabled={formState.isSubmitting || isSubmitFormLoading}
@@ -937,7 +936,7 @@ const CreateService = () => {
                     "Save Service"
                   )}
                 </Button>
-              </div>
+              </FormFooter>
             </form>
           </Form>
         </CardContent>

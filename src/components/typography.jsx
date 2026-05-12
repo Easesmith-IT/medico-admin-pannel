@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 export const H1 = ({ children, className }) => (
   <h1
     className={cn(
-      "scroll-m-20 text-4xl font-semibold tracking-tight text-balance",
+      "scroll-m-20 text-[32px] font-semibold tracking-[-0.02em] text-[#0F172A] text-balance",
       className
     )}
   >
@@ -14,7 +14,7 @@ export const H1 = ({ children, className }) => (
 export const H2 = ({ children, className }) => (
   <h2
     className={cn(
-      "scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0",
+      "scroll-m-20 text-[28px] font-semibold tracking-[-0.02em] first:mt-0",
       className
     )}
   >
@@ -25,7 +25,7 @@ export const H2 = ({ children, className }) => (
 export const H3 = ({ children, className }) => (
   <h3
     className={cn(
-      "scroll-m-20 text-2xl font-semibold tracking-tight",
+      "scroll-m-20 text-2xl font-semibold tracking-[-0.015em]",
       className
     )}
   >
@@ -36,7 +36,7 @@ export const H3 = ({ children, className }) => (
 export const H4 = ({ children, className }) => (
   <h4
     className={cn(
-      "scroll-m-20 text-xl font-semibold tracking-tight",
+      "scroll-m-20 text-xl font-semibold tracking-[-0.01em]",
       className
     )}
   >

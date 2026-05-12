@@ -29,6 +29,7 @@ import { AddServicePartnerStep6 } from "@/components/service-partner/add-steps/a
 import { Button } from "@/components/ui/button";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { Spinner } from "@/components/ui/spinner";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 
 const defaultValues = {
   firstName: "",
@@ -108,6 +109,7 @@ const UpdatePage = () => {
     resolver: zodResolver(fullSchema),
     mode: "onTouched",
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const { handleSubmit, trigger, formState, reset } = form;
 
@@ -121,7 +123,6 @@ const UpdatePage = () => {
   ];
 
   const onNext = async () => {
-    console.log("error", formState?.errors);
 
     let schema;
     switch (step) {
@@ -156,7 +157,6 @@ const UpdatePage = () => {
 
   const onBack = () => setStep((s) => Math.max(s - 1, 0));
   const onError = (error) => {
-    console.log("error", error);
   };
 
   const { data, isLoading, error } = useApiQuery({
@@ -164,7 +164,6 @@ const UpdatePage = () => {
     queryKeys: ["service-provider", params.servicePartnerId],
   });
 
-  console.log("data", data);
 
   useEffect(() => {
     if (data?.data) {

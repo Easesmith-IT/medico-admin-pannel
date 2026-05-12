@@ -1,17 +1,17 @@
+import { DELETE, PATCH } from "@/constants/apiMethods";
+import { useApiMutation } from "@/hooks/useApiMutation";
 import { customId } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { ConfirmModal } from "../shared/confirm-modal";
 import { Actions } from "../shared/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Skeleton } from "../ui/skeleton";
-import { TableCell, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { useRouter } from "next/navigation";
-import { Checkbox } from "../ui/checkbox";
-import { Switch } from "../ui/switch";
-import { useEffect, useState } from "react";
-import { useApiMutation } from "@/hooks/useApiMutation";
-import { DELETE, PATCH } from "@/constants/apiMethods";
+import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
-import { ConfirmModal } from "../shared/confirm-modal";
+import { Switch } from "../ui/switch";
+import { TableCell, TableRow } from "../ui/table";
 
 export const Service = ({ service }) => {
   const router = useRouter();
@@ -30,7 +30,7 @@ export const Service = ({ service }) => {
     setIsAlertModalOpen(true);
   };
 
-  const { mutateAsync, isPending, data, error } = useApiMutation({
+  const { mutateAsync, isPending, error } = useApiMutation({
     url: `/service/${service._id}/toggle-status`,
     method: PATCH,
     invalidateKey: ["service"],
@@ -45,7 +45,7 @@ export const Service = ({ service }) => {
     if (error) {
       setIsActive(service?.isActive);
     }
-  }, [error]);
+  }, [error, service?.isActive]);
 
   const { mutateAsync: deleteService, isPending: isDeleteLoading } =
     useApiMutation({
@@ -61,21 +61,31 @@ export const Service = ({ service }) => {
   return (
     <>
       <TableRow>
-        <TableCell>{customId(service?._id)}</TableCell>
-        <TableCell className="flex items-center gap-3">
-          <Avatar>
-            {/* replace with real asset path or remote url */}
-            <AvatarImage src={service.image} alt={service.name} />
-            <AvatarFallback>{service.name.slice(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <div className="font-medium">{service.name}</div>
-            {/* <div className="text-sm text-muted-foreground">{service._id}</div> */}
+        <TableCell
+          className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+          onClick={onView}
+        >
+          {customId(service?._id)}
+        </TableCell>
+
+        <TableCell className="min-w-[16rem] cursor-pointer" onClick={onView}>
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={service.image} alt={service.name} />
+              <AvatarFallback>{service.name.slice(0, 2)}</AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col">
+              <div className="truncate font-medium text-[#0F172A] hover:text-[#1D4ED8]">
+                {service.name}
+              </div>
+            </div>
           </div>
         </TableCell>
-        <TableCell className="max-w-xs truncate">
-          {service.description}
+
+        <TableCell className="max-w-xs">
+          <p className="line-clamp-2">{service.description}</p>
         </TableCell>
+
         <TableCell>
           <div className="flex flex-col">
             <span className="font-medium">₹{service.basePrice}</span>
@@ -84,48 +94,46 @@ export const Service = ({ service }) => {
             </span>
           </div>
         </TableCell>
+
         <TableCell>
-          <div className="flex gap-2 flex-wrap">
-            {service.modes.map((m) => (
-              <Badge key={m}>{m}</Badge>
+          <div className="flex flex-wrap gap-2">
+            {service.modes.map((mode) => (
+              <Badge key={mode}>{mode}</Badge>
             ))}
           </div>
         </TableCell>
+
         <TableCell>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-2">
             {service.cities.length > 0
-              ? service.cities.map((c) => (
-                  <Badge className="capitalize" variant="secondary" key={c._id}>
-                    {c.name}
+              ? service.cities.map((city) => (
+                  <Badge className="capitalize" variant="secondary" key={city._id}>
+                    {city.name}
                   </Badge>
                 ))
               : "NA"}
           </div>
         </TableCell>
+
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={service.isActive ? "success" : "destructive"}>
-              {isPending ? (
-                <Spinner />
-              ) : service.isActive ? (
-                "Active"
-              ) : (
-                "Inactive"
-              )}
+            <Badge variant={isActive ? "success" : "destructive"}>
+              {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
             </Badge>
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </TableCell>
+
         <TableCell className="text-right">
           <Actions onEdit={onEdit} onView={onView} onDelete={onDelete} />
         </TableCell>
       </TableRow>
 
-      {isAlertModalOpen && (
+      {isAlertModalOpen ? (
         <ConfirmModal
           header="Delete Service"
           description="Are you sure you want to delete this service? This action cannot be undone."
@@ -134,7 +142,7 @@ export const Service = ({ service }) => {
           disabled={isDeleteLoading}
           onConfirm={handleDeleteService}
         />
-      )}
+      ) : null}
     </>
   );
 };
@@ -143,28 +151,28 @@ Service.Skeleton = function ServiceSkeleton() {
   return (
     <TableRow>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell className="text-right">
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
     </TableRow>
   );

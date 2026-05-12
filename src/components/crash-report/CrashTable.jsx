@@ -11,7 +11,7 @@ import Spinner from "../shared/Spinner";
 
 export function CrashTable({ crashes, isLoading }) {
   return (
-    <div className="overflow-auto table-container">
+    <div className="overflow-x-auto overflow-y-visible table-container">
       <Table>
         <TableHeader>
           <TableRow>
@@ -23,7 +23,7 @@ export function CrashTable({ crashes, isLoading }) {
             <TableHead>User</TableHead>
             <TableHead>Time</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -1,0 +1,886 @@
+
+
+===== PAGE 1 =====
+
+   
+ 
+ Page 1 of 27  
+ 
+Software Requirements 
+Specification (SRS) for Medico 
+Doctor App 
+ 
+1. Introduction 
+1.1 Purpose 
+The Doctor App is designed to enhance the workflow of medical professionals by providing 
+tools for appointment management, professional networking, research sharing, and peer 
+collaboration. This app will help doctors manage their practice efficiently while fostering a 
+professional medical community. 
+1.2 Scope 
+The Doctor App will allow: 
+• Appointment booking and management with patients. 
+• Social media-like interactions for professional engagement. 
+• Research sharing among medical professionals. 
+• Direct communication with other doctors. 
+• Verification of doctors before granting access to the platform. 
+• Doctors to add clinics in their profile and create custom timing for each weekday. 
+• Doctors to follow each other and interact with posts through likes, comments, and 
+saves. 
+• Payment gateway and QR code options for doctors to receive payments. 
+• Payment management section where doctors can track received payments and 
+request settlements. 
+• Doctors to track the number of visitors who have seen their research. 
+• Doctors to save and comment on each other's research documents. 
+
+===== PAGE 2 =====
+
+   
+ 
+ Page 2 of 27  
+ 
+• Doctors to manage medical records of their patients by uploading prescriptions, 
+test reports, and case history. 
+• Doctors to reschedule appointments after completion. 
+• Azure cloud server and storage for secure and scalable hosting. 
+1.3 Intended Users 
+• Verified Medical Doctors 
+• Junior Doctor Students (limited access) 
+• Admins (for doctor verification and content moderation) 
+1.4 Tech Stack 
+• Frontend: Flutter (for Android App) 
+• Backend: Node.js with Express.js 
+• Database: PostgreSQL (structured data), MongoDB (social & research content) 
+• Authentication: Firebase/Auth0 
+• Cloud Storage & Hosting: Microsoft Azure 
+• Real-time Updates: Socket.io 
+ 
+2. Functional Requirements 
+2.1 User Authentication & Profile Management 
+The authentication system ensures that only verified medical professionals can access the 
+platform, enhancing trust and security. Doctors must sign up and submit verification 
+documents, which are reviewed by the admin team before approval. Once verified, they 
+can update their profiles, set consultation fees, and define their availability. This ensures 
+that patients and fellow doctors interact with credible professionals, maintaining the 
+platform's integrity and quality of service. 
+Registration & Verification Process 
+• Sign-Up Process: 
+o Doctors register using a secure sign-up form requiring email and/or mobile 
+number. 
+
+===== PAGE 3 =====
+
+   
+ 
+ Page 3 of 27  
+ 
+o Password policies enforce strong credentials (e.g., minimum length, 
+alphanumeric and special characters). 
+• Verification Documentation: 
+o Mandatory uploads include medical license, degree certificates, 
+government-issued IDs, and any other required documents in standardized 
+formats (JPEG, PDF). 
+o Automatic notifications are sent to the admin panel once a submission is 
+complete. 
+• Admin Review: 
+o Admins have access to a dedicated interface to review, approve, or reject 
+registration requests. 
+o The system displays a verification status (Pending, Approved, Rejected) and 
+provides feedback if resubmission is needed. 
+• Access Levels: 
+o Full access is granted only to verified doctors. 
+o Junior doctors and doctor students are assigned limited functionalities until 
+further credentials are provided. 
+• Multi-Factor Authentication (MFA): 
+o Supports 2FA using time-based one-time passwords (TOTP) or SMS 
+verification for enhanced security. 
+• Profile Editing & Audit Trail: 
+o Users can update personal (name, contact details) and professional 
+information (specialization, experience, consultation fees). 
+o An audit log records any profile changes, maintaining a history for security 
+and accountability. 
+ 
+
+===== PAGE 4 =====
+
+   
+ 
+ Page 4 of 27  
+ 
+2.2 Doctor Profile Details 
+The doctor profile section contains essential personal and professional information, 
+ensuring credibility and transparency within the medical community. Each profile will 
+include the following details: 
+ 
+• Personal Information: 
+o Full Name: "Dr. John Doe" 
+o Profile Photo: Upload Image 
+o Date of Birth: "1985-06-15" 
+o Gender: "Male/Female/Other" 
+o Email: "johndoe@example.com" 
+o Phone Number: "+91 9876543210" 
+o Address: "123, ABC Street, City, State, Country" 
+• Professional Details: 
+o Medical Registration Number: "MCI123456" 
+o Issuing Medical Council: "Medical Council of India" 
+o Years of Experience: "10 years" 
+o Specialization: "Cardiologist" 
+o Sub-Specialties: "Interventional Cardiology" 
+o Current Workplace: "XYZ Hospital" 
+o Designation: "Senior Consultant" 
+o Professional Bio: "Experienced Cardiologist with 10+ years..." 
+o Consultation Fees: "₹1000 per session" 
+• Educational Qualifications: 
+o Degrees: "MBBS, MD (Cardiology)" 
+o University Name: "AIIMS, New Delhi" 
+o Year of Graduation: "2008" 
+o Additional Certifications: "Fellowship in Interventional Cardiology" 
+o Residencies: "XYZ Hospital Residency Program" 
+o Training & Workshops: "Advanced Cardiac Life Support (ACLS) Training" 
+• Verification & Compliance: 
+o Upload Identity Proof (Aadhar, Passport, etc.) 
+o Upload Medical Degree Certificate 
+o Upload State Medical Council Registration Proof 
+o Admin Approval Status: "Pending/Approved/Rejected" 
+
+===== PAGE 5 =====
+
+   
+ 
+ Page 5 of 27  
+ 
+Personal Information: 
+• Data Fields: 
+o Full Name, Profile Photo (with guidelines for image resolution/size), Date of 
+Birth, Gender, Email, Phone Number, and Full Address. 
+• Validation: 
+o Input fields include validations for correct formats (e.g., email, phone 
+number) and mandatory field checks. 
+Professional Details: 
+• Key Information: 
+o Medical Registration Number, Issuing Medical Council, Years of Experience, 
+Specialization, Sub-Specialties, Current Workplace, and Designation. 
+• Dynamic Elements: 
+o Consultation fee input supports currency formatting and periodic 
+adjustments based on doctor availability. 
+• Bio & Additional Details: 
+o A free-text field for a professional bio with guidelines on content length and 
+relevance. 
+Educational Qualifications: 
+• Academic History: 
+o Fields for listing degrees, university names, graduation years, certifications, 
+residencies, and any additional training or workshops. 
+• Document Support: 
+o Upload options for scanned copies of degrees and certifications, with file 
+size and format restrictions. 
+Verification & Compliance: 
+
+===== PAGE 6 =====
+
+   
+ 
+ Page 6 of 27  
+ 
+• Documentation Upload: 
+o Secure upload for identity proofs, degree certificates, and professional 
+registration documents. 
+• Status Indicators: 
+o Visual cues (e.g., badges) on the profile indicating verification status. 
+• Periodic Review: 
+o Automated reminders for document re-validation if documents are nearing 
+expiry. 
+ 
+2.3 Clinic/Hospital Details 
+Clinic Registration & Management: 
+• Clinic Profile: 
+o Doctors can add multiple clinics with details such as Clinic Name, Address, 
+and Contact Information. 
+• Operating Hours: 
+o Customizable operating schedules per clinic with the ability to set different 
+hours for each day and account for exceptions (holidays, special events). 
+Multimedia & Location: 
+• Image Upload: 
+o Ability to upload multiple images for each clinic with built-in cropping and 
+optimization tools. 
+• Embedded Map: 
+o Integration with Google Maps for precise location tagging and route 
+guidance. 
+Services & Payment Methods: 
+
+===== PAGE 7 =====
+
+   
+ 
+ Page 7 of 27  
+ 
+• Service Listing: 
+o Input areas to detail services offered (e.g., ECG, Angioplasty, Health 
+Checkups) with the option to list sub-services. 
+• Payment Options: 
+o Display accepted payment methods (e.g., UPI, Credit/Debit Card, Net 
+Banking) and allow doctors to update these as needed. 
+ 
+2.4 Appointment Management 
+Doctors can efficiently manage patient appointment requests through an integrated 
+scheduling system. They can set their available time slots for each clinic, accept or reject 
+appointment requests, and reschedule them if necessary. The system will display an 
+overview of all appointments for the day, ensuring doctors stay informed about their 
+schedules. 
+After an appointment is completed, doctors will have the ability to upload prescriptions 
+and necessary medical notes directly to the platform. Patients will receive notifications 
+and can access these records at any time. Additionally, doctors can reschedule follow-up 
+appointments within the system, making continuity of care more efficient. 
+Doctors will also have a dedicated dashboard to view pending appointment requests, 
+upcoming confirmed appointments, and history of past consultations. Automatic 
+reminders will be sent to both patients and doctors before each scheduled appointment to 
+minimize no-shows. 
+Scheduling & Calendar Integration: 
+• Time Slot Configuration: 
+o Doctors can set available time slots per clinic and per weekday with options 
+for break periods or buffer times. 
+• Rules & Constraints: 
+o Minimum and maximum durations for appointments, along with automated 
+conflict checks. 
+
+===== PAGE 8 =====
+
+   
+ 
+ Page 8 of 27  
+ 
+Appointment Request Workflow: 
+• Patient Request Interface: 
+o While the patient-facing interface is separate, appointment requests are 
+communicated to the doctor’s dashboard in real time. 
+o Detailed request view includes patient details, reason for appointment, and 
+historical data (if available). 
+• Action Options: 
+o Accept, reschedule, or cancel appointments directly from the dashboard. 
+o Rescheduling actions automatically trigger notifications to patients, with the 
+updated appointment reflected in both calendars. 
+Post-Appointment Management: 
+• Record Upload: 
+o Secure mechanism for uploading prescriptions, test results, and 
+consultation notes after appointment completion. 
+• Notifications & Reminders: 
+o Automated push notifications and emails for upcoming appointments, 
+reschedules, and post-appointment follow-ups. 
+Dashboard & Reporting: 
+• Overview Panels: 
+o Separate sections for pending, upcoming, and completed appointments. 
+ 
+2.5 Doctor Social Media (Medico Media) 
+Content Creation & Sharing: 
+• Post Types: 
+
+===== PAGE 9 =====
+
+   
+ 
+ Page 9 of 27  
+ 
+o Support for creating text posts, image galleries, short video reels, and in-
+depth articles. 
+o Rich text editors with markdown support, hashtag inclusion, and tagging of 
+colleagues. 
+• Engagement Mechanisms: 
+o Like, comment, and save functionalities with real-time update feeds. 
+Interaction & Networking: 
+• Follow System: 
+o Doctors can follow peers and receive updates on their posts. 
+o Notification settings allow customization of alerts for new content or 
+interactions. 
+Content Moderation & Analytics: 
+• Reporting Tools: 
+o Options for users to flag inappropriate content. 
+o Admin review queue for flagged posts to maintain community standards. 
+• Engagement Metrics: 
+o Real-time statistics on post views, likes, comments, and shares, available 
+on both individual posts and overall profiles. 
+ 
+2.6 Research & Learning Platform 
+Research Upload & Management: 
+• Submission Interface: 
+o Doctors can upload research papers in multiple formats (PDF, DOCX) with 
+metadata (title, authors, abstract, keywords). 
+
+===== PAGE 10 =====
+
+   
+ 
+ Page 10 of 27  
+ 
+o Support for version control and updates to published research. 
+• Categorization & Search: 
+o Use of tags and categories (e.g., Cardiology, Neurology) to aid in the 
+discovery and filtering of research documents. 
+Interactive Features: 
+• Commenting & Discussion: 
+o Threaded discussions under each research post allowing in-depth academic 
+debate. 
+o Moderation tools for managing comment. 
+• Bookmarking & Sharing: 
+o Options for doctors to bookmark or save research papers for future 
+reference. 
+• Analytics: 
+o View counters. 
+ 
+2.7 Doctor-to-Doctor Communication 
+Messaging & Chat Functionality: 
+• Secure Messaging: 
+o Real-time one-on-one functionalities with end-to-end encryption. 
+o Multimedia support (images, documents, voice notes) within chats. 
+• Chat Management: 
+o Features such as read receipts, typing indicators, and chat history search. 
+o Options for archiving or deleting conversations while retaining essential logs. 
+
+===== PAGE 11 =====
+
+   
+ 
+ Page 11 of 27  
+ 
+Integration with Other Modules: 
+• Seamless Sharing: 
+o Ability to directly share research documents, appointment details, or patient 
+records (with proper permissions) within the chat interface. 
+• User Controls: 
+o Options to block or report contacts to ensure a secure and professional 
+communication environment. 
+ 
+2.8 Payment Management 
+Payment Gateway Integration: 
+• Transaction Security: 
+o Integration with trusted payment gateways for secure online transactions. 
+o Support for QR code payments with dynamic generation linked to individual 
+doctor profiles. 
+Transaction Tracking: 
+• History & Invoicing: 
+o Detailed transaction logs with timestamps, payment statuses, and invoice 
+generation for each completed appointment. 
+o Automated generation of digital invoices and receipts sent to both doctors 
+and patients. 
+Settlement & Refund Processing: 
+• Settlement Requests: 
+o Interface for doctors to request settlements, with an approval workflow 
+managed by the admin. 
+o Real-time update of pending, completed, and failed transactions. 
+
+===== PAGE 12 =====
+
+   
+ 
+ Page 12 of 27  
+ 
+• Refund Workflow: 
+o Defined process for handling appointment cancellations and refunds, with 
+necessary audit trails and notifications. 
+Reporting: 
+• Financial Dashboard: 
+o Visual displaying revenue, transaction volumes, and settlement statuses. 
+o Exportable reports for accounting and compliance purposes. 
+ 
+2.9 Medical Record Management 
+Document Management: 
+• Upload & Storage: 
+o Secure portal for uploading patient records including prescriptions, test 
+reports, and case histories. 
+o Support for various file types with automatic virus scanning and file size 
+limits. 
+Access Control: 
+• Role-Based Permissions: 
+o Strict access controls ensuring only authorized users (e.g., the patient and 
+their attending doctor) can view or modify records. 
+o Audit trails for all access and modification events. 
+Sharing & Notifications: 
+• Secure Sharing: 
+o Options to share medical records with other specialists or referring doctors, 
+subject to patient consent. 
+
+===== PAGE 13 =====
+
+   
+ 
+ Page 13 of 27  
+ 
+• Automated Alerts: 
+o Notifications for patients when new records are added or updated, ensuring 
+timely follow-up. 
+Compliance & Security: 
+• Encryption & Backups: 
+o End-to-end encryption for records in transit and at rest. 
+ 
+2.10 Admin Panel (Web Interface) 
+User & Content Management: 
+• Registration Oversight: 
+o A dashboard to review and verify doctor and clinic registrations, with filtering 
+and search capabilities. 
+• Content Moderation: 
+o Tools for monitoring social posts, research uploads. 
+Analytics & Reporting: 
+• Platform Metrics: 
+o Real-time dashboards displaying user engagement, appointment statistics, 
+and financial transactions. 
+o Customizable reports for tracking trends, resolving disputes, and planning 
+platform improvements. 
+Payment & Dispute Management: 
+• Settlement Interface: 
+o Tools to manage payment disputes, refund requests, and settlement 
+approvals. 
+
+===== PAGE 14 =====
+
+   
+ 
+ Page 14 of 27  
+ 
+o Communication channels for contacting users to resolve issues. 
+System Administration & Security: 
+• Role-Based Access: 
+o Multi-tier admin access ensuring only authorized personnel can perform 
+sensitive operations. 
+o Comprehensive logging of all admin activities for audit purposes. 
+• Cloud Integration: 
+o Monitoring tools integrated with Microsoft Azure for scalability, security 
+alerts, and system health checks. 
+ 
+6. Frequently Asked Questions (FAQ) 
+6.1 Who can use the Doctor App? 
+The app is designed exclusively for verified medical professionals, including doctors and 
+junior doctor students (with limited access). 
+6.2 How is doctor verification handled? 
+Doctors must submit proof of their medical credentials, which are manually reviewed by 
+the admin team before granting access. 
+6.3 Can patients access the app? 
+No, this version of the app is strictly for medical professionals. Patients can book 
+appointments through a separate patient-facing platform. 
+6.4 How does the appointment system work? 
+Doctors set their available time slots, and patients can book appointments. Doctors can 
+accept, reschedule, or cancel appointments as needed. 
+
+===== PAGE 15 =====
+
+   
+ 
+ Page 15 of 27  
+ 
+6.5 What payment methods are supported? 
+The app integrates with a payment gateway, allowing doctors to receive payments via 
+online transactions, including QR code payments. 
+6.6 Can doctors collaborate on research? 
+Yes, doctors can upload, browse, save, and comment on research papers, facilitating 
+academic collaboration. 
+6.7 Is my data secure? 
+Yes, the app uses Azure cloud security features, encrypted data storage, and secure 
+authentication mechanisms. 
+ 
+ 
+Software Requirements 
+Specification (SRS) for Patient App 
+ 
+1. Introduction 
+ 
+1.1 Purpose 
+The Patient App is designed to empower patients and non-medical users to manage their 
+healthcare needs with ease. It provides a user-friendly interface for booking doctor 
+appointments, viewing detailed doctor and clinic profiles, managing medical records, and 
+processing secure payments. The app also includes a dedicated Help Center to connect 
+users with support. By streamlining these processes, the app aims to reduce 
+administrative burdens, improve healthcare access, and enhance the overall patient 
+experience. 
+
+===== PAGE 16 =====
+
+   
+ 
+ Page 16 of 27  
+ 
+ 
+1.2 Scope 
+The Patient App will enable users to: 
+• Search & View Doctor Profiles: Find doctors by specialty, location, ratings, and 
+availability. 
+• Appointment Booking & Management: Book, reschedule, and cancel 
+appointments with integrated payment processing. 
+• Medical Records Access: View prescriptions and test reports uploaded by doctors. 
+• Rating & Reviews: Rate and review doctors or clinics after an appointment. 
+• Help Center: Access a support portal to resolve issues or ask questions (without in-
+app chat). 
+• Authentication Options: Register and log in using traditional sign-up, email/OTP 
+verification, or via Google Auth. 
+• Payment Processing: Make secure payments through integrated gateways (UPI, 
+Credit/Debit Cards, Net Banking, QR code). 
+• Azure Cloud Hosting: Leverage Microsoft Azure for secure, scalable data storage 
+and hosting. 
+ 
+1.3 Intended Users 
+• Patients & General Public: Individuals seeking healthcare services, booking 
+appointments, or accessing their medical records. 
+• Non-Medical Users: Users who do not have a medical background but require 
+health-related services. 
+• Admins: Responsible for monitoring user activities, managing doctor and clinic 
+verifications, and ensuring the overall system integrity. 
+ 
+1.4 Tech Stack 
+• Frontend: Flutter (for Android and iOS) ensuring a smooth and responsive user 
+interface. 
+
+===== PAGE 17 =====
+
+   
+ 
+ Page 17 of 27  
+ 
+• Backend: Node.js with Express.js, offering a scalable API layer. 
+• Database: PostgreSQL for structured data (user profiles, appointments) and 
+MongoDB for unstructured data (reviews, posts). 
+• Authentication: Firebase/Auth0, including support for Google authentication. 
+• Cloud Storage & Hosting: Microsoft Azure, ensuring high availability and data 
+redundancy. 
+• Real-Time Updates: Socket.io for push notifications (excluding user-to-user chat). 
+ 
+ 
+2. Functional Requirements 
+ 
+2.1 User Registration & Profile Management 
+Overview: 
+Patients must create an account to access the app’s services. The registration process is 
+designed to be straightforward, ensuring secure and accurate data capture. 
+Details & Sample Data: 
+• Registration Fields: 
+o Full Name: e.g., "Alice Smith" 
+o Profile Photo: Option to upload an image. 
+o Date of Birth: e.g., "1990-04-22" 
+o Gender: e.g., "Female/Male/Other" 
+o Email: e.g., "alice.smith@example.com" 
+o Phone Number: e.g., "+1 555-123-4567" 
+o Address: e.g., "789 Elm Street, Springfield, IL, USA" 
+o Medical History (Optional): A text field for listing conditions (e.g., 
+"Hypertension"). 
+• Authentication Options: 
+
+===== PAGE 18 =====
+
+   
+ 
+ Page 18 of 27  
+ 
+o Email/OTP Verification: Ensuring the email is verified. 
+o Google Auth Integration: Option to sign in using Google credentials. 
+• Profile Management: 
+o Users can update their personal details and medical history. 
+o Ability to add emergency contact information. 
+ 
+2.2 Doctor Search & Profile Viewing 
+Overview: 
+Patients can search for doctors using various filters and view comprehensive profiles to 
+make informed decisions. 
+Details & Sample Data: 
+• Search Filters: 
+o Specialization: e.g., "Cardiologist" 
+o Location: e.g., "New York, NY" 
+o Availability: e.g., "Available this week" 
+o Ratings: Display aggregated patient ratings. 
+• Doctor Profile Details: 
+o Basic Information: Name (e.g., "Dr. John Doe"), profile photo. 
+o Professional Details: Specialization, years of experience, consultation fees. 
+o Educational Background: Brief summary of qualifications. 
+o Clinic Information: Clinic address, operating hours, and contact details. 
+o User Reviews & Ratings: Aggregated patient feedback and individual review 
+comments. 
+ 
+2.3 Appointment Booking & Management 
+
+===== PAGE 19 =====
+
+   
+ 
+ Page 19 of 27  
+ 
+Overview: 
+The appointment module facilitates scheduling consultations with doctors, offering a 
+seamless booking process integrated with payment functionality. 
+Details & Sample Data: 
+• Booking Process: 
+o Select Doctor: Choose a doctor from search results. 
+o Choose Appointment Slot: e.g., "March 15, 2025, at 11:00 AM" 
+o Input Reason for Visit: Optional text field (e.g., "Routine check-up"). 
+o Confirm Booking: Appointment status initially set to “Pending” until 
+confirmed by the doctor. 
+Direct Calling Feature: 
+• Patients can click on the displayed doctor or clinic phone numbers (e.g., 
+"+1 555-123-4567" or "+1 555-987-6543") to initiate a call directly from 
+the app. 
+ 
+• Appointment Management: 
+o Dashboard View: Displays upcoming, rescheduled, and past appointments. 
+o Reschedule/Cancel Options: Patients can modify or cancel appointments, 
+with confirmation prompts. 
+o Notifications & Reminders: Automated alerts sent before appointments. 
+o Post-Appointment Access: Patients can view prescriptions and 
+consultation notes uploaded by doctors. 
+ 
+2.4 Medical Records Management 
+Overview: 
+Patients can manage their digital health records, ensuring that prescriptions, test reports, 
+and other documents are easily accessible. 
+Details & Sample Data: 
+• Upload & Storage: 
+
+===== PAGE 20 =====
+
+   
+ 
+ Page 20 of 27  
+ 
+o Document Types: "Prescription", "Blood Test Report", etc. 
+o File Formats: Support for PDFs, JPEGs, and PNGs. 
+o Metadata: Date of record (e.g., "2025-03-15"), doctor's name, clinic details. 
+• Viewing & Sharing: 
+o Record Listing: Chronologically sorted or filtered by document type. 
+o Access Control: Option to share records with a selected doctor via a secure 
+link. 
+o Notification: Patients are alerted when new documents are uploaded. 
+ 
+2.5 Payment Integration 
+Overview: 
+The app facilitates secure and efficient payment processing, ensuring that patients can 
+pay for consultations directly within the app. 
+Details & Sample Data: 
+• Payment Methods: 
+o Online Transactions: Support for UPI, Credit/Debit Cards, and Net Banking. 
+o QR Code Payments: Dynamic QR code generation for quick payments. 
+• Transaction Flow: 
+o Fee Display: Appointment fee (e.g., "₹1000 per consultation") is clearly 
+displayed during booking. 
+o Payment Confirmation: Payment status updates (e.g., “Paid”, “Pending”) 
+are shown. 
+o Digital Receipts: Automatic generation of invoices post-payment. 
+• Payment History: 
+o Transaction Log: Details such as Transaction ID, Date, Amount, and Service 
+rendered. 
+o Refund Process: Procedure for handling cancellations and issuing refunds. 
+ 
+
+===== PAGE 21 =====
+
+   
+ 
+ Page 21 of 27  
+ 
+2.6 Rating & Reviews 
+Overview: 
+Patients can rate and review doctors or clinics after an appointment, providing valuable 
+feedback for both the service providers and future patients. 
+Details & Sample Data: 
+• Rating Mechanism: 
+o Star Rating: e.g., a 1-to-5 star rating system. 
+o Review Text: A field for detailed feedback (e.g., "Excellent care and attention 
+during my visit."). 
+• Review Moderation: 
+o Reviews may be moderated by admins before being published. 
+o Option to edit or delete one's review. 
+• Display: 
+o Average ratings displayed on doctor and clinic profiles. 
+o Individual reviews are listed with timestamps and reviewer initials. 
+ 
+2.7 Help Center 
+Overview: 
+A dedicated Help Center will be available for patients to access support resources and 
+contact customer service without an in-app chat option. 
+Details & Sample Data: 
+• Help Center Features: 
+o FAQ Section: Common questions and answers regarding account issues, 
+booking procedures, payment processing, etc. 
+o Support Ticket System: Patients can submit a support request by filling out 
+a form (e.g., "Issue with appointment payment"). Fields include Subject, 
+Description, and optionally, a screenshot upload. 
+o Email/Phone Support: Contact details for further assistance are provided. 
+
+===== PAGE 22 =====
+
+   
+ 
+ Page 22 of 27  
+ 
+o Status Updates: Patients can view the status of their support tickets (e.g., 
+"Open", "In Progress", "Resolved"). 
+ 
+2.8 Integration & Data Synchronization 
+Overview: 
+The app is designed to integrate seamlessly with the broader healthcare ecosystem, 
+ensuring that all data (appointments, records, payments) is synchronized in real time. 
+Details & Sample Data: 
+• API Integration: RESTful APIs enable real-time data exchange with the Doctor App 
+and other backend systems. 
+• Data Sync: Immediate updates for changes in appointment status, payment 
+transactions, or new medical record uploads. 
+• Security Protocols: All data transfers are secured via SSL/TLS encryption, ensuring 
+confidentiality and compliance with healthcare standards. 
+ 
+2.9 Social Media Engagement (Patient Side) 
+Overview: 
+In addition to core healthcare functionalities, the Patient App incorporates social media 
+features that allow patients to engage with doctors’ content. Patients can follow their 
+preferred doctors, like their posts, and save posts for future reference. The personalized 
+feed displays only the posts from the doctors they follow, ensuring relevant and engaging 
+content. 
+Details & Workflows: 
+• Doctor Follow Feature: 
+o Follow/Unfollow Button: 
+▪ A “Follow” button is displayed on each doctor’s profile. 
+▪ Patients can tap the button to follow a doctor; once followed, the 
+button toggles to “Following” with an option to unfollow. 
+o Feed Integration: 
+
+===== PAGE 23 =====
+
+   
+ 
+ Page 23 of 27  
+ 
+▪ Once a patient follows a doctor, all new posts by that doctor 
+automatically appear in the patient’s personalized feed. 
+o Notifications: 
+▪ Optional notifications can alert patients when a followed doctor posts 
+new content. 
+• Personalized Feed: 
+o Content Aggregation: 
+▪ The feed aggregates posts exclusively from the doctors the patient 
+follows. 
+▪ Posts may include text updates, images, or links related to health 
+tips, educational content, and service updates. 
+o Sorting & Filtering: 
+▪ Posts are sorted by recency, with potential enhancements for 
+trending or highly engaged content. 
+o User Interface: 
+▪ The feed displays key post details including the doctor’s name, post 
+timestamp, content preview, and engagement options. 
+• Like Functionality: 
+o Interaction: 
+▪ Patients can “like” posts by tapping a like icon. 
+▪ Each like increases the post’s engagement counter, which is visible to 
+the patient and the doctor. 
+o Engagement Analytics: 
+▪ Like data is recorded to provide insights into content popularity and 
+patient preferences. 
+• Save Functionality: 
+o Bookmarking: 
+▪ Patients can save posts for later reference by tapping a save icon. 
+
+===== PAGE 24 =====
+
+   
+ 
+ Page 24 of 27  
+ 
+▪ Saved posts are accessible in a dedicated “Saved Posts” section 
+within the app. 
+o Toggle State: 
+▪ The save icon toggles between “Save” and “Saved” to reflect the 
+current status. 
+o Content Type Restriction: 
+▪ Only posts from doctors are eligible for saving, ensuring a focused 
+collection of professional content. 
+Sample Data & User Journey: 
+• Following a Doctor: 
+o A patient views “Dr. John Doe’s” profile and taps the “Follow” button. 
+o Dr. John Doe’s posts, such as “5 Tips for a Healthy Heart” and “Latest 
+Treatment Innovations in Cardiology,” appear in the patient’s feed. 
+• Engaging with Content: 
+o The patient taps the like icon on a post, increasing its like count. 
+o The patient also saves a post about an upcoming webinar by Dr. John Doe for 
+future reference. 
+• Personalized Feed: 
+o Every time Dr. John Doe or other followed doctors publish new posts, they 
+appear in the patient’s feed, ensuring timely and relevant updates. 
+Privacy & Moderation: 
+• Content Moderation: 
+o All posts by doctors follow the platform’s moderation policies, ensuring 
+content quality and relevance. 
+• Usage Restrictions: 
+o Patients are not permitted to comment on or share posts externally within 
+this module, maintaining the focus on content consumption and 
+engagement. 
+• Data Handling: 
+
+===== PAGE 25 =====
+
+   
+ 
+ Page 25 of 27  
+ 
+o Engagement data (likes and saved posts) is stored securely and used solely 
+to enhance the patient experience and for internal analytics. 
+ 
+ 
+ 
+3. Non-Functional Requirements 
+ 
+3.1 Security 
+• Data Encryption: All sensitive data (personal, medical, payment) is encrypted 
+during transit and at rest. 
+• Authentication & Authorization: Robust mechanisms (Firebase/Auth0 with Google 
+Auth option) secure user logins. 
+ 
+3.2 Performance 
+• Scalability: Designed to handle a large volume of users and transactions. 
+• Response Time: Target response times under 2-3 seconds for user interactions. 
+• Load Balancing: Azure cloud services ensure efficient traffic management. 
+ 
+3.3 Usability 
+• User Interface: Clean, intuitive design that accommodates users of all technical 
+abilities. 
+• Accessibility: Compliance with accessibility standards for users with disabilities. 
+• Localization: Support for multiple languages to serve a diverse user base. 
+ 
+3.4 Reliability & Availability 
+• Uptime: Targeting 99.9% uptime via robust Azure infrastructure. 
+
+===== PAGE 26 =====
+
+   
+ 
+ Page 26 of 27  
+ 
+• Backup & Recovery: Automated backups and a comprehensive disaster recovery 
+plan. 
+• Monitoring: Continuous performance monitoring and real-time alerts for any 
+issues. 
+ 
+ 
+4. Deployment Plan 
+• Development Phase: Local development with test data; unit and integration tests 
+will be conducted. 
+• Beta Testing: Limited release to a selected group of users for initial feedback. 
+• Final Deployment: Launch on the Google Play Store. 
+• Maintenance: Regular updates, security patches, and feature enhancements 
+based on user feedback. 
+ 
+5. Frequently Asked Questions (FAQ) 
+6.1 Who can use the Patient App? 
+The app is designed for patients and non-medical users seeking to access healthcare 
+services, book appointments, and manage their medical records. 
+6.2 How do I register? 
+Users can register by providing personal details and verifying their email via OTP or by using 
+Google authentication. No medical certification is required. 
+6.3 How is my data secured? 
+All personal, medical, and payment information is encrypted and stored securely on 
+Microsoft Azure, adhering to HIPAA and GDPR standards. 
+6.4 Can I rate and review doctors or clinics? 
+Yes, after your appointment, you can rate the service (using a star system) and leave 
+detailed reviews to help others make informed decisions. 
+6.5 How are payments processed? 
+
+===== PAGE 27 =====
+
+   
+ 
+ Page 27 of 27  
+ 
+Payments are securely processed via integrated gateways supporting UPI, Credit/Debit 
+Cards, and Net Banking. QR code payments are also available for quick transactions, and 
+digital receipts are issued for each payment. 
+6.6 How do I get help if I have an issue? 
+Access the Help Center for FAQs, support ticket submission, and contact details for 
+further assistance. There is no in-app chat; all support is managed through the Help 
+Center. 

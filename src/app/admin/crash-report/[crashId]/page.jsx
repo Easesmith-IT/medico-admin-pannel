@@ -7,6 +7,8 @@ import { useParams } from "next/navigation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InfoBox, InfoCard, InfoRow } from "@/components/crash-report/index";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 
 const CrashDetailPage = () => {
   const { crashId } = useParams();
@@ -14,7 +16,7 @@ const CrashDetailPage = () => {
   // ----------------------------
   // Fetch single crash report
   // ----------------------------
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/crash-report/get/${crashId}`,
     queryKeys: ["crash-report", crashId],
     enabled: !!crashId,
@@ -34,11 +36,27 @@ const CrashDetailPage = () => {
   // ----------------------------
   // Not found
   // ----------------------------
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load crash report"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
+
   if (!crash) {
     return (
-      <div className="text-sm text-muted-foreground">
-        Crash report not found
-      </div>
+      <StateView
+        type="empty"
+        title="Crash report not found"
+        description="The requested crash report record is not available."
+        actionLabel="Back to crash reports"
+        actionHref="/admin/crash-report"
+      />
     );
   }
 
@@ -46,12 +64,11 @@ const CrashDetailPage = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <BackLink href="/admin/crash-report" />
+        <BackLink href="/admin/crash-report">
+          <H1>{crash.errorName}</H1>
+        </BackLink>
         <div>
-          <h1 className="text-2xl font-bold">{crash.errorName}</h1>
-          {/* <p className="text-sm text-muted-foreground">
-              {crash.screenName || "-"}
-            </p> */}
+          <p className="text-sm text-muted-foreground">{crash.screenName || "-"}</p>
         </div>
       </div>
 
@@ -136,7 +153,7 @@ const CrashDetailPage = () => {
 
       {/* Stack Trace */}
       {crash.stackTrace && (
-        <div className="rounded-lg border bg-black text-green-400 p-4 font-mono text-sm overflow-auto">
+        <div className="overflow-x-auto overflow-y-visible whitespace-pre-wrap break-words rounded-lg border bg-black p-4 font-mono text-sm text-green-400">
           {crash.stackTrace}
         </div>
       )}

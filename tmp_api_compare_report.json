@@ -1,0 +1,1315 @@
+{
+  "totals": {
+    "frontendUniqueApis": 60,
+    "backendMountedRoutes": 186,
+    "matched": 59,
+    "diffs": 1,
+    "missingInBackend": 1,
+    "methodMismatch": 0,
+    "unresolvedCount": 0,
+    "backendRelevantRoutes": 165,
+    "backendRelevantNotUsedInAdminPanel": 106
+  },
+  "diffs": [
+    {
+      "type": "MISSING_IN_BACKEND",
+      "api": {
+        "method": "POST",
+        "path": "/api/v1/admin/verify-login-otp",
+        "files": [
+          "E:/easesmith/medico/medico-admin-pannel/src/components/verify-otp-modal.jsx"
+        ]
+      }
+    }
+  ],
+  "matched": [
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/login",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/(auth)/(login)/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/login",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#adminLogin"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/signup",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/admins/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/signup",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#adminSignup"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/subadmins",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/admins/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/subadmins",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getSubAdmins"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/services/names",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/services/names",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getServiceNames"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/patients/names",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patients/names",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getPatientNames"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/city/getAllCities",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/cities/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/[serviceId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service-partner/add-steps/add-service-partner-step6.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/getAllCities",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#getAllCities"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/service-providers/names",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/service-providers/names",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getServiceProviderNames"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/bookings/create",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/bookings/create",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#createBookingByAdmin"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/booking/getAllBookings",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/booking/getAllBookings",
+        "file": "route/bookingRoute.js",
+        "controller": "controller/bookingController.js#getAllBookings"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/booking/bookings/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/booking/bookings/:bookingId",
+        "file": "route/bookingRoute.js",
+        "controller": "controller/bookingController.js#getByIdBooking"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/bookings/update/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/appointments/[appointmentId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/bookings/update/:bookingId",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#updateBookingByAdmin"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/items/create",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/categories/add/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/components/category/add-category-modal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/create",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#createCategory"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/items/getAllCategories",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/categories/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/getAllCategories",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#getAllCategories"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/items/category/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/categories/[categoryId]/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/categories/[categoryId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/category/:id",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#getCategoryDetails"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/items/update/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/categories/[categoryId]/update/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/components/category/add-category-modal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/update/:id",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#updateCategory"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/city/admin/cities",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/cities/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/admin/cities",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#addCity"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/city/cities/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/cities/[cityId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/cities/:cityId",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#getCityById"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/city/admin/cities/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/cities/[cityId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/admin/cities/:cityId",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#updateCity"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/crash-report/get",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/crash-report/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/crash-report/get",
+        "file": "route/crashReportRoutes.js",
+        "controller": "controller/crashController.js#getCrashReports"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/crash-report/get/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/crash-report/[crashId]/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/crash-report/get/:crashId",
+        "file": "route/crashReportRoutes.js",
+        "controller": "controller/crashController.js#getSingleCrashReport"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/doctors/create",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/doctors/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/doctors/create",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#createDoctor"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/doctors",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/doctors/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/doctors",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getAllDoctors"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/doctors/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/doctors/[doctorId]/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/doctors/:id",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getDoctorById"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/socialPost/getPosts",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/doctors/[doctorId]/social/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/getPosts",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#getPosts"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/socialPost/getPostByAdmin/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/doctors/[doctorId]/social/[postId]/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/getPostByAdmin/:id",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#getPostByIdByAdmin"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/patients",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patients",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getAllPatients"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/patient/myTreatmentHistory",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/bookings/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/patient/myTreatmentHistory",
+        "file": "route/patientRoute.js",
+        "controller": "controller/patientController.js#getCompletePatientTreatmentHistory"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/patients/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patients/:id",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#getPatientById"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/patient/updateProfile/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/patients/[patientId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/patient/updateProfile/:id",
+        "file": "route/patientRoute.js",
+        "controller": "controller/patientController.js#updatePatient"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/serviceProvider/createservice-provider",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/createservice-provider",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#createServiceProvider"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/serviceProvider/getAllServiceProviders",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/getAllServiceProviders",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#getAllServiceProviders"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/serviceProvider/service-provider/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/[servicePartnerId]/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/[servicePartnerId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/service-provider/:id",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#getServiceProviderById"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/serviceProvider/service-provider/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/service-partners/[servicePartnerId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/service-provider/:id",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#updateServiceProvider"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/service/createService",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/add/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/createService",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#createService"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/service/getAllServices",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service-partner/add-steps/add-service-partner-step3.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/getAllServices",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#getAllServices"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/service/getServiceById/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/[serviceId]/page.jsx",
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/[serviceId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/getServiceById/:id",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#getServiceById"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/service/services/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/app/admin/services/[serviceId]/update/page.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/services/:id",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#updateService"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/subadmins/:param/toggle-status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/admin/admin.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/subadmins/:id/toggle-status",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#toggleSubAdminStatus"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/logout",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/app-header.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/logout",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#logout"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/bookings/export",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/booking/export-modal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/bookings/export",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#exportAppointments"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/bookings/:param/status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/booking/update-booking-modal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/bookings/:bookingId/status",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#updateBookingStatus"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/items/delete/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/category/category.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/delete/:id",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#deleteCategory"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/items/toggle-status/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/category/category.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/items/toggle-status/:id",
+        "file": "route/itemRoute.js",
+        "controller": "controller/itemCategoryController.js#toggleCategoryStatus"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/city/admin/cities/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/city/city.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/admin/cities/:cityId",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#deleteCity"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/city/admin/cities/toggle/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/city/city.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/city/admin/cities/toggle/:cityId",
+        "file": "route/cityRoute.js",
+        "controller": "controller/cityController.js#toggleCityStatus"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/admin/doctors/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/doctor.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/doctors/:id",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#deleteDoctor"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/doctors/:param/toggle-status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/doctor.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/doctors/:id/toggle-status",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#toggleDoctorStatus"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/socialPost/addComment/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/social/add-commentmodal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/addComment/:id",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#addComment"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/socialPost/followDoctor",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/social/overview.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/followDoctor",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#toggleFollowDoctor"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/socialPost/posts/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/social/post-card.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/posts/:id",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#deletePost"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/socialPost/posts/:param/hide",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/doctor/social/post-card.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/socialPost/posts/:id/hide",
+        "file": "route/socialPostRoute.js",
+        "controller": "controller/socialmediaController.js#toggleHidePost"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/patient/:param/medications",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/patient/add-medication.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patient/:patientId/medications",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#adminAddMedication"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/patients/export",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/patient/export-modal.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patients/export",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#exportPatients"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/admin/patient/:param/medications",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/patient/medication.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patient/:patientId/medications",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#adminRemoveMedication"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/patients/:param/toggle-status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/patient/patient.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/admin/patients/:id/toggle-status",
+        "file": "route/adminRoute.js",
+        "controller": "controller/adminController.js#togglePatientStatus"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/service/:param/toggle-status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service/service.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/:id/toggle-status",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#toggleServiceStatus"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/service/service/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service/service.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/service/service/:id",
+        "file": "route/serviceRoute.js",
+        "controller": "controller/serviceController.js#deleteService"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/serviceProvider/service-provider/:param",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service-partner/service-partner.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/service-provider/:id",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#deleteServiceProvider"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/serviceProvider/:param/toggle-status",
+      "files": [
+        "E:/easesmith/medico/medico-admin-pannel/src/components/service-partner/service-partner.jsx"
+      ],
+      "backend": {
+        "path": "/api/v1/serviceProvider/:id/toggle-status",
+        "file": "route/serviceProvider.js",
+        "controller": "controller/providerController.js#toggleStatus"
+      }
+    }
+  ],
+  "unresolved": [],
+  "backendNotUsedByRouteFile": {
+    "route/adminRoute.js": [
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/addEquipments",
+        "controller": "controller/adminController.js#addEquipment"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/admin/booking/approve-cancellation/:bookingId",
+        "controller": "controller/adminController.js#approveCancellation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/admin/admin/city/:cityId/doctors",
+        "controller": "controller/adminController.js#getDoctorsByCity"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/admin/admin/doctor/:doctorId/cities",
+        "controller": "controller/adminController.js#getDoctorCities"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/admin/doctor/add-cities",
+        "controller": "controller/adminController.js#addDoctorToCities"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/admin/doctor/remove-cities",
+        "controller": "controller/adminController.js#removeDoctorFromCities"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/admin/admin/doctor/update-cities",
+        "controller": "controller/adminController.js#updateDoctorCities"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/check-auth",
+        "controller": "controller/adminController.js#checkAuthStatus"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/admin/doctors/:id/approve",
+        "controller": "controller/adminController.js#approveDoctor"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/admin/doctors/:id/reject",
+        "controller": "controller/adminController.js#rejectDoctor"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/logout-all-devices",
+        "controller": "controller/adminController.js#logoutAllDevices"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/admin/me",
+        "controller": "controller/adminController.js#getMyProfile"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/admin/patients/:id",
+        "controller": "controller/adminController.js#deletePatient"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/admin/patients/:id/block",
+        "controller": "controller/adminController.js#blockPatient"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/patients/create",
+        "controller": "controller/adminController.js#createPatient"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/admin/reports/dashboard",
+        "controller": "controller/adminController.js#getDashboardStats"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/admin/reports/doctors",
+        "controller": "controller/adminController.js#getDoctorStats"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/admin/updateProfile",
+        "controller": "controller/adminController.js#updateProfile"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admin/verify-signup-otp",
+        "controller": "controller/adminController.js#verifySignupOtp"
+      }
+    ],
+    "route/bookingRoute.js": [
+      {
+        "method": "PUT",
+        "path": "/api/v1/booking/cancel/:bookingId",
+        "controller": "controller/bookingController.js#cancelBooking"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/booking/completed-details/:bookingId",
+        "controller": "controller/bookingController.js#bookingCompletedDetails"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/booking/create",
+        "controller": "controller/bookingController.js#createBooking"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/booking/my-bookings",
+        "controller": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/booking/my-bookings/:providerId",
+        "controller": "controller/bookingController.js#getBookingsByServiceProvider"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/booking/patient/:patientId/bookings",
+        "controller": "controller/bookingController.js#getBookedServicesByPatientId"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/booking/patient/:treatmentId",
+        "controller": "controller/bookingController.js#getTreatmentById"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/booking/providerBookings",
+        "controller": "controller/bookingController.js#createProviderBooking"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/booking/reschedule/:bookingId",
+        "controller": "controller/bookingController.js#rescheduleBooking"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/booking/service-summary/:serviceId",
+        "controller": "controller/bookingController.js#getServiceSummaryByServiceId"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/booking/update-status/:bookingId",
+        "controller": "controller/bookingController.js#updateServiceStatus"
+      }
+    ],
+    "route/cityRoute.js": [
+      {
+        "method": "PATCH",
+        "path": "/api/v1/city/:cityId/toggle",
+        "controller": "controller/cityController.js#toggleCityStatus"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/city/find/by-location",
+        "controller": "controller/cityController.js#findCityByLocation"
+      }
+    ],
+    "route/crashReportRoutes.js": [
+      {
+        "method": "POST",
+        "path": "/api/v1/crash-report/create",
+        "controller": "controller/crashController.js#createCrashReport"
+      }
+    ],
+    "route/doctorRoute.js": [
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/:doctorId/service-availability",
+        "controller": "controller/doctorController.js#getServiceAvailability"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/availability",
+        "controller": "controller/doctorController.js#configureAvailability"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/availability",
+        "controller": "controller/doctorController.js#updateAvailability"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/doctor/break-time",
+        "controller": "controller/doctorController.js#removeBreakTime"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/break-time",
+        "controller": "controller/doctorController.js#addBreakTime"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/bulk-manage-slots",
+        "controller": "controller/doctorController.js#bulkManageSlots"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/check-auth",
+        "controller": "controller/doctorController.js#checkAuthStatus"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/clinic",
+        "controller": "controller/doctorController.js#addClinic"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/doctor/clinic/:clinicId",
+        "controller": "controller/doctorController.js#deleteClinic"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/clinic/:clinicId",
+        "controller": "controller/doctorController.js#updateClinic"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/doctor/cities/by-name/:doctorId/:cityName",
+        "controller": "controller/doctorController.js#getDoctorCitiesByName"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/doctor/my-cities/:doctorId",
+        "controller": "controller/doctorController.js#getDoctorCities"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/doctors/city/:cityName",
+        "controller": "controller/doctorController.js#getDoctorsByCityName"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/getAllDoctors",
+        "controller": "controller/doctorController.js#getAllDoctors"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/getDoctorById/:id",
+        "controller": "controller/doctorController.js#getDoctorById"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/getMyProfile",
+        "controller": "controller/doctorController.js#getMyProfile"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/login",
+        "controller": "controller/doctorController.js#doctorLogin"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/logout",
+        "controller": "controller/doctorController.js#logout"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/logout-all-devices",
+        "controller": "controller/doctorController.js#logoutAllDevices"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/my-availability",
+        "controller": "controller/doctorController.js#getMyAvailability"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/resend-login-otp",
+        "controller": "controller/doctorController.js#resendLoginOtp"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/resend-signup-otp",
+        "controller": "controller/doctorController.js#resendSignupOtp"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/service-availability",
+        "controller": "controller/doctorController.js#updateServiceAvailability"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/service-coverage",
+        "controller": "controller/doctorController.js#updateServiceCoverage"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/signup",
+        "controller": "controller/doctorController.js#doctorSignup"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/slots/:doctorId",
+        "controller": "controller/doctorController.js#getAvailableSlots"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/doctor/specialization/:specialization",
+        "controller": "controller/doctorController.js#getDoctorsBySpecialization"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/toggle-slot",
+        "controller": "controller/doctorController.js#toggleSlotAvailability"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/doctor/updateProfile",
+        "controller": "controller/doctorController.js#updateProfile"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/verification-documents",
+        "controller": "controller/doctorController.js#uploadVerificationDocuments"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/verify-login-otp",
+        "controller": "controller/doctorController.js#verifyLoginOtp"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/doctor/verify-signup-otp",
+        "controller": "controller/doctorController.js#verifySignupOtp"
+      }
+    ],
+    "route/itemRoute.js": [
+      {
+        "method": "GET",
+        "path": "/api/v1/items/active",
+        "controller": "controller/itemCategoryController.js#getActiveCategories"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/items/getItemCategoryById/:id",
+        "controller": "controller/itemCategoryController.js#getItemsByCategory"
+      }
+    ],
+    "route/patientRoute.js": [
+      {
+        "method": "DELETE",
+        "path": "/api/v1/patient/allergies",
+        "controller": "controller/patientController.js#removeAllergy"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/allergies",
+        "controller": "controller/patientController.js#addAllergy"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/check-auth",
+        "controller": "controller/patientController.js#checkAuthStatus"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/follow/:doctorId",
+        "controller": "controller/patientController.js#followDoctor"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/patient/getById/:patientId",
+        "controller": "controller/patientController.js#getPatientById"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/login",
+        "controller": "controller/patientController.js#patientLogin"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/logout",
+        "controller": "controller/patientController.js#logout"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/logout-all",
+        "controller": "controller/patientController.js#patientLogoutAll"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/medical-history",
+        "controller": "controller/patientController.js#updateMedicalHistory"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/patient/medical-history/:historyId",
+        "controller": "controller/patientController.js#deleteMedicalHistory"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/patient/medications",
+        "controller": "controller/patientController.js#removeMedication"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/medications",
+        "controller": "controller/patientController.js#addMedication"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/patient/profile",
+        "controller": "controller/patientController.js#getMyProfile"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/resend-login-otp",
+        "controller": "controller/patientController.js#resendLoginOtp"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/resend-signup-otp",
+        "controller": "controller/patientController.js#resendSignupOtp"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/signup",
+        "controller": "controller/patientController.js#patientSignup"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/patient/unfollow/:doctorId",
+        "controller": "controller/patientController.js#unfollowDoctor"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/verify-login-otp",
+        "controller": "controller/patientController.js#verifyLoginOtp"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/patient/verify-signup-otp",
+        "controller": "controller/patientController.js#verifySignupOtp"
+      }
+    ],
+    "route/serviceRoute.js": [
+      {
+        "method": "GET",
+        "path": "/api/v1/service/:id/price",
+        "controller": "controller/serviceController.js#calculateServicePrice"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/service/:id/restore",
+        "controller": "controller/serviceController.js#restoreService"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/:serviceId/slots",
+        "controller": "controller/serviceController.js#getAvailableSlots"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/service/admin/bulk-update",
+        "controller": "controller/serviceController.js#bulkUpdateServices"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/admin/statistics",
+        "controller": "controller/serviceController.js#getServiceStatistics"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/category/:category",
+        "controller": "controller/serviceController.js#getServicesByCategory"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/city/:cityId",
+        "controller": "controller/serviceController.js#getServicesByCity"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/nursing/:nursingType",
+        "controller": "controller/serviceController.js#getNursingServicesByType"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/service/search",
+        "controller": "controller/serviceController.js#searchServices"
+      }
+    ],
+    "route/serviceProvider.js": [
+      {
+        "method": "POST",
+        "path": "/api/v1/serviceProvider/login",
+        "controller": "controller/providerController.js#loginServiceProvider"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/serviceProvider/service-provider/appointments",
+        "controller": "controller/providerController.js#getServiceProviderAppointments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/serviceProvider/service-provider/appointments/:id",
+        "controller": "controller/providerController.js#getSingleAppointment"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/serviceProvider/service-providers/by-service/:serviceId",
+        "controller": "controller/providerController.js#getProvidersByServiceId"
+      }
+    ],
+    "route/socialPostRoute.js": [
+      {
+        "method": "POST",
+        "path": "/api/v1/socialPost/commentPost/:id",
+        "controller": "controller/socialmediaController.js#addComment"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/socialPost/createPost",
+        "controller": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/socialPost/feed",
+        "controller": "controller/socialmediaController.js#getSocialFeed"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/socialPost/follow-stats/me",
+        "controller": "controller/socialmediaController.js#getMyFollowStats"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/socialPost/getPostById/:id",
+        "controller": "controller/socialmediaController.js#getPostById"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/socialPost/likePost/:id/toggle",
+        "controller": "controller/socialmediaController.js#toggleLikePost"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/socialPost/search",
+        "controller": "controller/socialmediaController.js#searchSocialPosts"
+      }
+    ]
+  }
+}

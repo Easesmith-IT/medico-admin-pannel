@@ -2,21 +2,18 @@ import {
   Building2Icon,
   LandmarkIcon,
   MapPinIcon,
-  MoreHorizontalIcon,
   NavigationIcon,
-  Phone,
   PhoneIcon,
 } from "lucide-react";
-import { Badge } from "../ui/badge";
-import { TableCell, TableRow } from "../ui/table";
-import { Skeleton } from "../ui/skeleton";
+
 import { Actions } from "../shared/actions";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { TableCell, TableRow } from "../ui/table";
 
 export const Hospital = ({ hospital }) => {
   const onDelete = () => {};
-
   const onView = () => {};
-
   const onEdit = () => {};
 
   return (
@@ -24,11 +21,11 @@ export const Hospital = ({ hospital }) => {
       <TableCell className="font-medium">
         <div className="flex flex-col">
           <span>{hospital.clinicName}</span>
-          {hospital.defaultClinic && (
+          {hospital.defaultClinic ? (
             <Badge variant="outline" className="mt-1 text-xs">
               Default
             </Badge>
-          )}
+          ) : null}
         </div>
       </TableCell>
 
@@ -68,7 +65,7 @@ export const Hospital = ({ hospital }) => {
       </TableCell>
 
       <TableCell>
-        <Badge variant={hospital.status === "active" ? "default" : "secondary"}>
+        <Badge variant={hospital.status === "active" ? "success" : "secondary"}>
           {hospital.status}
         </Badge>
       </TableCell>
@@ -84,28 +81,25 @@ Hospital.Skeleton = function HospitalSkeleton() {
   return (
     <TableRow>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
       <TableCell>
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
-      {/* <TableCell>
-        <Skeleton className="w-full h-5" />
-      </TableCell> */}
       <TableCell className="text-right">
-        <Skeleton className="w-full h-5" />
+        <Skeleton className="h-5 w-full" />
       </TableCell>
     </TableRow>
   );

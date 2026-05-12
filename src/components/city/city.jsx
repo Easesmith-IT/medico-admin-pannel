@@ -34,6 +34,9 @@ export const City = ({ city }) => {
   const onEdit = () => {
     router.push(`/admin/cities/${city?._id}/update`);
   };
+  const onView = () => {
+    router.push(`/admin/cities/${city?._id}/update`);
+  };
 
   const onDelete = () => {
     setIsAlertModalOpen(true);
@@ -71,9 +74,16 @@ export const City = ({ city }) => {
   return (
     <>
       <TableRow>
-        <TableCell>{customId(city?._id)}</TableCell>
+        <TableCell
+          className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+          onClick={onView}
+        >
+          {customId(city?._id)}
+        </TableCell>
 
-        <TableCell className="capitalize">{city?.name}</TableCell>
+        <TableCell className="cursor-pointer capitalize font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+          {city?.name}
+        </TableCell>
 
         {/* <TableCell>{city?.latitude}</TableCell>
         <TableCell>{city?.longitude}</TableCell> */}
@@ -98,10 +108,10 @@ export const City = ({ city }) => {
 
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={city.isActive ? "success" : "destructive"}>
+            <Badge variant={isActive ? "success" : "destructive"}>
               {isTogglePending ? (
                 <Spinner />
-              ) : city.isActive ? (
+              ) : isActive ? (
                 "Active"
               ) : (
                 "Inactive"
@@ -111,7 +121,7 @@ export const City = ({ city }) => {
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </TableCell>

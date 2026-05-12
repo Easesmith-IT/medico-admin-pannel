@@ -1,6 +1,15 @@
 "use client";
+export const dynamic = "force-dynamic";
+import { useState } from "react";
+import { FileOutputIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { ExportPatientsModal } from "@/components/patient/export-modal";
+import { Patient } from "@/components/patient/patient";
+import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
+import { PaginationComp } from "@/components/shared/PaginationComp";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,102 +22,82 @@ import {
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import {
-  Search,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  RotateCcwIcon,
-  FileOutputIcon,
-} from "lucide-react";
-import { H1 } from "@/components/typography";
-import Link from "next/link";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { Patient } from "@/components/patient/patient";
-import DataNotFound from "@/components/shared/DataNotFound";
-import { PaginationComp } from "@/components/shared/PaginationComp";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { ExportPatientsModal } from "@/components/patient/export-modal";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
+import { useDebounce } from "@/hooks/use-debounce";
+
+const defaults = {
+  gender: "all",
+  bloodGroup: "all",
+  status: "all",
+  search: "",
+  page: 1,
+  limit: "10",
+};
 
 const PatientsPage = () => {
-  const [gender, setGender] = useState("all");
-  const [bloodGroup, setBloodGroup] = useState("all");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
-  const [patients, setPatients] = useState([]);
-  const [limit, setLimit] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
+  const debouncedSearch = useDebounce(params.search, 600);
 
-  const handleReset = () => {
-    setGender("all");
-    setBloodGroup("all");
-    setStatus("all");
-    setSearch("");
-  };
-
-  const handleExort = () => {
-    setIsModalOpen(true);
-  };
-
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/admin/patients?isActive=${
-      status === "all" ? null : status === "true"
-    }&page=${page}&limit=${limit}&searchQuery=${encodeURIComponent(
-      search
+      params.status === "all" ? "" : params.status
+    }&page=${params.page}&limit=${params.limit}&searchQuery=${encodeURIComponent(
+      debouncedSearch
     )}&gender=${
-      gender === "all" ? "" : encodeURIComponent(gender)
-    }&bloodGroup=${bloodGroup === "all" ? "" : encodeURIComponent(bloodGroup)}`,
-    queryKeys: ["patients", status, page, search, limit, gender, bloodGroup],
+      params.gender === "all" ? "" : encodeURIComponent(params.gender)
+    }&bloodGroup=${
+      params.bloodGroup === "all" ? "" : encodeURIComponent(params.bloodGroup)
+    }`,
+    queryKeys: [
+      "patients",
+      params.status,
+      params.page,
+      params.limit,
+      params.gender,
+      params.bloodGroup,
+      debouncedSearch,
+    ],
   });
 
-  console.log("data", data);
-
-  useEffect(() => {
-    if (data) {
-      setPatients(data?.data?.patients || []);
-      setPageCount(data?.totalPages || 0);
-    }
-  }, [data]);
+  const patients = data?.data?.patients || [];
+  const pageCount = data?.totalPages || 0;
 
   return (
     <div className="space-y-6">
       <H1>Patients</H1>
 
-      {/* Filters */}
-      <div className="flex justify-between items-end gap-4 flex-wrap">
-        <div className="lg:col-span-2">
-          <label htmlFor="search" className="text-sm font-medium mb-1 block">
-            Search
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 size-4  text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search by name, email, phone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 w-lg bg-white"
-            />
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="patient-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="patient-search"
+                placeholder="Search by name, email, phone..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="bg-white pl-9"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-4 items-end flex-wrap">
           <div>
-            <label className="text-sm font-medium mb-1 block">Gender</label>
-            <Select value={gender} onValueChange={setGender}>
+            <label className="mb-1 block text-sm font-medium">Gender</label>
+            <Select
+              value={params.gender}
+              onValueChange={(value) => updateParams({ gender: value, page: 1 })}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
@@ -122,10 +111,13 @@ const PatientsPage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">
-              Blood Group
-            </label>
-            <Select value={bloodGroup} onValueChange={setBloodGroup}>
+            <label className="mb-1 block text-sm font-medium">Blood Group</label>
+            <Select
+              value={params.bloodGroup}
+              onValueChange={(value) =>
+                updateParams({ bloodGroup: value, page: 1 })
+              }
+            >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
@@ -142,9 +134,13 @@ const PatientsPage = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select value={status} onValueChange={setStatus}>
+            <label className="mb-1 block text-sm font-medium">Status</label>
+            <Select
+              value={params.status}
+              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
@@ -156,37 +152,53 @@ const PatientsPage = () => {
             </Select>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset Filters</p>
-            </TooltipContent>
-          </Tooltip>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Limit</label>
+            <Select
+              value={params.limit}
+              onValueChange={(value) => updateParams({ limit: value, page: 1 })}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="30">30</SelectItem>
+                <SelectItem value="40">40</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="medico" onClick={handleExort}>
-                <FileOutputIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Export Data</p>
-            </TooltipContent>
-          </Tooltip>
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
+
+          <Button variant="medico" onClick={() => setIsModalOpen(true)}>
+            <FileOutputIcon />
+            Export
+          </Button>
         </div>
-      </div>
+      </FilterBar>
 
-      {/* Table */}
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load patients"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
+
       <div className="table-container">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">Patient ID</TableHead>
               <TableHead>Profile</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Blood Group</TableHead>
@@ -197,36 +209,38 @@ const PatientsPage = () => {
           </TableHeader>
           <TableBody>
             {patients.map((patient, index) => (
-              <Patient key={patients._id || index} patient={patient} />
+              <Patient key={patient._id || index} patient={patient} />
             ))}
 
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <Patient.Skeleton key={index} />
-              ))}
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <Patient.Skeleton key={index} />
+                ))
+              : null}
           </TableBody>
         </Table>
 
-        {patients?.length === 0 && !isLoading && (
+        {patients.length === 0 && !isLoading ? (
           <DataNotFound name="Patients" />
-        )}
+        ) : null}
       </div>
 
       <PaginationComp
-        page={page}
+        page={params.page}
         pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
       />
 
-      {isModalOpen && (
+      {isModalOpen ? (
         <ExportPatientsModal
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
         />
-      )}
+      ) : null}
     </div>
   );
 };
 
 export default PatientsPage;
+

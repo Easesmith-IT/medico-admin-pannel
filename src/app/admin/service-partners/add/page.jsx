@@ -31,6 +31,7 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { POST } from "@/constants/apiMethods";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 
 const defaultValues = {
   firstName: "",
@@ -109,6 +110,7 @@ const AddServicePartner = () => {
     resolver: zodResolver(fullSchema),
     mode: "onTouched",
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const { handleSubmit, trigger, formState } = form;
 
@@ -122,7 +124,6 @@ const AddServicePartner = () => {
   ];
 
   const onNext = async () => {
-    console.log("error", formState?.errors);
 
     let schema;
     switch (step) {
@@ -163,7 +164,6 @@ const AddServicePartner = () => {
 
   const onBack = () => setStep((s) => Math.max(s - 1, 0));
   const onError = (error) => {
-    console.log("error", error);
   };
 
   const {

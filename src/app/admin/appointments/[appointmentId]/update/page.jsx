@@ -27,19 +27,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { PATCH, POST } from "@/constants/apiMethods";
+import { PATCH } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import {
   buildQuery,
-  generateTimeOptions,
   generateTimeRange,
 } from "@/lib/utils";
 import { format } from "date-fns/format";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
+import { PatientSummaryCard } from "@/components/shared/patient-summary-card";
 
 // -------------------------------
 // ZOD SCHEMA
@@ -47,6 +49,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 const bookingSchema = z.object({
   serviceId: z.string().min(1, "Required"),
   patientId: z.string().min(1, "Required"),
+  treatmentSelection: z.string().min(1, "Required"),
   cityId: z.string().optional(),
   appointmentDate: z.date().min(1, "Required"),
   startTime: z.string().min(1, "Required"),
@@ -54,29 +57,9 @@ const bookingSchema = z.object({
   //   duration: z.coerce.number().min(1),
   servicePartnerId: z.string().optional(),
   notes: z.string().optional(),
-  category: z.enum(["nursing", "consultation", "therapy", "other"]),
+  category: z.enum(["nursing", "consultation", "equipment"]),
   modes: z.string(),
 });
-
-const addressList = [
-  {
-    _id: "675df82c",
-    street: "MG Road",
-    city: "Bengaluru",
-    state: "Karnataka",
-    country: "India",
-    pincode: "560001",
-    isDefault: true,
-  },
-  {
-    _id: "675df8de",
-    street: "Park Street",
-    city: "Kolkata",
-    state: "West Bengal",
-    country: "India",
-    pincode: "700016",
-  },
-];
 
 // -------------------------------
 // COMPONENT
@@ -84,17 +67,7 @@ const addressList = [
 const UpdateAppointment = () => {
   const router = useRouter();
   const params = useParams();
-  const [isAddressLoading, setIsAddressLoading] = useState(true);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsAddressLoading(false);
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, []);
+  const [treatmentOptions, setTreatmentOptions] = useState([]);
 
   const [timeOptions, setTimeOptions] = useState([]);
 
@@ -103,6 +76,7 @@ const UpdateAppointment = () => {
     defaultValues: {
       serviceId: "",
       patientId: "",
+      treatmentSelection: "",
       appointmentDate: "",
       startTime: "",
       endTime: "",
@@ -113,6 +87,7 @@ const UpdateAppointment = () => {
       modes: [],
     },
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const {
     control,
@@ -121,6 +96,7 @@ const UpdateAppointment = () => {
 
     reset,
   } = form;
+  const patientId = watch("patientId");
   const serviceId = watch("serviceId");
   const cityId = watch("cityId");
 
@@ -130,7 +106,6 @@ const UpdateAppointment = () => {
   });
 
   const booking = data?.data;
-  console.log("booking", booking);
 
   useEffect(() => {
     if (booking) {
@@ -148,6 +123,7 @@ const UpdateAppointment = () => {
       reset({
         serviceId: serviceId?._id,
         patientId: patientId?._id,
+        treatmentSelection: booking?.treatmentId?._id || booking?.treatmentId || "",
         servicePartnerId: servicePartnerId?._id || "",
         appointmentDate: appointmentDate && new Date(appointmentDate),
         startTime: slotTime?.startTime,
@@ -158,6 +134,51 @@ const UpdateAppointment = () => {
       });
     }
   }, [data]);
+
+  const {
+    data: treatmentData,
+    isLoading: isTreatmentLoading,
+    refetch: refetchTreatments,
+  } = useApiQuery({
+    url: `/admin/patients/${patientId}/treatments?serviceId=${serviceId || ""}`,
+    queryKeys: ["patient-treatments", patientId, serviceId],
+    options: { enabled: false },
+  });
+
+  useEffect(() => {
+    if (patientId && serviceId) {
+      refetchTreatments();
+    } else {
+      setTreatmentOptions([]);
+    }
+  }, [patientId, serviceId, refetchTreatments]);
+
+  useEffect(() => {
+    const treatments = treatmentData?.data || [];
+    const options = treatments.map((item) => ({
+      value: item._id,
+      label: `#${String(item._id).slice(-6).toUpperCase()} • ${item.status} • Sessions ${item.sessionsCount || 0}`,
+    }));
+    setTreatmentOptions(options);
+  }, [treatmentData]);
+
+  const {
+    data: selectedPatientData,
+    isLoading: isSelectedPatientLoading,
+    refetch: refetchSelectedPatient,
+  } = useApiQuery({
+    url: `/admin/patients/${patientId}`,
+    queryKeys: ["patient-profile", patientId],
+    options: { enabled: false },
+  });
+
+  useEffect(() => {
+    if (patientId) {
+      refetchSelectedPatient();
+    }
+  }, [patientId, refetchSelectedPatient]);
+
+  const selectedPatient = selectedPatientData?.data?.patient;
 
   const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
     url: `/admin/services/names`,
@@ -170,7 +191,6 @@ const UpdateAppointment = () => {
         (item) => item._id === serviceId
       );
       const { consultationSlots } = serviceDoc?.slotConfig;
-      console.log("consultationSlots", consultationSlots);
 
       const timeOptions = generateTimeRange(
         consultationSlots?.startTime,
@@ -180,17 +200,20 @@ const UpdateAppointment = () => {
     }
   }, [serviceId]);
 
-  console.log("serviceData", serviceData);
-
-  const { data: patientData, isLoading: isPatientLoading } = useApiQuery({
-    url: `/admin/patients/names`,
-    queryKeys: ["patient-admin"],
-  });
 
   const { data: cityData, isLoading: isCityLoading } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
+  const cityLookup = useMemo(() => {
+    const lookup = {};
+    (cityData?.data || []).forEach((city) => {
+      if (city?._id && city?.name) {
+        lookup[String(city._id)] = city.name;
+      }
+    });
+    return lookup;
+  }, [cityData]);
 
   const query = buildQuery({
     serviceId,
@@ -224,6 +247,7 @@ const UpdateAppointment = () => {
   });
 
   const onSubmit = async (data) => {
+    const isCreateTreatment = data.treatmentSelection === "__create_new__";
     const apiData = {
       ...data,
       appointmentDate:
@@ -231,15 +255,16 @@ const UpdateAppointment = () => {
         format(new Date(data.appointmentDate), "yyyy-MM-dd"),
       modes: data.modes ? [data.modes] : [],
       cityId: null,
+      treatmentId: isCreateTreatment ? undefined : data.treatmentSelection,
+      createNewTreatment: isCreateTreatment,
     };
-    console.log("Booking Payload:", apiData);
+    delete apiData.treatmentSelection;
 
     await submitForm(apiData);
   };
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push("/admin/appointments");
     }
   }, [result]);
@@ -293,28 +318,50 @@ const UpdateAppointment = () => {
                 <FormField
                   control={control}
                   name="patientId"
-                  render={({ field }) => (
-                    <FormItem>
+                  render={() => (
+                    <FormItem className="md:col-span-2 lg:col-span-3">
                       <FormLabel>Patient</FormLabel>
                       <FormControl>
+                        {selectedPatient ? (
+                          <PatientSummaryCard
+                            patient={selectedPatient}
+                            cityLookup={cityLookup}
+                          />
+                        ) : (
+                          <div className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-muted-foreground">
+                            Patient details are loading...
+                          </div>
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="treatmentSelection"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Treatment</FormLabel>
+                      <FormControl>
                         <Select
-                          disabled
                           value={field.value}
-                          key={field.value}
                           onValueChange={field.onChange}
+                          disabled={!patientId || !serviceId || isTreatmentLoading}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Patient" />
+                            <SelectValue placeholder="Select treatment or create new" />
                           </SelectTrigger>
                           <SelectContent>
-                            {patientData?.data?.map((item) => (
-                              <SelectItem key={item._id} value={item._id}>
-                                {item.firstName} {item.lastName}
+                            <SelectItem value="__create_new__">
+                              + Create New Treatment
+                            </SelectItem>
+                            {treatmentOptions.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
                               </SelectItem>
                             ))}
-                            {patientData && patientData.data.length === 0 && (
-                              <div disabled>No patients found</div>
-                            )}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -324,101 +371,11 @@ const UpdateAppointment = () => {
                 />
               </div>
 
-              <FormField
-                control={control}
-                name="addressId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Select Address
-                    </FormLabel>
-
-                    {!isAddressLoading && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                        {addressList?.map((address) => {
-                          const selected = field.value === address._id;
-
-                          return (
-                            <div
-                              key={address._id}
-                              onClick={() => {
-                                if (field.value === address._id) {
-                                  field.onChange(""); // DESELECT
-                                } else {
-                                  field.onChange(address._id); // SELECT
-                                }
-                              }}
-                              className={`
-                  cursor-pointer border rounded-xl p-4 shadow-sm 
-                  transition-all duration-200
-                  ${
-                    selected
-                      ? "border-blue-600 bg-blue-50 shadow-md"
-                      : "border-gray-300 bg-white"
-                  }
-                  hover:shadow-md
-                `}
-                            >
-                              {/* Title */}
-                              {/* <h3 className="font-semibold text-gray-900 text-lg mb-2">
-                                {address.title || "Address"}
-                              </h3> */}
-
-                              {/* Address Lines */}
-                              <div className="text-sm text-gray-700 space-y-1">
-                                <p>
-                                  <span className="font-semibold">Street:</span>{" "}
-                                  {address.street}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">City:</span>{" "}
-                                  {address.city}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">State:</span>{" "}
-                                  {address.state}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Country:
-                                  </span>{" "}
-                                  {address.country}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Pincode:
-                                  </span>{" "}
-                                  {address.pincode}
-                                </p>
-                              </div>
-
-                              {/* Default Badge */}
-                              {address.isDefault && (
-                                <div className="mt-3">
-                                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                    Default
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-
-                        {/* Empty State */}
-                        {addressList && addressList.length === 0 && (
-                          <div className="col-span-full text-sm text-muted-foreground">
-                            No saved addresses found
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {isAddressLoading && <Spinner />}
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {patientId && isSelectedPatientLoading && (
+                <div className="flex items-center justify-center py-2">
+                  <Spinner />
+                </div>
+              )}
 
               <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 col-span-4">
                 {/* Appointment Date */}
@@ -620,7 +577,7 @@ const UpdateAppointment = () => {
                                   {item.name}
                                 </SelectItem>
                               ))}
-                              {patientData && patientData.data.length === 0 && (
+                              {cityData && cityData.data.length === 0 && (
                                 <div disabled>No city found</div>
                               )}
                             </SelectContent>
@@ -775,11 +732,11 @@ const UpdateAppointment = () => {
               />
 
               {/* Submit Button */}
-              <div className="flex gap-3 justify-end">
+              <FormFooter className="flex gap-3 justify-end">
                 <Button type="submit" className="">
                   {isSubmitFormLoading ? <Spinner /> : "Update Booking"}
                 </Button>
-              </div>
+              </FormFooter>
             </form>
           </Form>
         </CardContent>

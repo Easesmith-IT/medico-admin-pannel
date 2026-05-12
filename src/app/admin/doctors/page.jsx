@@ -1,12 +1,15 @@
 "use client";
+export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 
 import { Doctor } from "@/components/doctor/doctor";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,48 +24,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { PlusIcon, RotateCcwIcon, Search } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
+import { StateView } from "@/components/shared/state-view";
+
+const defaults = {
+  search: "",
+  status: "all",
+  page: 1,
+  limit: "10",
+};
 
 const Doctors = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
-  const [doctors, setDoctors] = useState([]);
-  const [limit, setLimit] = useState(10);
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
+  const debouncedSearch = useDebounce(params.search, 600);
 
-  const handleReset = () => {
-    setStatus("all");
-    setSearchQuery("");
-  };
-
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/admin/doctors?status=${
-      status === "all" ? "" : status
-    }&page=${page}&limit=${limit}&search=${searchQuery}`,
-    queryKeys: ["doctors", status, page, searchQuery, limit],
+      params.status === "all" ? "" : params.status
+    }&page=${params.page}&limit=${params.limit}&search=${encodeURIComponent(
+      debouncedSearch
+    )}`,
+    queryKeys: [
+      "doctors",
+      params.status,
+      params.page,
+      debouncedSearch,
+      params.limit,
+    ],
   });
 
-  console.log("data", data);
-
-  useEffect(() => {
-    if (data) {
-      setDoctors(data?.data?.doctors || []);
-      setPageCount(data?.totalPages || 0);
-    }
-  }, [data]);
+  const doctors = data?.data?.doctors || [];
+  const pageCount = data?.totalPages || 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <H1>Doctors</H1>
         <Button asChild variant="medico">
           <Link href="/admin/doctors/add">
@@ -72,32 +70,34 @@ const Doctors = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        {/* Search Input */}
-        <div></div>
-        <div className="grow hidden">
-          <Label htmlFor="search" className="sr-only">
-            Search
-          </Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1 h-5 w-5 text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search by name, email, or phone..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
-            />
-          </div>
-        </div>
-
-        {/* Filter Buttons */}
+      <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="doctor-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="doctor-search"
+                placeholder="Search by name, email, phone..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="bg-white pl-9"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select onValueChange={(value) => setStatus(value)} value={status}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select specialization" />
+            <label className="mb-1 block text-sm font-medium">Status</label>
+            <Select
+              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+              value={params.status}
+            >
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -107,30 +107,51 @@ const Doctors = () => {
               </SelectContent>
             </Select>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset Filters</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </div>
 
-      {/* Table */}
+          <div>
+            <label className="mb-1 block text-sm font-medium">Limit</label>
+            <Select
+              value={params.limit}
+              onValueChange={(value) => updateParams({ limit: value, page: 1 })}
+            >
+              <SelectTrigger className="w-28">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="30">30</SelectItem>
+                <SelectItem value="40">40</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
+        </div>
+      </FilterBar>
+
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load doctors"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
+
       <div className="table-container">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">Doctor ID</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Specialization</TableHead>
-              <TableHead>Current Workplace</TableHead>
-              <TableHead>Gender</TableHead>
               <TableHead>Verification Status</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -140,46 +161,33 @@ const Doctors = () => {
             {doctors.map((doctor) => (
               <Doctor key={doctor._id || doctor.id} doctor={doctor} />
             ))}
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <Doctor.Skeleton key={index} />
-              ))}
+
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <Doctor.Skeleton key={index} />
+                ))
+              : null}
           </TableBody>
         </Table>
-        {doctors?.length === 0 && !isLoading && <DataNotFound name="Doctors" />}
-      </div>
-      <PaginationComp
-        page={page}
-        pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
-      />
 
-      {/* Pagination */}
-      {/* <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing 1 to 5 of 25 results
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" disabled>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="secondary" size="icon" className="font-medium">
-            1
-          </Button>
-          <Button variant="outline" size="icon">
-            2
-          </Button>
-          <Button variant="outline" size="icon">
-            3
-          </Button>
-          <Button variant="outline" size="icon">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div> */}
+        {doctors.length === 0 && !isLoading ? (
+          <DataNotFound
+            name="Doctors"
+            actionLabel="Add Doctor"
+            actionHref="/admin/doctors/add"
+          />
+        ) : null}
+      </div>
+
+      <PaginationComp
+        page={params.page}
+        pageCount={pageCount}
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
+      />
     </div>
   );
 };
 
 export default Doctors;
+

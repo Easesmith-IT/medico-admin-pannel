@@ -11,7 +11,6 @@ import { useForm } from "react-hook-form";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -37,6 +36,8 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import DatePicker from "@/components/shared/DatePicker";
 import { Spinner } from "@/components/ui/spinner";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
 
 const UpdatePatient = () => {
   const router = useRouter();
@@ -66,6 +67,7 @@ const UpdatePatient = () => {
       },
     },
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const {
     control,
@@ -83,13 +85,12 @@ const UpdatePatient = () => {
   });
 
   const patient = data?.data?.patient;
-  console.log("patient data", data);
 
   useEffect(() => {
     if (data) {
       reset({
         firstName: patient?.firstName,
-        email: patient?.email,
+        email: patient?.email || "",
         phone: patient?.phone,
         dateOfBirth: patient?.dateOfBirth && new Date(patient?.dateOfBirth),
         gender: patient?.gender,
@@ -123,20 +124,17 @@ const UpdatePatient = () => {
 
   // ===== Submit handler =====
   const onSubmit = async (values) => {
-    console.log({ values });
 
     await submitForm(values);
   };
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push("/admin/patients");
     }
   }, [result]);
 
   const onError = (error) => {
-    console.log("error", error);
   };
 
   return (
@@ -395,7 +393,7 @@ const UpdatePatient = () => {
               </div>
             </CardContent>
 
-            <CardFooter className="flex justify-end">
+            <FormFooter className="flex justify-end">
               {/* <Button type="submit">Save profile</Button> */}
               <Button
                 variant="medico"
@@ -404,7 +402,7 @@ const UpdatePatient = () => {
               >
                 {isSubmitFormLoading ? <Spinner /> : "Update"}
               </Button>
-            </CardFooter>
+            </FormFooter>
           </Card>
         </form>
       </Form>

@@ -21,7 +21,11 @@ export const Actions = ({
         {children ? (
           children
         ) : (
-          <Button disabled={disabled} variant="ghost" className="h-8 w-8 p-0">
+          <Button
+            disabled={disabled}
+            variant="ghost"
+            className="h-9 w-9 rounded-[10px] p-0 hover:bg-[#EEF2FF] hover:text-[#1E3A8A]"
+          >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         )}

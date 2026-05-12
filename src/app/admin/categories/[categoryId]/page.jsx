@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,36 +13,53 @@ import {
 } from "@/components/ui/table";
 import { useParams } from "next/navigation";
 import { BackLink } from "@/components/shared/back-link";
-import { H2 } from "@/components/typography";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 import { CategoryDetailsSkeleton } from "@/components/category/category-details-skeleton";
 
 const CategoryDetailsPage = () => {
   const params = useParams();
-  const { data, isLoading } = useApiQuery({
+
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/items/category/${params.categoryId}`,
     queryKeys: ["category", params.categoryId],
   });
 
-  console.log("data", data);
-  let category = data?.data?.category;
+  const category = data?.data?.category;
+  const items = category?.items || [];
 
-  // Find the selected category from list
-
-  const totalValue = category?.items?.reduce(
-    (acc, item) => acc + item.unitPrice,
-    0,
-  );
+  const totalValue =
+    items.reduce((accumulator, item) => accumulator + item.unitPrice, 0) || 0;
 
   return (
     <div className="space-y-6">
-      {/* Category Info */}
       <BackLink href="/admin/categories">
-        <H2>Category Details</H2>
+        <H1>Category Details</H1>
       </BackLink>
 
-      {isLoading ? (
-        <CategoryDetailsSkeleton />
-      ) : (
+      {isLoading ? <CategoryDetailsSkeleton /> : null}
+
+      {!isLoading && error ? (
+        <StateView
+          type="error"
+          title="Unable to load category details"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
+
+      {!isLoading && !error && !category ? (
+        <StateView
+          type="empty"
+          title="Category not found"
+          description="The requested category record is not available."
+          actionLabel="Back to categories"
+          actionHref="/admin/categories"
+        />
+      ) : null}
+
+      {!isLoading && !error && category ? (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -67,11 +83,13 @@ const CategoryDetailsPage = () => {
 
               <p>
                 <strong>Created At:</strong>{" "}
-                {new Date(category.createdAt).toLocaleString()}
+                {category.createdAt
+                  ? new Date(category.createdAt).toLocaleString()
+                  : "Not available"}
               </p>
 
               <p>
-                <strong>Total Items:</strong> {category.items.length}
+                <strong>Total Items:</strong> {items.length}
               </p>
 
               <p>
@@ -80,7 +98,6 @@ const CategoryDetailsPage = () => {
             </CardContent>
           </Card>
 
-          {/* Items Table */}
           <Card>
             <CardHeader>
               <CardTitle>Items</CardTitle>
@@ -98,7 +115,7 @@ const CategoryDetailsPage = () => {
                 </TableHeader>
 
                 <TableBody>
-                  {category.items.map((item, index) => (
+                  {items.map((item, index) => (
                     <TableRow key={item._id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{item.name}</TableCell>
@@ -117,7 +134,7 @@ const CategoryDetailsPage = () => {
             </CardContent>
           </Card>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

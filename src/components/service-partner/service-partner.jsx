@@ -1,29 +1,28 @@
-import { MoreHorizontal, MoreHorizontalIcon } from "lucide-react";
-import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { TableCell, TableRow } from "../ui/table";
+import { DELETE, PATCH } from "@/constants/apiMethods";
+import { STATUS_STYLES } from "@/constants/status";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { cn, customId } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getDisplayName } from "@/lib/display";
+
+import { Actions } from "../shared/actions";
+import { ConfirmModal } from "../shared/confirm-modal";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
-import { ConfirmModal } from "../shared/confirm-modal";
-import { useEffect, useState } from "react";
-import { Actions } from "../shared/actions";
-import { DELETE, PATCH } from "@/constants/apiMethods";
-import { useApiMutation } from "@/hooks/useApiMutation";
-import { useRouter } from "next/navigation";
-import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/spinner";
-import { cn } from "@/lib/utils";
-import { STATUS_STYLES } from "@/constants/status";
+import { Switch } from "../ui/switch";
+import { TableCell, TableRow } from "../ui/table";
 
 export const ServicePartner = ({ servicePartner }) => {
   const router = useRouter();
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [isActive, setIsActive] = useState(servicePartner.isActive || false);
+  const fullName = getDisplayName(servicePartner);
+  const specialization =
+    servicePartner?.services?.[0]?.specialization ||
+    servicePartner?.services?.[0]?.serviceName ||
+    "-";
 
   const onDelete = () => {
     setIsAlertModalOpen(true);
@@ -48,7 +47,7 @@ export const ServicePartner = ({ servicePartner }) => {
     await deleteServicePartner();
   };
 
-  const { mutateAsync, isPending, data, error } = useApiMutation({
+  const { mutateAsync, isPending, error } = useApiMutation({
     url: `/serviceProvider/${servicePartner._id}/toggle-status`,
     method: PATCH,
     invalidateKey: ["service-provider"],
@@ -63,40 +62,37 @@ export const ServicePartner = ({ servicePartner }) => {
     if (error) {
       setIsActive(servicePartner.isActive);
     }
-  }, [error]);
+  }, [error, servicePartner.isActive]);
 
   return (
     <>
       <TableRow>
-        {/* Name */}
-        <TableCell className="font-medium">
-          {servicePartner?.firstName} {servicePartner?.lastName}
+        <TableCell
+          className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+          onClick={onView}
+        >
+          {customId(servicePartner?._id)}
+        </TableCell>
+        <TableCell className="cursor-pointer font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+          {fullName}
         </TableCell>
 
-        {/* Email */}
-        <TableCell>{servicePartner?.email}</TableCell>
-
-        {/* Phone */}
-        <TableCell>{servicePartner?.mobile}</TableCell>
-
-        {/* Age */}
-        <TableCell>{servicePartner?.age || "—"}</TableCell>
-
-        {/* Specialization (from services array) */}
         <TableCell>
-          {servicePartner?.services?.[0]?.specialization || "—"}
+          {servicePartner?.mobile || servicePartner?.phone || "-"}
         </TableCell>
 
-        {/* Gender */}
+        <TableCell>{servicePartner?.age || "-"}</TableCell>
+
+        <TableCell>{specialization}</TableCell>
+
         <TableCell className="capitalize">{servicePartner?.gender}</TableCell>
 
-        {/* Verification Status */}
         <TableCell>
           <Badge
-            variant={"success"}
+            variant="success"
             className={cn(
               "capitalize",
-              STATUS_STYLES[servicePartner?.approvalStatus]
+              STATUS_STYLES[servicePartner?.approvalStatus],
             )}
           >
             {servicePartner?.approvalStatus}
@@ -105,32 +101,23 @@ export const ServicePartner = ({ servicePartner }) => {
 
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge
-              variant={servicePartner.isActive ? "success" : "destructive"}
-            >
-              {isPending ? (
-                <Spinner />
-              ) : servicePartner.isActive ? (
-                "Active"
-              ) : (
-                "Inactive"
-              )}
+            <Badge variant={isActive ? "success" : "destructive"}>
+              {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
             </Badge>
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </TableCell>
 
-        {/* Actions */}
         <TableCell className="text-right">
           <Actions onDelete={onDelete} onEdit={onEdit} onView={onView} />
         </TableCell>
       </TableRow>
 
-      {isAlertModalOpen && (
+      {isAlertModalOpen ? (
         <ConfirmModal
           header="Delete Service Partner"
           description="Are you sure you want to delete this service partner? This action cannot be undone."
@@ -139,7 +126,7 @@ export const ServicePartner = ({ servicePartner }) => {
           disabled={isDeleteLoading}
           onConfirm={handleDeleteServicePartner}
         />
-      )}
+      ) : null}
     </>
   );
 };

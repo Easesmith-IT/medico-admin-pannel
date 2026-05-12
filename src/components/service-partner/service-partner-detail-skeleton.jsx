@@ -1,53 +1,26 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const ServicePartnerDetailsSkeleton = () => {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-6 w-20" />
-          </CardTitle>
-        </CardHeader>
-      </Card>
-
-      {/* Section Skeleton Builder */}
-      {Array.from({ length: 10 }).map((_, index) => (
-        <Card key={index}>
-          <CardHeader>
-            <CardTitle>
-              <Skeleton className="h-5 w-48" />
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-5 w-full" />
-            </div>
-
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-5 w-full" />
-            </div>
-
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-5 w-full" />
-            </div>
-
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-5 w-full" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-5">
+      <Skeleton className="h-28 rounded-[24px]" />
+      <Skeleton className="h-72 rounded-[32px]" />
+      <div className="grid gap-3 md:grid-cols-3">
+        <Skeleton className="h-28 rounded-[24px]" />
+        <Skeleton className="h-28 rounded-[24px]" />
+        <Skeleton className="h-28 rounded-[24px]" />
+      </div>
+      <Skeleton className="h-12 rounded-[20px]" />
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="space-y-5">
+          <Skeleton className="h-72 rounded-[28px]" />
+          <Skeleton className="h-64 rounded-[28px]" />
+          <Skeleton className="h-80 rounded-[28px]" />
+        </div>
+        <Skeleton className="h-[520px] rounded-[24px]" />
+      </div>
     </div>
   );
 };

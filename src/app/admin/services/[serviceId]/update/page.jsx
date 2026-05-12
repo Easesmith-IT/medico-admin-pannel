@@ -36,6 +36,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { FormFooter } from "@/components/shared/form-footer";
 
 function DurationChips({ values = [], selected = [], onChange }) {
   return (
@@ -98,6 +100,7 @@ const UpdateService = () => {
     },
     mode: "onBlur",
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const {
     control,
@@ -969,7 +972,7 @@ const UpdateService = () => {
                   )}
                 />
               </div>
-              <div className="flex gap-3 justify-end">
+              <FormFooter className="flex gap-3 justify-end">
                 <Button
                   type="submit"
                   disabled={formState.isSubmitting || isSubmitFormLoading}
@@ -981,7 +984,7 @@ const UpdateService = () => {
                     "Update"
                   )}
                 </Button>
-              </div>
+              </FormFooter>
             </form>
           </Form>
         </CardContent>

@@ -23,17 +23,13 @@ export function PaginationComp({
   const renderPageNumbers = () => {
     const items = [];
     const maxVisiblePages = totalPageCount < 5 ? totalPageCount : 5;
-    console.log("maxVisiblePages", maxVisiblePages);
 
     if (totalPageCount <= maxVisiblePages) {
       for (let i = 1; i <= totalPageCount; i++) {
         items.push(
           <PaginationItem className="cursor-pointer" key={i}>
             <PaginationLink
-              className={cn(
-                "border border-input! size-10 rounded-full",
-                page === i && "text-white bg-main! hover:bg-main"
-              )}
+              className={cn("h-10 min-w-10 rounded-[12px] px-3")}
               isActive={page === i}
               onClick={() => setPage(i)}
             >
@@ -115,16 +111,16 @@ export function PaginationComp({
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row items-center gap-3 w-full",
+        "flex w-full flex-col items-center gap-3 md:flex-row",
         className
       )}
     >
       <Pagination>
-        <PaginationContent className="gap-3">
+        <PaginationContent className="gap-2">
           <PaginationItem className="cursor-pointer">
             <PaginationPrevious
               onClick={handlePrevious}
-              className="border size-10 rounded-full bg-white"
+              className="size-10 rounded-[12px] bg-white"
               to=""
             />
           </PaginationItem>
@@ -134,9 +130,7 @@ export function PaginationComp({
           ) : (
             <PaginationItem className="cursor-pointer">
               <PaginationLink
-                className={cn(
-                  "border border-input! size-10 rounded-full text-white hover:text-white bg-main! hover:bg-main"
-                )}
+                className="h-10 min-w-10 rounded-[12px] px-3"
               >
                 {page}
               </PaginationLink>
@@ -145,14 +139,14 @@ export function PaginationComp({
           <PaginationItem className="cursor-pointer">
             <PaginationNext
               onClick={handleNext}
-              className="border size-10 rounded-full bg-white"
+              className="size-10 rounded-[12px] bg-white"
               to=""
             />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
       {show && (
-        <span className="text-gray-600 text-sm whitespace-nowrap">
+        <span className="whitespace-nowrap text-sm text-[#6B7280]">
           Total Pages: {pageCount || 1}
         </span>
       )}

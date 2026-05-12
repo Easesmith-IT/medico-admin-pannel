@@ -60,17 +60,24 @@ export const Category = ({ category }) => {
   return (
     <>
       <TableRow>
-        <TableCell>{customId(category?._id)}</TableCell>
-        <TableCell>{category.name}</TableCell>
+        <TableCell
+          className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+          onClick={onView}
+        >
+          {customId(category?._id)}
+        </TableCell>
+        <TableCell className="cursor-pointer font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+          {category.name}
+        </TableCell>
         <TableCell>
           <p className="w-80 whitespace-pre-wrap">{category.description || "NA"}</p>
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={category.isActive ? "success" : "destructive"}>
+            <Badge variant={isActive ? "success" : "destructive"}>
               {isTogglePending ? (
                 <Spinner />
-              ) : category.isActive ? (
+              ) : isActive ? (
                 "Active"
               ) : (
                 "Inactive"
@@ -80,7 +87,7 @@ export const Category = ({ category }) => {
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </TableCell>

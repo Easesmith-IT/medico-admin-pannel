@@ -29,8 +29,8 @@ export const Medication = ({ item }) => {
     }
   }, [result]);
   return (
-    <div className="border py-1 px-2 rounded-md flex gap-3 items-center">
-      <p className="text-base font-medium text-foreground">{item}</p>
+    <div className="flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-3 py-2">
+      <p className="text-sm font-medium text-foreground">{item}</p>
       <Button
         onClick={removeMedication}
         variant="destructive"

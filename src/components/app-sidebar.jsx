@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   BuildingIcon,
   CalendarCheckIcon,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -91,33 +92,46 @@ const menuItems = [
 ];
 
 export const AppSidebar = () => {
-  const router = useRouter();
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r border-[#1E293B]">
+      <SidebarHeader className="px-3 pt-4">
         <SidebarMenuItem>
-          <SidebarMenuButton asChild className="gap-x-4 h-10 px-4">
+          <SidebarMenuButton
+            asChild
+            className="h-12 gap-x-3 rounded-[14px] px-3 hover:bg-[#12213C]"
+          >
             <Link href="/" prefetch>
               <Image
                 src="/logos/medico-logo.svg"
-                width={30}
-                height={30}
+                width={28}
+                height={28}
                 alt="Medico"
               />
-              <span className="font-semibold text-sm">Medico Admin</span>
+              <span className="text-sm font-semibold tracking-[-0.01em] text-white">
+                Medico Admin
+              </span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2 pb-4">
         {menuItems.map((group) => (
           <SidebarGroup key={group.title}>
+            <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-[#64748B]">
+              {group.title}
+            </p>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                {group.items.map((item, index) => (
+                  <motion.li
+                    key={item.title}
+                    className="group/menu-item relative list-none"
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.16, delay: index * 0.02, ease: "easeOut" }}
+                  >
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={
@@ -126,14 +140,14 @@ export const AppSidebar = () => {
                           : pathname.startsWith(item.url)
                       }
                       asChild
-                      className="gap-x-4 h-10 px-4"
+                      className="h-11 gap-x-3 rounded-[12px] px-3 text-[14px] text-[#CBD5E1] transition-all hover:bg-[#12213C] hover:text-white data-[active=true]:bg-[#1E3A8A]/35 data-[active=true]:text-[#DBEAFE] data-[active=true]:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.45)]"
                     >
                       <Link href={item.url} prefetch>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </motion.li>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>

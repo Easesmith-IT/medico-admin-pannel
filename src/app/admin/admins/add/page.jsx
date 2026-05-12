@@ -33,6 +33,7 @@ import { VerifyOtpModal } from "@/components/verify-otp-modal";
 import { toast } from "sonner";
 import Spinner from "@/components/shared/Spinner";
 import { useRouter } from "next/navigation";
+import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 
 // Zod schema matching the mongoose model fields the user provided
 const adminSchema = z.object({
@@ -78,6 +79,7 @@ const Add = ({ defaultValues }) => {
       ...defaultValues,
     },
   });
+  useUnsavedChangesWarning(form.formState.isDirty);
 
   const {
     mutateAsync: submitForm,
@@ -95,7 +97,6 @@ const Add = ({ defaultValues }) => {
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       router.push("/admin/admins");
       // setOpen(true);
     }

@@ -3,6 +3,8 @@
 import ServiceDetailsSkeleton from "@/components/service/service-details-skeleton";
 import SlotConfigViewer from "@/components/service/slot-view";
 import { BackLink } from "@/components/shared/back-link";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -20,49 +22,70 @@ import { useParams } from "next/navigation";
 const ServiceDetails = () => {
   const params = useParams();
 
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/service/getServiceById/${params.serviceId}`,
     queryKeys: ["service", params.serviceId],
   });
 
-  console.log("data", data);
   const service = data?.data;
-
-  // if (!service) return <p>No service found.</p>;
+  const creatorName =
+    `${service?.createdBy?.firstName || ""} ${service?.createdBy?.lastName || ""}`.trim() || "N/A";
+  const creatorEmail = service?.createdBy?.email || "N/A";
+  const creatorRole = service?.createdBy?.userModel || "N/A";
 
   return (
     <div className="space-y-6">
       <BackLink href="/admin/services">
-        {/* <H2>Update Service</H2> */}
+        <H1>Service Details</H1>
       </BackLink>
 
-      {isLoading ? (
-        <ServiceDetailsSkeleton />
-      ) : (
+      {isLoading ? <ServiceDetailsSkeleton /> : null}
+
+      {!isLoading && error ? (
+        <StateView
+          type="error"
+          title="Unable to load service details"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
+
+      {!isLoading && !error && !service ? (
+        <StateView
+          type="empty"
+          title="Service not found"
+          description="The requested service record is not available."
+          actionLabel="Back to services"
+          actionHref="/admin/services"
+        />
+      ) : null}
+
+      {!isLoading && !error && service ? (
         <div className="w-full">
-          {/* Header Section */}
           <div className="flex flex-col gap-2">
             {service.image ? (
-              <img // TODO: Use next js Image tag
+              <img
                 src={service.image}
                 alt={service.name}
                 width={120}
                 height={120}
-                className="rounded-xl object-cover shrink-0"
+                className="shrink-0 rounded-xl object-cover"
               />
             ) : (
-              <div className="w-28 h-28 bg-gray-200 rounded-xl flex items-center justify-center text-sm">
+              <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-gray-200 text-sm">
                 No Image
               </div>
             )}
 
             <div>
-              <h1 className="text-3xl font-bold">{service.name}</h1>
-              <p className="text-gray-600 mt-2">{service.description}</p>
+              <h2 className="text-3xl font-bold">{service.name}</h2>
+              <p className="mt-2 text-gray-600">{service.description}</p>
             </div>
           </div>
+
           <Separator className="my-6" />
-          {/* Pricing Section */}
+
           <Card className="mb-6 shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -84,8 +107,8 @@ const ServiceDetails = () => {
               </div>
             </CardContent>
           </Card>
-          {/* Duration Section */}
-          {service.supportsDuration && (
+
+          {service.supportsDuration ? (
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -98,17 +121,17 @@ const ServiceDetails = () => {
                   {service.defaultDuration} mins
                 </p>
 
-                <div className="flex gap-2 flex-wrap">
-                  {service.durationOptions?.map((d, idx) => (
-                    <Badge key={idx} variant="secondary" className="px-3 py-1">
-                      {d} min
+                <div className="flex flex-wrap gap-2">
+                  {service.durationOptions?.map((duration, index) => (
+                    <Badge key={index} variant="secondary" className="px-3 py-1">
+                      {duration} min
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
-          )}
-          {/* Cities Section */}
+          ) : null}
+
           <Card className="mb-6 shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -116,11 +139,11 @@ const ServiceDetails = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                 {service.cities?.map((city) => (
                   <div
                     key={city._id}
-                    className="flex justify-between items-center rounded-lg border p-3"
+                    className="flex items-center justify-between rounded-lg border p-3"
                   >
                     <div>
                       <p className="font-medium capitalize">{city.name}</p>
@@ -133,7 +156,7 @@ const ServiceDetails = () => {
               </div>
             </CardContent>
           </Card>
-          {/* Additional Info */}
+
           <Card className="mb-6 shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -142,17 +165,19 @@ const ServiceDetails = () => {
             </CardHeader>
             <CardContent className="space-y-1">
               <p>
-                <strong>Name:</strong> {service.createdBy?.name}
+                <strong>Name:</strong> {creatorName}
               </p>
               <p>
-                <strong>Email:</strong> {service.createdBy?.email}
+                <strong>Email:</strong> {creatorEmail}
               </p>
               <p>
-                <strong>Role:</strong> {service.createdBy?.userModel}
+                <strong>Role:</strong> {creatorRole}
               </p>
             </CardContent>
           </Card>
+
           <Separator className="my-6" />
+
           <Card className="mb-6 shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -172,12 +197,12 @@ const ServiceDetails = () => {
                 <span className="font-medium">Category:</span>
                 <span>{service.category}</span>
               </div>
-              {service.category === "nursing" && (
+              {service.category === "nursing" ? (
                 <div className="flex justify-between">
                   <span className="font-medium">Nursing Type:</span>
                   <span>{service.nursingType}</span>
                 </div>
-              )}
+              ) : null}
               <div className="flex justify-between">
                 <span className="font-medium">Formatted Duration:</span>
                 <span>{service.formattedDuration}</span>
@@ -188,14 +213,16 @@ const ServiceDetails = () => {
               </div>
             </CardContent>
           </Card>
+
           <Separator className="my-6" />
+
           <Card className="shadow-none">
             <CardContent>
               <SlotConfigViewer slotConfig={service.slotConfig} />
             </CardContent>
           </Card>
-          {/* Status */}
-          <div className="flex items-center gap-2 mt-4">
+
+          <div className="mt-4 flex items-center gap-2">
             <CheckCircle
               className={`h-5 w-5 ${
                 service.isActive ? "text-green-500" : "text-red-500"
@@ -205,14 +232,16 @@ const ServiceDetails = () => {
               Status: {service.isActive ? "Active" : "Inactive"}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Created At: {service.createdAt && new Date(service.createdAt).toLocaleString()}
+          <p className="mt-2 text-xs text-gray-500">
+            Created At:{" "}
+            {service.createdAt && new Date(service.createdAt).toLocaleString()}
           </p>
           <p className="text-xs text-gray-500">
-            Updated At: {service.updatedAt && new Date(service.updatedAt).toLocaleString()}
+            Updated At:{" "}
+            {service.updatedAt && new Date(service.updatedAt).toLocaleString()}
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

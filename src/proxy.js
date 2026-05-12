@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { localPermissions } from "./constants/permissions";
 
+const backendUrl =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1";
+
 export async function proxy(request) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
@@ -57,18 +60,20 @@ export async function proxy(request) {
     if (!isAuthenticated) {
       console.log("isAuthenticated is false");
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/check-auth`,
-        {
+      try {
+        const res = await fetch(`${backendUrl}/admin/check-auth`, {
           method: "POST",
           headers: { Cookie: `refreshToken=${refreshToken}` },
+        });
+
+        const data = await res.json();
+        console.log("data", data);
+
+        if (!data?.isAuthenticated) {
+          return NextResponse.redirect(new URL("/", request.url));
         }
-      );
-
-      const data = await res.json();
-      console.log("data", data);
-
-      if (!data?.isAuthenticated) {
+      } catch (error) {
+        console.error("check-auth request failed", error);
         return NextResponse.redirect(new URL("/", request.url));
       }
     }

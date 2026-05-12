@@ -100,7 +100,7 @@ const Social = () => {
 
   return (
     <div>
-      <div className="flex-1 overflow-auto space-y-6">
+      <div className="flex-1 space-y-6">
         <div className="flex justify-between items-center gap-5">
           <BackLink href={`/admin/doctors/${params.doctorId}`}>
             <H1>Social Media</H1>

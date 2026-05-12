@@ -11,16 +11,19 @@ import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { ConfirmModal } from "../shared/confirm-modal";
 import { useEffect, useState } from "react";
+import { getDisplayName } from "@/lib/display";
 import { Actions } from "../shared/actions";
 import { DELETE, PATCH } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useRouter } from "next/navigation";
 import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/spinner";
+import { customId } from "@/lib/utils";
 
 export const Doctor = ({ doctor }) => {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [isActive, setIsActive] = useState(doctor?.isActive || false);
+  const fullName = getDisplayName(doctor);
   const router = useRouter();
 
   const onDelete = () => {
@@ -66,12 +69,17 @@ export const Doctor = ({ doctor }) => {
   return (
     <>
       <TableRow>
-        <TableCell className="font-medium">{doctor.firstName}</TableCell>
-        <TableCell>{doctor.email}</TableCell>
+        <TableCell
+          className="min-w-[8.5rem] cursor-pointer whitespace-nowrap font-medium text-[#1D4ED8] [overflow-wrap:normal] hover:underline"
+          onClick={onView}
+        >
+          {customId(doctor?._id)}
+        </TableCell>
+        <TableCell className="cursor-pointer font-medium text-[#0F172A] hover:text-[#1D4ED8] hover:underline" onClick={onView}>
+          {fullName}
+        </TableCell>
         <TableCell>{doctor.phone}</TableCell>
         <TableCell>{doctor.specialization}</TableCell>
-        <TableCell>{doctor.currentWorkplace}</TableCell>
-        <TableCell className="capitalize">{doctor.gender}</TableCell>
         <TableCell>
           <Badge
             variant={
@@ -88,10 +96,10 @@ export const Doctor = ({ doctor }) => {
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={doctor.isActive ? "success" : "destructive"}>
+            <Badge variant={isActive ? "success" : "destructive"}>
               {isPending ? (
                 <Spinner />
-              ) : doctor.isActive ? (
+              ) : isActive ? (
                 "Active"
               ) : (
                 "Inactive"
@@ -100,7 +108,7 @@ export const Doctor = ({ doctor }) => {
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-orange-500"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </TableCell>
@@ -126,12 +134,6 @@ export const Doctor = ({ doctor }) => {
 Doctor.Skeleton = function DoctorSkeleton() {
   return (
     <TableRow>
-      <TableCell>
-        <Skeleton className="w-full h-5" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="w-full h-5" />
-      </TableCell>
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>

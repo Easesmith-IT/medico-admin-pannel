@@ -1,4 +1,5 @@
-import { Input } from "@/components/ui/input";
+import { RotateCcwIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -7,38 +8,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { RotateCcwIcon } from "lucide-react";
 
-export function CrashFilters({
-  environment,
-  setEnvironment,
-  severity,
-  setSeverity,
-  userType,
-  setUserType,
-}) {
-  const handleReset = () => {
-    setEnvironment("");
-    setSeverity("");
-    setUserType("");
-  };
-
+export function CrashFilters({ filters, onChange, onReset }) {
   return (
-    <div className="flex justify-end items-center gap-4">
-      {/* <Input placeholder="Search error..." /> */}
-
+    <div className="flex flex-wrap items-end gap-3">
       <div>
-        <label className="text-sm font-medium mb-1 block">Environment</label>
-        <Select value={environment} onValueChange={setEnvironment}>
-          <SelectTrigger>
+        <label className="mb-1 block text-sm font-medium">Environment</label>
+        <Select
+          value={filters.environment}
+          onValueChange={(value) => onChange({ environment: value, page: 1 })}
+        >
+          <SelectTrigger className="w-40">
             <SelectValue placeholder="Environment" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="development">Development</SelectItem>
             <SelectItem value="production">Production</SelectItem>
             <SelectItem value="staging">Staging</SelectItem>
@@ -47,12 +31,16 @@ export function CrashFilters({
       </div>
 
       <div>
-        <label className="text-sm font-medium mb-1 block">Severity</label>
-        <Select value={severity} onValueChange={setSeverity}>
-          <SelectTrigger>
+        <label className="mb-1 block text-sm font-medium">Severity</label>
+        <Select
+          value={filters.severity}
+          onValueChange={(value) => onChange({ severity: value, page: 1 })}
+        >
+          <SelectTrigger className="w-32">
             <SelectValue placeholder="Severity" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="LOW">Low</SelectItem>
             <SelectItem value="MEDIUM">Medium</SelectItem>
             <SelectItem value="HIGH">High</SelectItem>
@@ -60,13 +48,18 @@ export function CrashFilters({
           </SelectContent>
         </Select>
       </div>
+
       <div>
-        <label className="text-sm font-medium mb-1 block">User Type</label>
-        <Select value={userType} onValueChange={setUserType}>
-          <SelectTrigger>
+        <label className="mb-1 block text-sm font-medium">User Type</label>
+        <Select
+          value={filters.userType}
+          onValueChange={(value) => onChange({ userType: value, page: 1 })}
+        >
+          <SelectTrigger className="w-32">
             <SelectValue placeholder="User Type" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="Patient">Patient</SelectItem>
             <SelectItem value="Doctor">Doctor</SelectItem>
             <SelectItem value="Admin">Admin</SelectItem>
@@ -74,16 +67,29 @@ export function CrashFilters({
         </Select>
       </div>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" onClick={handleReset}>
-            <RotateCcwIcon />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Reset Filters</p>
-        </TooltipContent>
-      </Tooltip>
+      <div>
+        <label className="mb-1 block text-sm font-medium">Limit</label>
+        <Select
+          value={filters.limit}
+          onValueChange={(value) => onChange({ limit: value, page: 1 })}
+        >
+          <SelectTrigger className="w-24">
+            <SelectValue placeholder="10" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="30">30</SelectItem>
+            <SelectItem value="40">40</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button variant="outline" onClick={onReset}>
+        <RotateCcwIcon />
+        Reset
+      </Button>
     </div>
   );
 }

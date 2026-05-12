@@ -7,7 +7,7 @@ export function cn(...inputs) {
 
 export function customId(id, prefix = "ID") {
   if (!id) return "";
-  const part = `${id.slice(0, 4)}-${id.slice(-4)}`.toUpperCase();
+  const part = `${id.slice(0, 6)}-${id.slice(-6)}`.toUpperCase();
   return `#${prefix}-${part}`;
 }
 

@@ -1,9 +1,12 @@
 "use client";
+export const dynamic = "force-dynamic";
+
+import { useEffect, useMemo } from "react";
+import { RotateCcwIcon, SearchIcon } from "lucide-react";
 
 import { Hospital } from "@/components/hospital/hospital";
-import { ExportPatientsModal } from "@/components/patient/export-modal";
-import { Patient } from "@/components/patient/patient";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
@@ -22,14 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useApiQuery } from "@/hooks/useApiQuery";
-import { RotateCcwIcon, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
 
 const hospitalsData = [
   {
@@ -72,110 +68,127 @@ const hospitalsData = [
   },
 ];
 
+const defaults = {
+  search: "",
+  status: "all",
+  page: 1,
+  limit: "10",
+};
+
 const HospitalPage = () => {
-  const [gender, setGender] = useState("all");
-  const [bloodGroup, setBloodGroup] = useState("all");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
-  const [hospitals, setHospitals] = useState([...hospitalsData]);
-  const [limit, setLimit] = useState(10);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
 
-  const handleReset = () => {
-    setGender("all");
-    setBloodGroup("all");
-    setStatus("all");
-    setSearch("");
-  };
+  const filteredHospitals = useMemo(() => {
+    const searchText = params.search.trim().toLowerCase();
 
-  const handleExort = () => {
-    setIsModalOpen(true);
-  };
+    return hospitalsData.filter((hospital) => {
+      const matchesStatus =
+        params.status === "all" || hospital.status === params.status;
 
-  const { data, isLoading, error } = useApiQuery({
-    url: `/admin/patients?isActive=${
-      status === "all" ? null : status === "true"
-    }&page=${page}&limit=${limit}&searchQuery=${encodeURIComponent(
-      search
-    )}&gender=${
-      gender === "all" ? "" : encodeURIComponent(gender)
-    }&bloodGroup=${bloodGroup === "all" ? "" : encodeURIComponent(bloodGroup)}`,
-    queryKeys: ["patients", status, page, search, limit, gender, bloodGroup],
-  });
+      const matchesSearch =
+        searchText.length === 0 ||
+        [
+          hospital.clinicName,
+          hospital.clinicReceptionNumber,
+          hospital.city,
+          hospital.area,
+          hospital.clinicOwnership,
+          hospital.propertyOwnership,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchText);
 
-  console.log("data", data);
+      return matchesStatus && matchesSearch;
+    });
+  }, [params.search, params.status]);
 
-  // useEffect(() => {
-  //   if (data) {
-  //     setPatients(data?.data?.patients || []);
-  //     setPageCount(data?.totalPages || 0);
-  //   }
-  // }, [data]);
+  const pageCount = Math.ceil(filteredHospitals.length / Number(params.limit));
+
+  useEffect(() => {
+    if (pageCount === 0 && params.page !== 1) {
+      updateParams({ page: 1 });
+      return;
+    }
+
+    if (pageCount > 0 && params.page > pageCount) {
+      updateParams({ page: pageCount });
+    }
+  }, [pageCount, params.page, updateParams]);
+
+  const paginatedHospitals = useMemo(() => {
+    const limit = Number(params.limit);
+    const start = (params.page - 1) * limit;
+    return filteredHospitals.slice(start, start + limit);
+  }, [filteredHospitals, params.page, params.limit]);
 
   return (
     <div className="space-y-6">
       <H1>Hospitals</H1>
 
-      {/* Filters */}
-      <div className="flex justify-between items-end gap-4 flex-wrap">
-        <div className="lg:col-span-2">
-          <label htmlFor="search" className="text-sm font-medium mb-1 block">
-            Search
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 size-4  text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search by name, email, phone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 w-lg bg-white"
-            />
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="hospital-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="hospital-search"
+                placeholder="Search by clinic, city, phone..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="bg-white pl-9"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-4 items-end flex-wrap">
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select value={status} onValueChange={setStatus}>
+            <label className="mb-1 block text-sm font-medium">Status</label>
+            <Select
+              value={params.status}
+              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+            >
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="All" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset Filters</p>
-            </TooltipContent>
-          </Tooltip>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Limit</label>
+            <Select
+              value={params.limit}
+              onValueChange={(value) => updateParams({ limit: value, page: 1 })}
+            >
+              <SelectTrigger className="w-28">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="30">30</SelectItem>
+                <SelectItem value="40">40</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {/* <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="medico" onClick={handleExort}>
-                <FileOutputIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Export Data</p>
-            </TooltipContent>
-          </Tooltip> */}
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
         </div>
-      </div>
+      </FilterBar>
 
-      {/* Table */}
       <div className="table-container">
         <Table>
           <TableHeader>
@@ -191,35 +204,21 @@ const HospitalPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {hospitals.map((hospital, index) => (
+            {paginatedHospitals.map((hospital, index) => (
               <Hospital key={hospital?._id || index} hospital={hospital} />
             ))}
-
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <Hospital.Skeleton key={index} />
-              ))}
           </TableBody>
         </Table>
 
-        {hospitals?.length === 0 && !isLoading && (
-          <DataNotFound name="Hospitals" />
-        )}
+        {paginatedHospitals.length === 0 ? <DataNotFound name="Hospitals" /> : null}
       </div>
 
       <PaginationComp
-        page={page}
+        page={params.page}
         pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
       />
-
-      {isModalOpen && (
-        <ExportPatientsModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-        />
-      )}
     </div>
   );
 };

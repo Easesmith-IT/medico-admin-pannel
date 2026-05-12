@@ -1,13 +1,24 @@
 "use client";
+export const dynamic = "force-dynamic";
+
+import Link from "next/link";
+import { PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
 
 import { Admin } from "@/components/admin/admin";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
+import { StateView } from "@/components/shared/state-view";
 import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, RotateCcwIcon, Search } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -16,89 +27,74 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useListQueryParams } from "@/hooks/use-list-query-params";
 import { buildQuery } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+const defaults = {
+  page: 1,
+  limit: "10",
+  status: "all",
+  search: "",
+};
 
 const Admins = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState("10");
-  const [pageCount, setPageCount] = useState(0);
-  const [status, setStatus] = useState("all");
-  const [search, setSearch] = useState("");
-
-  const handleReset = () => {
-    setStatus("all");
-    setPage(1);
-    setLimit("10");
-    setSearch("");
-  };
+  const { params, updateParams, resetParams } = useListQueryParams(defaults);
+  const debouncedSearch = useDebounce(params.search, 600);
 
   const query = buildQuery({
-    page,
-    limit,
-    status,
-    search,
+    page: params.page,
+    limit: params.limit,
+    status: params.status,
+    search: debouncedSearch,
   });
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/admin/subadmins?${query}`,
-    queryKeys: ["admin", page, limit, status, search],
+    queryKeys: ["admin", params.page, params.limit, params.status, debouncedSearch],
   });
 
-  console.log("data", data);
-
-  useEffect(() => {
-    if (data?.data) {
-      setPageCount(data?.pagination?.pages || 1);
-    }
-  }, [data]);
+  const pageCount = data?.pagination?.pages || 1;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-5">
         <H1>Admins</H1>
         <Button asChild variant="medico">
-          <Link href={"/admin/admins/add"}>
+          <Link href="/admin/admins/add">
             <PlusIcon />
             Add
           </Link>
         </Button>
       </div>
 
-      <div className="flex justify-between items-center gap-5">
-        <div>
-          <label htmlFor="search" className="text-sm font-medium mb-1 block">
-            Search
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 size-4  text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search admin..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 w-lg bg-white"
-            />
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-56 grow md:max-w-md">
+            <label htmlFor="admin-search" className="mb-1 block text-sm font-medium">
+              Search
+            </label>
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                id="admin-search"
+                placeholder="Search admin..."
+                value={params.search}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value, page: 1 })
+                }
+                className="bg-white pl-9"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-5 items-end">
           <div>
-            <label className="text-sm font-medium mb-1 block">Status</label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-full">
+            <label className="mb-1 block text-sm font-medium">Status</label>
+            <Select
+              value={params.status}
+              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+            >
+              <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -108,30 +104,53 @@ const Admins = () => {
               </SelectContent>
             </Select>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleReset}>
-                <RotateCcwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset Filters</p>
-            </TooltipContent>
-          </Tooltip>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">Limit</label>
+            <Select
+              value={params.limit}
+              onValueChange={(value) => updateParams({ limit: value, page: 1 })}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="30">30</SelectItem>
+                <SelectItem value="40">40</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button variant="outline" onClick={resetParams}>
+            <RotateCcwIcon />
+            Reset
+          </Button>
         </div>
-      </div>
+      </FilterBar>
+
+      {error ? (
+        <StateView
+          type="error"
+          title="Unable to load admins"
+          description={error.message}
+          actionLabel="Retry"
+          onAction={refetch}
+        />
+      ) : null}
 
       <div className="table-container">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-10">ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created At</TableHead>
-              {/* <TableHead className="text-right">Actions</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -139,23 +158,24 @@ const Admins = () => {
               <Admin key={admin?._id || index} admin={admin} />
             ))}
 
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <Admin.Skeleton key={index} />
-              ))}
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <Admin.Skeleton key={index} />
+                ))
+              : null}
           </TableBody>
         </Table>
 
-        {data?.data?.length === 0 && !isLoading && (
-          <DataNotFound name="Admins" />
-        )}
+        {data?.data?.length === 0 && !isLoading ? (
+          <DataNotFound name="Admins" actionLabel="Add Admin" actionHref="/admin/admins/add" />
+        ) : null}
       </div>
 
       <PaginationComp
-        page={page}
+        page={params.page}
         pageCount={pageCount}
-        setPage={setPage}
-        className="mt-8 mb-5"
+        setPage={(nextPage) => updateParams({ page: nextPage })}
+        className="mb-5 mt-8"
       />
     </div>
   );

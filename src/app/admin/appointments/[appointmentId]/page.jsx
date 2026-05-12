@@ -4,6 +4,8 @@ import { BookingDetailsSkeleton } from "@/components/booking/booking-details-ske
 import { UpdateBookingModal } from "@/components/booking/update-booking-modal";
 import { BackLink } from "@/components/shared/back-link";
 import { Info } from "@/components/shared/info";
+import { StateView } from "@/components/shared/state-view";
+import { H1 } from "@/components/typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +20,7 @@ const BookingDetails = () => {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/booking/bookings/${params.appointmentId}`,
     queryKeys: ["bookings", params.appointmentId],
   });
@@ -26,7 +28,30 @@ const BookingDetails = () => {
   const booking = data?.data;
 
   if (isLoading) return <BookingDetailsSkeleton />;
-  if (!booking) return <div>No booking found.</div>;
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load appointment details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
+
+  if (!booking) {
+    return (
+      <StateView
+        type="empty"
+        title="Appointment not found"
+        description="The requested appointment record is not available."
+        actionLabel="Back to appointments"
+        actionHref="/admin/appointments"
+      />
+    );
+  }
 
   // ✅ New API structure
   const {
@@ -41,6 +66,12 @@ const BookingDetails = () => {
     pricing,
     treatment,
   } = booking;
+  const patientName =
+    `${patient?.firstName || ""} ${patient?.lastName || ""}`.trim() || "-";
+  const patientEmail = patient?.email || "-";
+  const providerName =
+    `${provider?.firstName || ""} ${provider?.lastName || ""}`.trim() || "-";
+  const providerEmail = provider?.email || "-";
 
   return (
     <div className="space-y-6">
@@ -54,7 +85,9 @@ const BookingDetails = () => {
 
       {/* Header Actions */}
       <div className="flex justify-between gap-4">
-        <BackLink href="/admin/appointments" />
+        <BackLink href="/admin/appointments">
+          <H1>Appointment Details</H1>
+        </BackLink>
 
         <div className="flex gap-5 items-center">
           {status !== "Cancelled" && status !== "Rejected" && (
@@ -101,9 +134,9 @@ const BookingDetails = () => {
           <CardTitle className="text-lg">Patient Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <Info label="Name" value={patient?.firstName || "—"} />
-          <Info label="Email" value={patient?.email || "—"} />
-          <Info label="Phone" value={patient?.phone || "—"} />
+          <Info label="Name" value={patientName} />
+          <Info label="Email" value={patientEmail} />
+          <Info label="Phone" value={patient?.phone || "-"} />
         </CardContent>
       </Card>
 
@@ -128,12 +161,12 @@ const BookingDetails = () => {
           <CardTitle className="text-lg">Provider Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <Info label="Name" value={provider?.name || "—"} />
-          <Info label="Email" value={provider?.email || "—"} />
-          <Info label="Phone" value={provider?.phone || "—"} />
+          <Info label="Name" value={providerName} />
+          <Info label="Email" value={providerEmail} />
+          <Info label="Phone" value={provider?.phone || "-"} />
           <Info
             label="City"
-            value={provider?.city?.length ? provider.city.join(", ") : "—"}
+            value={provider?.city?.length ? provider.city.join(", ") : "-"}
           />
         </CardContent>
       </Card>
@@ -202,3 +235,4 @@ const BookingDetails = () => {
 };
 
 export default BookingDetails;
+
