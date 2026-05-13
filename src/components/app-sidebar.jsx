@@ -4,11 +4,14 @@ import { motion } from "framer-motion";
 import {
   BuildingIcon,
   CalendarCheckIcon,
+  CreditCardIcon,
+  FingerprintIcon,
   FileWarningIcon,
   HospitalIcon,
   LayoutDashboardIcon,
   LayoutGridIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   StethoscopeIcon,
   UserCheckIcon,
   UserCogIcon,
@@ -78,6 +81,11 @@ const menuItems = [
         url: "/admin/appointments",
       },
       {
+        title: "Payments",
+        icon: CreditCardIcon,
+        url: "/admin/payments",
+      },
+      {
         title: "Categories",
         icon: LayoutGridIcon,
         url: "/admin/categories",
@@ -86,6 +94,21 @@ const menuItems = [
         title: "Crash Reports",
         icon: FileWarningIcon,
         url: "/admin/crash-report",
+      },
+      {
+        title: "Security",
+        icon: FingerprintIcon,
+        url: "/admin/security/sessions",
+      },
+      {
+        title: "Profile",
+        icon: ShieldCheckIcon,
+        url: "/admin/profile",
+      },
+      {
+        title: "Audit Logs",
+        icon: ShieldCheckIcon,
+        url: "/admin/governance/audit-logs",
       },
     ],
   },

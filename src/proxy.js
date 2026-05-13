@@ -4,96 +4,133 @@ import { localPermissions } from "./constants/permissions";
 const backendUrl =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1";
 
+const safeParseJson = (value) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
+const normalizeRole = (role = "") =>
+  String(role || "")
+    .toLowerCase()
+    .replace(/[_\s]/g, "");
+
+const normalizePathSection = (pathname = "") =>
+  pathname.split("/admin/")[1]?.split("/")[0] || "";
+
+const hasPermission = (userInfo, permissionKey) => {
+  if (!permissionKey) return true;
+
+  const role = normalizeRole(userInfo?.role);
+  if (role === "superadmin") return true;
+
+  const permissions = userInfo?.permissions;
+  if (Array.isArray(permissions)) return permissions.includes(permissionKey);
+
+  if (permissions && typeof permissions === "object") {
+    const value = permissions[permissionKey];
+    return value === true || value === "read" || value === "write";
+  }
+
+  return false;
+};
+
+const resolveSessionFromBackend = async (request) => {
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const response = await fetch(`${backendUrl}/admin/check-auth`, {
+      method: "POST",
+      headers: {
+        Cookie: cookieHeader,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return { isAuthenticated: false, userInfo: null };
+    const payload = await response.json();
+    return {
+      isAuthenticated: Boolean(payload?.isAuthenticated),
+      userInfo: payload?.data || null,
+    };
+  } catch {
+    return { isAuthenticated: false, userInfo: null };
+  }
+};
+
 export async function proxy(request) {
-  const url = request.nextUrl.clone();
-  const pathname = url.pathname;
+  const pathname = request.nextUrl.pathname;
 
-  // -------------------------------
-  // 1️⃣ Read cookies
-  // -------------------------------
-  const accessToken = request.cookies.get("accessToken")?.value;
-  const refreshToken = request.cookies.get("refreshToken")?.value;
-  const isAuthenticated = request.cookies.get("isAuthenticated")?.value
-    ? JSON.parse(request.cookies.get("isAuthenticated")?.value)
-    : false;
-  console.log("refreshToken", refreshToken);
-  console.log("accessToken", accessToken);
-  console.log("typeof isAuthenticated", typeof isAuthenticated);
-
-  // const refreshToken = request.cookies.get("refreshToken")?.value;
-
-  // -------------------------------
-  // 2️⃣ Parse userInfo cookie safely
-  // -------------------------------
-  // let userInfo = {};
-  // const userInfoCookie = request.cookies.get("userInfo")?.value;
-  // if (userInfoCookie) {
-  //   try {
-  //     userInfo = JSON.parse(userInfoCookie);
-  //   } catch (err) {
-  //     console.error("Failed to parse userInfo cookie:", err);
-  //   }
-  // }
-
-  // const permissions = userInfo?.permissions;
-  // const section = pathname.split("/admin/")[1]?.split("/")[0];
-
-  // -------------------------------
-  // 3️⃣ Skip static & API assets
-  // -------------------------------
   if (pathname.startsWith("/_next") || pathname.startsWith("/api")) {
     return NextResponse.next();
   }
 
-  // -------------------------------
-  // 4️⃣ Redirect logged-in users away from "/"
-  // -------------------------------
-  if (isAuthenticated && pathname === "/") {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+  const userInfoFromCookie = safeParseJson(
+    request.cookies.get("userInfo")?.value
+  );
+  const isAuthCookieRaw = request.cookies.get("isAuthenticated")?.value;
+  const isAuthCookie = safeParseJson(isAuthCookieRaw);
+
+  let isAuthenticated = Boolean(
+    typeof isAuthCookie === "boolean" ? isAuthCookie : isAuthCookieRaw === "true"
+  );
+  let userInfo = userInfoFromCookie;
+
+  const hasAuthTokens =
+    Boolean(request.cookies.get("accessToken")?.value) ||
+    Boolean(request.cookies.get("refreshToken")?.value);
+
+  if ((!isAuthenticated || !userInfo) && hasAuthTokens) {
+    const session = await resolveSessionFromBackend(request);
+    isAuthenticated = session.isAuthenticated;
+    userInfo = session.userInfo;
   }
 
-  // -------------------------------
-  // 5️⃣ Handle admin pages (auth + permission)
-  // -------------------------------
-  if (pathname.startsWith("/admin")) {
-    // 🔹 If not logged in → check backend
-    if (!isAuthenticated) {
-      console.log("isAuthenticated is false");
-
-      try {
-        const res = await fetch(`${backendUrl}/admin/check-auth`, {
-          method: "POST",
-          headers: { Cookie: `refreshToken=${refreshToken}` },
-        });
-
-        const data = await res.json();
-        console.log("data", data);
-
-        if (!data?.isAuthenticated) {
-          return NextResponse.redirect(new URL("/", request.url));
-        }
-      } catch (error) {
-        console.error("check-auth request failed", error);
-        return NextResponse.redirect(new URL("/", request.url));
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      const response = NextResponse.redirect(
+        new URL("/admin/dashboard", request.url)
+      );
+      if (userInfo) {
+        response.cookies.set("userInfo", JSON.stringify(userInfo), { path: "/" });
       }
+      response.cookies.set("isAuthenticated", JSON.stringify(true), {
+        path: "/",
+      });
+      return response;
+    }
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/admin")) {
+    if (!isAuthenticated) {
+      const response = NextResponse.redirect(new URL("/", request.url));
+      response.cookies.delete("userInfo");
+      response.cookies.delete("isAuthenticated");
+      return response;
     }
 
-    //   // 🔹 Permission check
-    //   const permissionKey = localPermissions[section];
-    //   if (
-    //     !permissions?.[permissionKey] ||
-    //     permissions?.[permissionKey] === "none"
-    //   ) {
-    //     return NextResponse.redirect(new URL("/", request.url));
-    //   }
+    const section = normalizePathSection(pathname);
+    const permissionKey = localPermissions[section];
+
+    if (!hasPermission(userInfo, permissionKey)) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+
+    const response = NextResponse.next();
+    if (userInfo) {
+      response.cookies.set("userInfo", JSON.stringify(userInfo), { path: "/" });
+    }
+    response.cookies.set("isAuthenticated", JSON.stringify(true), { path: "/" });
+    return response;
   }
 
-  // -------------------------------
-  // ✅ Allow public "/" when not logged in
-  // -------------------------------
   return NextResponse.next();
 }
 
 export const config = {
   matcher: ["/admin/:path*", "/"],
 };
+

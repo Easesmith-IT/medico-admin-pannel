@@ -40,8 +40,8 @@ const Login = () => {
   const form = useForm({
     resolver: zodResolver(AdminLoginSchema),
     defaultValues: {
-      email: "admin@medico.com",
-      password: "Mansi@333",
+      email: "",
+      password: "",
       rememberMe: false,
     },
   });
@@ -65,20 +65,13 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (result) {
-      console.log("login result", result);
-      // Cookies
-      
-      // const { accessToken, refreshToken, userInfo } = result.cookies;
-      // setAuthCookies({
-      //   accessToken,
-      //   refreshToken,
-      //   userInfo: JSON.stringify(userInfo),
-      // });
-      // login();
-
-      // console.log("userInfo", userInfo);
-
+    if (result?.data?.admin) {
+      setAuthCookies({
+        accessToken: result?.data?.accessToken,
+        refreshToken: result?.data?.refreshToken,
+        userInfo: result.data.admin,
+        isAuthenticated: true,
+      });
       reset();
       router.push("/admin/dashboard");
     }

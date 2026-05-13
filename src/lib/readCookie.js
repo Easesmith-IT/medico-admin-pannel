@@ -1,10 +1,12 @@
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const readCookie = (name) => {
-    let cookieValue = Cookies.get(name);
+  const cookieValue = Cookies.get(name);
+  if (!cookieValue) return undefined;
 
-    if (cookieValue) {
-        cookieValue = JSON.parse(cookieValue);
-    }
+  try {
+    return JSON.parse(cookieValue);
+  } catch {
     return cookieValue;
+  }
 };

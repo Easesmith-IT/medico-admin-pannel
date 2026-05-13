@@ -6,23 +6,48 @@ import { format } from "date-fns/format";
 import { Badge } from "../ui/badge";
 import { Spinner } from "../ui/spinner";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { PATCH } from "@/constants/apiMethods";
+import { DELETE, PATCH } from "@/constants/apiMethods";
 import { useEffect, useState } from "react";
 import { getDisplayName } from "@/lib/display";
 import { Switch } from "../ui/switch";
+import { getCurrentAdminUser, canManageAdminMutations } from "@/lib/rbac";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
 
 export const Admin = ({ admin }) => {
+  const router = useRouter();
+  const currentUser = getCurrentAdminUser();
   const [isActive, setIsActive] = useState(admin?.status === "active");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const fullName = getDisplayName(admin);
   const email = admin?.email || "-";
+  const canMutate = canManageAdminMutations(currentUser);
+  const isSelf = String(currentUser?.id || currentUser?._id || "") === String(admin?._id || "");
+  const mutationDisabled = !canMutate || isSelf;
 
-  const { mutateAsync, isPending, data, error } = useApiMutation({
+  const { mutateAsync, isPending, error } = useApiMutation({
     url: `/admin/subadmins/${admin._id}/toggle-status`,
     method: PATCH,
     invalidateKey: ["admin"],
   });
+  const { mutateAsync: deleteAdmin, isPending: isDeletePending } = useApiMutation({
+    url: `/admin/subadmins/${admin._id}`,
+    method: DELETE,
+    invalidateKey: ["admin"],
+  });
 
   const toggleStatus = async (value) => {
+    if (mutationDisabled) return;
     setIsActive(value);
     await mutateAsync();
   };
@@ -51,6 +76,7 @@ export const Admin = ({ admin }) => {
           <Switch
             checked={isActive}
             onCheckedChange={toggleStatus}
+            disabled={isPending || mutationDisabled}
             className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
           />
         </div>
@@ -58,9 +84,46 @@ export const Admin = ({ admin }) => {
       <TableCell>
         {admin?.createdAt && format(new Date(admin?.createdAt), "dd MMM, yyyy")}
       </TableCell>
-      {/* <TableCell className="text-right">
-        <Actions />
-      </TableCell> */}
+      <TableCell className="text-right">
+        <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+          <Actions
+            disabled={isDeletePending}
+            onView={() => router.push(`/admin/admins/${admin._id}`)}
+            onEdit={() => router.push(`/admin/admins/${admin._id}/edit`)}
+            onDelete={
+              mutationDisabled
+                ? undefined
+                : () => {
+                    setIsDeleteOpen(true);
+                  }
+            }
+          />
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Admin</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will deactivate the admin account and revoke active sessions.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction asChild>
+                <Button
+                  variant="destructive"
+                  disabled={isDeletePending}
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    await deleteAdmin();
+                    setIsDeleteOpen(false);
+                  }}
+                >
+                  {isDeletePending ? <Spinner /> : "Delete"}
+                </Button>
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </TableCell>
     </TableRow>
   );
 };
@@ -86,9 +149,9 @@ Admin.Skeleton = function AdminSkeleton() {
       <TableCell>
         <Skeleton className="w-full h-5" />
       </TableCell>
-      {/* <TableCell className="text-right">
-        <Skeleton className="w-full h-5" />
-      </TableCell> */}
+      <TableCell className="text-right">
+        <Skeleton className="ml-auto h-8 w-8 rounded-md" />
+      </TableCell>
     </TableRow>
   );
 };

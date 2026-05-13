@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarCheckIcon,
+  CreditCardIcon,
+  FingerprintIcon,
   FileWarningIcon,
   HospitalIcon,
   LayoutDashboardIcon,
@@ -11,6 +13,7 @@ import {
   MapPinnedIcon,
   SearchIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   StethoscopeIcon,
   UserCheckIcon,
   UserCogIcon,
@@ -39,11 +42,15 @@ const quickRoutes = [
     icon: UserCogIcon,
   },
   { label: "Appointments", href: "/admin/appointments", icon: CalendarCheckIcon },
+  { label: "Payments", href: "/admin/payments", icon: CreditCardIcon },
   { label: "Services", href: "/admin/services", icon: SettingsIcon },
   { label: "Cities", href: "/admin/cities", icon: MapPinnedIcon },
   { label: "Hospitals", href: "/admin/hospitals", icon: HospitalIcon },
   { label: "Categories", href: "/admin/categories", icon: LayoutGridIcon },
   { label: "Crash Reports", href: "/admin/crash-report", icon: FileWarningIcon },
+  { label: "Security Sessions", href: "/admin/security/sessions", icon: FingerprintIcon },
+  { label: "Profile Security", href: "/admin/profile", icon: ShieldCheckIcon },
+  { label: "Audit Logs", href: "/admin/governance/audit-logs", icon: ShieldCheckIcon },
 ];
 
 export const CommandPalette = () => {

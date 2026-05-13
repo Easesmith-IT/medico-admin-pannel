@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AdminBreadcrumbs } from "@/components/shared/admin-breadcrumbs";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const Layout = ({ children }) => {
@@ -11,7 +12,12 @@ const Layout = ({ children }) => {
           <AppHeader />
         </div>
         <main className="min-h-[calc(100dvh-var(--app-header-height))] min-w-0 px-4 py-6 md:px-8">
-          <div className="mx-auto w-full max-w-[1440px] min-w-0">{children}</div>
+          <div className="mx-auto w-full max-w-[1440px] min-w-0 space-y-4">
+            <div className="rounded-xl bg-white/70 px-3 py-2 shadow-sm backdrop-blur md:px-4">
+              <AdminBreadcrumbs />
+            </div>
+            {children}
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

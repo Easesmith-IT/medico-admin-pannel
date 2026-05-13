@@ -46,7 +46,7 @@
 }
 
 :root {
-  --app-header-height: 4.25rem;
+  --app-header-height: 3.75rem;
   --radius: 0.75rem;
   --background: #f5f7fb;
   --foreground: #111827;
@@ -120,6 +120,7 @@
   body {
     width: 100%;
     max-width: 100%;
+    overflow-x: hidden;
     scrollbar-gutter: stable;
   }
 
@@ -127,6 +128,7 @@
   #__next {
     width: 100%;
     max-width: 100%;
+    overflow-x: hidden;
   }
 
   body {

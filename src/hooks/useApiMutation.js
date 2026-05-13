@@ -6,6 +6,33 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useCrashReporter from "@/hooks/useCrashReporter";
 
+const SENSITIVE_KEYS = new Set([
+  "password",
+  "confirmPassword",
+  "oldPassword",
+  "newPassword",
+  "token",
+  "accessToken",
+  "refreshToken",
+  "otp",
+  "otpToken",
+  "authorization",
+]);
+
+const redactSensitiveFields = (input) => {
+  if (Array.isArray(input)) return input.map(redactSensitiveFields);
+  if (!input || typeof input !== "object") return input;
+
+  return Object.entries(input).reduce((acc, [key, value]) => {
+    if (SENSITIVE_KEYS.has(key)) {
+      acc[key] = "[REDACTED]";
+      return acc;
+    }
+    acc[key] = redactSensitiveFields(value);
+    return acc;
+  }, {});
+};
+
 const apiCall = async ({ url, method, data, config = {} }) => {
   try {
     const axiosConfig =
@@ -97,7 +124,7 @@ export function useApiMutation({
             request: {
               url,
               method,
-              body: variables,
+              body: redactSensitiveFields(variables),
             },
           });
         } catch {
