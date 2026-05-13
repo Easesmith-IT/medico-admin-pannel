@@ -200,8 +200,8 @@ const PatientDetailsPage = () => {
   const primaryAddress = addresses.find((address) => address.isDefault) || addresses[0];
 
   const timelineEvents = useMemo(() => {
-    const appointmentEvents = timeline.map((item) => ({
-      id: item._id,
+    const appointmentEvents = timeline.map((item, index) => ({
+      id: item._id || item.id || `appointment-${index}`,
       type: "appointment",
       title: item.serviceName || "Appointment",
       status: item.status || "Pending",

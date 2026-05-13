@@ -120,7 +120,6 @@
   body {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
     scrollbar-gutter: stable;
   }
 
@@ -128,7 +127,6 @@
   #__next {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
   }
 
   body {
