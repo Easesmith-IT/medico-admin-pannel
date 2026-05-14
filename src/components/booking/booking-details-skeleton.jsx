@@ -1,83 +1,38 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const BookingDetailsSkeleton = () => {
   return (
-    <div className="space-y-6 animate-pulse">
-      <Skeleton className="h-6 w-32" /> {/* BackLink */}
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-6 w-20 rounded-full" />
-          </div>
-        </CardHeader>
-      </Card>
-      {/* Patient Details */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-      {/* Service Details */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-      {/* Appointment Details */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-      {/* Pricing Summary */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-      {/* Meta Info */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-4">
-        <Skeleton className="h-10 w-28" />
-        <Skeleton className="h-10 w-28" />
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-white/40 bg-white/80 p-3">
+        <Skeleton className="h-5 w-56" />
+        <div className="mt-3 flex gap-2">
+          <Skeleton className="h-9 w-28" />
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-20" />
+        </div>
+      </div>
+
+      <Skeleton className="h-56 w-full rounded-[32px]" />
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton key={index} className="h-24 rounded-2xl" />
+        ))}
+      </div>
+
+      <Skeleton className="h-36 w-full rounded-2xl" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_360px]">
+        <div className="space-y-4">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <Skeleton key={index} className="h-44 w-full rounded-2xl" />
+          ))}
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-36 w-full rounded-2xl" />
+          ))}
+        </div>
       </div>
     </div>
   );

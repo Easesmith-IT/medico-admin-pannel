@@ -272,7 +272,7 @@ const UpdateAppointment = () => {
   return (
     <div className="space-y-6">
       <BackLink href="/admin/appointments">
-        <H1>Update Booking</H1>
+        <H1>Update Appointment</H1>
       </BackLink>
 
       <Card className="shadow-md">
@@ -304,7 +304,9 @@ const UpdateAppointment = () => {
                               </SelectItem>
                             ))}
                             {serviceData && serviceData.data.length === 0 && (
-                              <div disabled>No services found</div>
+                              <SelectItem value="__no_services__" disabled>
+                                No services found
+                              </SelectItem>
                             )}
                           </SelectContent>
                         </Select>
@@ -578,7 +580,9 @@ const UpdateAppointment = () => {
                                 </SelectItem>
                               ))}
                               {cityData && cityData.data.length === 0 && (
-                                <div disabled>No city found</div>
+                                <SelectItem value="__no_cities__" disabled>
+                                  No city found
+                                </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -734,7 +738,7 @@ const UpdateAppointment = () => {
               {/* Submit Button */}
               <FormFooter className="flex gap-3 justify-end">
                 <Button type="submit" className="">
-                  {isSubmitFormLoading ? <Spinner /> : "Update Booking"}
+                  {isSubmitFormLoading ? <Spinner /> : "Update Appointment"}
                 </Button>
               </FormFooter>
             </form>

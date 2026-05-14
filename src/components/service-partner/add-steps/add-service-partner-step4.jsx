@@ -81,7 +81,6 @@ export const AddServicePartnerStep4 = () => {
     const file = e.target.files?.[0];
 
     if (!file) return setValue(path, undefined);
-    console.log("file", file);
     setValue(path, file, { shouldValidate: true, shouldTouch: true });
   }
 

@@ -46,7 +46,6 @@ export const VerifyOtpModal = ({ open, onClose, phone, onResend }) => {
     defaultValues: { otp: "" },
   });
 
-  console.log("getvalues", form.getValues());
 
   useEffect(() => {
     if (!open) return;
@@ -72,12 +71,10 @@ export const VerifyOtpModal = ({ open, onClose, phone, onResend }) => {
   };
 
   const onError = (error) => {
-    console.log("error", error);
   };
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
       onClose();
     }
   }, [result]);

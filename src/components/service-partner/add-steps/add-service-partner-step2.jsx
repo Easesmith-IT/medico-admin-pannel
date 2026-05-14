@@ -23,7 +23,6 @@ export const AddServicePartnerStep2 = () => {
   const pincode = watch("currentAddress.pincode");
   const landmark = watch("currentAddress.landmark");
 
-  console.log("sameAsCurrent", sameAsCurrent);
 
   // useEffect(() => {
   //   if (sameAsCurrent) {

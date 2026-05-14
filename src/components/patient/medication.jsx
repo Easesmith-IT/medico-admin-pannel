@@ -25,7 +25,6 @@ export const Medication = ({ item }) => {
 
   useEffect(() => {
     if (result) {
-      console.log("result", result);
     }
   }, [result]);
   return (

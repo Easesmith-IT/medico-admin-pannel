@@ -2,23 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  CalendarCheckIcon,
-  CreditCardIcon,
-  FingerprintIcon,
-  FileWarningIcon,
-  HospitalIcon,
-  LayoutDashboardIcon,
-  LayoutGridIcon,
-  MapPinnedIcon,
-  SearchIcon,
-  SettingsIcon,
-  ShieldCheckIcon,
-  StethoscopeIcon,
-  UserCheckIcon,
-  UserCogIcon,
-  UsersIcon,
-} from "lucide-react";
+import { SearchIcon } from "lucide-react";
 
 import {
   CommandDialog,
@@ -30,27 +14,18 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
+import {
+  ADMIN_ACCOUNT_SECTION,
+  ADMIN_NAVIGATION_SECTIONS,
+} from "@/components/navigation/admin-navigation";
 
-const quickRoutes = [
-  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboardIcon },
-  { label: "Admins", href: "/admin/admins", icon: UserCheckIcon },
-  { label: "Doctors", href: "/admin/doctors", icon: StethoscopeIcon },
-  { label: "Patients", href: "/admin/patients", icon: UsersIcon },
+const commandSections = [
+  ...ADMIN_NAVIGATION_SECTIONS,
   {
-    label: "Service Partners",
-    href: "/admin/service-partners",
-    icon: UserCogIcon,
+    id: ADMIN_ACCOUNT_SECTION.id,
+    title: ADMIN_ACCOUNT_SECTION.title,
+    items: [ADMIN_ACCOUNT_SECTION.item],
   },
-  { label: "Appointments", href: "/admin/appointments", icon: CalendarCheckIcon },
-  { label: "Payments", href: "/admin/payments", icon: CreditCardIcon },
-  { label: "Services", href: "/admin/services", icon: SettingsIcon },
-  { label: "Cities", href: "/admin/cities", icon: MapPinnedIcon },
-  { label: "Hospitals", href: "/admin/hospitals", icon: HospitalIcon },
-  { label: "Categories", href: "/admin/categories", icon: LayoutGridIcon },
-  { label: "Crash Reports", href: "/admin/crash-report", icon: FileWarningIcon },
-  { label: "Security Sessions", href: "/admin/security/sessions", icon: FingerprintIcon },
-  { label: "Profile Security", href: "/admin/profile", icon: ShieldCheckIcon },
-  { label: "Audit Logs", href: "/admin/governance/audit-logs", icon: ShieldCheckIcon },
 ];
 
 export const CommandPalette = () => {
@@ -73,8 +48,15 @@ export const CommandPalette = () => {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const routes = useMemo(
-    () => quickRoutes.filter((route) => route.href !== pathname),
+  const sectionRoutes = useMemo(
+    () =>
+      commandSections
+        .map((section) => ({
+          id: section.id,
+          title: section.title,
+          routes: section.items.filter((item) => item.href !== pathname),
+        }))
+        .filter((section) => section.routes.length > 0),
     [pathname]
   );
 
@@ -101,17 +83,19 @@ export const CommandPalette = () => {
         <CommandInput placeholder="Type a page name..." />
         <CommandList>
           <CommandEmpty>No pages found.</CommandEmpty>
-          <CommandGroup heading="Navigation">
-            {routes.map((route) => {
-              const Icon = route.icon;
-              return (
-                <CommandItem key={route.href} onSelect={() => onSelect(route.href)}>
-                  <Icon className="size-4" />
-                  <span>{route.label}</span>
-                </CommandItem>
-              );
-            })}
-          </CommandGroup>
+          {sectionRoutes.map((section) => (
+            <CommandGroup key={section.id} heading={section.title}>
+              {section.routes.map((route) => {
+                const Icon = route.icon;
+                return (
+                  <CommandItem key={route.href} onSelect={() => onSelect(route.href)}>
+                    <Icon className="size-4" />
+                    <span>{route.title}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          ))}
         </CommandList>
       </CommandDialog>
     </>

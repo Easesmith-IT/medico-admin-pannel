@@ -27,7 +27,6 @@ export function CrashReportsPage() {
 
   useEffect(() => {
     if (res?.status === 200 || res?.status === 201) {
-      console.log("getCrashReport res", res?.data);
       const modifiedData = res?.data?.data?.map(adaptCrashForList);
       setCrashReports(modifiedData);
       setPageCount(res?.data?.meta?.totalPages);

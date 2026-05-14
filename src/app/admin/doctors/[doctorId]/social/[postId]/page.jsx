@@ -55,7 +55,6 @@ const PostDetails = () => {
     queryKeys: ["post", params.postId],
   });
 
-  console.log("data", data);
   const selectedPost = data;
 
   if (isLoading) {

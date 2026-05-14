@@ -36,7 +36,6 @@ export const AddServicePartnerStep6 = () => {
   });
 
   const printData = () => {
-    console.log("form values", getValues());
   };
 
   useEffect(() => {
@@ -55,12 +54,9 @@ export const AddServicePartnerStep6 = () => {
   };
 
   const removeLanguage = (index) => {
-    console.log("index", index);
 
     const updated = [...languages];
-    console.log("updated", updated);
     updated.splice(index, 1);
-    console.log("updated 1", updated);
     setValue("languages", updated);
   };
 

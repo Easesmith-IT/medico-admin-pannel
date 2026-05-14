@@ -86,8 +86,6 @@ const Social = () => {
   //   isToast:false
   // });
 
-  console.log("data", data);
-
   // useEffect(() => {
   //   mutateAsync()
   // }, []);

@@ -7,18 +7,20 @@ const Layout = ({ children }) => {
   return (
     <SidebarProvider className="min-h-dvh">
       <AppSidebar />
-      <SidebarInset className="max-h-dvh min-w-0 overflow-y-auto bg-[#F5F7FB]">
-        <div className="sticky top-0 z-50 shrink-0">
-          <AppHeader />
-        </div>
-        <main className="min-h-[calc(100dvh-var(--app-header-height))] min-w-0 px-4 py-6 md:px-8">
-          <div className="mx-auto w-full max-w-[1440px] min-w-0 space-y-4">
-            <div className="rounded-xl bg-white/70 px-3 py-2 shadow-sm backdrop-blur md:px-4">
-              <AdminBreadcrumbs />
-            </div>
-            {children}
+      <SidebarInset className="max-h-dvh min-w-0 overflow-hidden bg-[#F5F7FB]">
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="sticky top-0 z-50 shrink-0">
+            <AppHeader />
           </div>
-        </main>
+          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+            <div className="mx-auto w-full max-w-[1440px] min-w-0 space-y-4">
+              <div className="rounded-xl bg-white/70 px-3 py-2 shadow-sm backdrop-blur md:px-4">
+                <AdminBreadcrumbs />
+              </div>
+              {children}
+            </div>
+          </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

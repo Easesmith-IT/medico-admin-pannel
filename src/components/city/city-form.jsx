@@ -50,8 +50,6 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
     
     if (data?.length) {
       const { lat, lon } = data[0];
-      
-      console.log("lat, lon", {lat, lon});
       setValue("latitude", Number(lat));
       setValue("longitude", Number(lon));
     }
@@ -70,15 +68,10 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
   const rawLat = watch("latitude");
   const rawLng = watch("longitude");
 
-  console.log("rawLat,rawLng", { rawLat, rawLng });
-  
-
   const latitude = typeof rawLat === "number" ? rawLat : Number(rawLat) || 26.5;
 
   const longitude =
     typeof rawLng === "number" ? rawLng : Number(rawLng) || 80.3;
-
-  console.log("defaultValues", defaultValues);
 
   useEffect(() => {
     if (defaultValues) {

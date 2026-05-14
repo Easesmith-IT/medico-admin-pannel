@@ -106,7 +106,6 @@ const AddServicePartner = () => {
   const [imagePreview, setImagePreview] = useState("");
 
   function onSubmit(values) {
-    console.log("SUBMITTING", values);
   }
 
   const onDropImage = useCallback(
