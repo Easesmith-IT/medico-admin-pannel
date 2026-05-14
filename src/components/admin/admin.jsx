@@ -1,4 +1,5 @@
 import { customId } from "@/lib/utils";
+import Link from "next/link";
 import { Actions } from "../shared/actions";
 import { TableCell, TableRow } from "../ui/table";
 import { Skeleton } from "../ui/skeleton";
@@ -61,7 +62,12 @@ export const Admin = ({ admin }) => {
   return (
     <TableRow>
       <TableCell className="min-w-[8.5rem] whitespace-nowrap [overflow-wrap:normal]">
-        {customId(admin?._id)}
+        <Link
+          href={`/admin/admins/${admin?._id}`}
+          className="font-medium text-primary underline-offset-2 hover:underline"
+        >
+          {customId(admin?._id)}
+        </Link>
       </TableCell>
       <TableCell className="capitalize">
         {fullName}
