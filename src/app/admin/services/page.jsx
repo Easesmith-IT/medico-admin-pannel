@@ -8,7 +8,7 @@ import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -75,20 +75,24 @@ const Services = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <H1>Services</H1>
-        <Button variant="medico" asChild>
-          <Link href="/admin/services/add">
-            <PlusIcon />
-            Add Service
-          </Link>
-        </Button>
-      </div>
-
+      <ListPageHeader
+        title="Services"
+        actions={
+          <Button variant="medico" asChild>
+            <Link href="/admin/services/add">
+              <PlusIcon />
+              <span>Add Service</span>
+            </Link>
+          </Button>
+        }
+      />
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="service-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="service-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -130,7 +134,9 @@ const Services = () => {
             <label className="mb-1 block text-sm font-medium">Status</label>
             <Select
               value={params.status}
-              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ status: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
@@ -183,7 +189,9 @@ const Services = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[8.5rem] whitespace-nowrap">ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">
+                ID
+              </TableHead>
               <TableHead>Service</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Pricing</TableHead>
@@ -226,4 +234,3 @@ const Services = () => {
 };
 
 export default Services;
-

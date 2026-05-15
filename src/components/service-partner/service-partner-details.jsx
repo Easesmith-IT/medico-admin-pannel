@@ -625,35 +625,35 @@ export const ServicePartnerHeader = ({
   const renderWorkflowButton = (action) => {
     if (action === "approve") {
       return (
-        <Button onClick={() => onWorkflowAction("approve")} className="h-9 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8]" disabled={isMutating}>
+        <Button onClick={() => onWorkflowAction("approve")} variant="workflowPrimary" size="sm" disabled={isMutating}>
           Approve
         </Button>
       );
     }
     if (action === "under_review") {
       return (
-        <Button onClick={() => onWorkflowAction("under_review")} variant="outline" className="h-9 rounded-xl border-[#bfdbfe] bg-blue-50 text-blue-700" disabled={isMutating}>
+        <Button onClick={() => onWorkflowAction("under_review")} variant="workflowInfo" size="sm" disabled={isMutating}>
           Under Review
         </Button>
       );
     }
     if (action === "suspend") {
       return (
-        <Button onClick={() => onWorkflowAction("suspend")} variant="outline" className="h-9 rounded-xl border-[#fed7aa] bg-orange-50 text-orange-700" disabled={isMutating}>
+        <Button onClick={() => onWorkflowAction("suspend")} variant="workflowWarning" size="sm" disabled={isMutating}>
           Suspend
         </Button>
       );
     }
     if (action === "reject") {
       return (
-        <Button onClick={() => onWorkflowAction("reject")} className="h-9 rounded-xl bg-rose-600 hover:bg-rose-700" disabled={isMutating}>
+        <Button onClick={() => onWorkflowAction("reject")} variant="workflowDanger" size="sm" disabled={isMutating}>
           Reject
         </Button>
       );
     }
     if (action === "reinstate") {
       return (
-        <Button onClick={() => onWorkflowAction("reinstate")} className="h-9 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8]" disabled={isMutating}>
+        <Button onClick={() => onWorkflowAction("reinstate")} variant="workflowPrimary" size="sm" disabled={isMutating}>
           Reinstate
         </Button>
       );
@@ -662,7 +662,7 @@ export const ServicePartnerHeader = ({
   };
 
   return (
-    <div className="sticky top-[calc(var(--app-header-height)_+_6px)] z-[70] min-w-0 rounded-[24px] bg-[rgba(255,255,255,0.92)] p-4 shadow-[0_16px_34px_rgb(15_23_42_/_0.1)] backdrop-blur-xl sm:p-5">
+    <div className="sticky top-[var(--sticky-offset-workspace)] z-[70] min-w-0 rounded-[24px] bg-[rgba(255,255,255,0.92)] p-4 shadow-[0_16px_34px_rgb(15_23_42_/_0.1)] backdrop-blur-xl sm:p-5">
       <div className="min-w-0 space-y-4">
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-[#64748b]">
           <Link href="/admin/service-partners" className="inline-flex items-center gap-1 text-[#1d4ed8] hover:text-[#1e40af]">
@@ -719,13 +719,13 @@ export const ServicePartnerHeader = ({
             <div className="min-w-0">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">Management</p>
               <div className="flex min-w-0 flex-wrap gap-2">
-                <Button onClick={onEdit} variant="outline" size="sm" className="h-9 rounded-xl border-[#bfdbfe] bg-white text-[#1d4ed8]">
+                <Button onClick={onEdit} variant="outline" size="sm">
                   Edit
                 </Button>
-                <Button onClick={onViewAppointments} variant="outline" size="sm" className="h-9 rounded-xl border-[#dbe4f8] bg-white text-[#334155]">
+                <Button onClick={onViewAppointments} variant="outline" size="sm">
                   View
                 </Button>
-                <Button onClick={onDelete} variant="destructive" size="sm" className="h-9 rounded-xl" disabled={isMutating}>
+                <Button onClick={onDelete} variant="destructive" size="sm" disabled={isMutating}>
                   Delete
                 </Button>
               </div>
@@ -818,13 +818,13 @@ export const ServicePartnerHero = ({ provider, stats, onEdit, onViewAppointments
         </div>
 
         <div className="grid min-w-0 gap-3 self-start">
-          <Button className="h-10 rounded-xl bg-white text-[#0f172a] hover:bg-slate-100" onClick={onEdit}>
+          <Button variant="heroLight" onClick={onEdit}>
             Edit
           </Button>
-          <Button className="h-10 rounded-xl border border-white/40 bg-white/10 hover:bg-white/20" onClick={onViewAppointments}>
+          <Button variant="heroGhost" onClick={onViewAppointments}>
             View Appointments
           </Button>
-          <Button className="h-10 rounded-xl border border-rose-300/50 bg-rose-500/10 text-rose-100 hover:bg-rose-500/20" onClick={onSuspend}>
+          <Button variant="heroDanger" onClick={onSuspend}>
             Suspend
           </Button>
         </div>
@@ -869,7 +869,7 @@ export const AnalyticsStrip = ({ stats }) => {
 };
 
 export const StickySectionNav = ({ activeSection, onNavigate }) => (
-  <div className="sticky top-[calc(var(--app-header-height)_+_112px)] z-30 min-w-0 rounded-[20px] bg-[rgba(255,255,255,0.88)] p-2 shadow-[0_10px_26px_rgb(15_23_42_/_0.08)] backdrop-blur-md">
+  <div className="sticky top-[var(--sticky-offset-section-nav)] z-30 min-w-0 rounded-[20px] bg-[rgba(255,255,255,0.88)] p-2 shadow-[0_10px_26px_rgb(15_23_42_/_0.08)] backdrop-blur-md">
     <div className="flex min-w-0 gap-2 overflow-x-auto overflow-y-visible">
       {SECTION_ITEMS.map((section) => (
         <button
@@ -1318,35 +1318,35 @@ export const IntelligenceSidebar = ({
   onEdit,
   isMutating,
 }) => (
-  <div className="sticky top-[calc(var(--app-header-height)_+_12px)] min-w-0 space-y-4 rounded-[24px] bg-[rgba(255,255,255,0.92)] p-4 shadow-[0_16px_34px_rgb(15_23_42_/_0.08)] backdrop-blur-xl xl:w-[320px] xl:min-w-[320px] xl:shrink-0">
+  <div className="sticky top-[var(--sticky-offset-sidebar)] min-w-0 space-y-4 rounded-[24px] bg-[rgba(255,255,255,0.92)] p-4 shadow-[0_16px_34px_rgb(15_23_42_/_0.08)] backdrop-blur-xl xl:w-[320px] xl:min-w-[320px] xl:shrink-0">
     <div className="min-w-0">
       <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#64748b]">Quick Actions</p>
       <div className="mt-3 grid min-w-0 gap-2">
         {workflowActions.map((action) => {
           if (action === "approve" || action === "reinstate") {
             return (
-              <Button key={action} className="h-9 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8]" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
+              <Button key={action} variant="workflowPrimary" size="sm" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
                 {action === "reinstate" ? "Reinstate" : "Approve"}
               </Button>
             );
           }
           if (action === "under_review") {
             return (
-              <Button key={action} variant="outline" className="h-9 rounded-xl border-[#bfdbfe] bg-blue-50 text-blue-700" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
+              <Button key={action} variant="workflowInfo" size="sm" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
                 Under Review
               </Button>
             );
           }
           if (action === "suspend") {
             return (
-              <Button key={action} variant="outline" className="h-9 rounded-xl border-[#fed7aa] bg-orange-50 text-orange-700" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
+              <Button key={action} variant="workflowWarning" size="sm" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
                 Suspend
               </Button>
             );
           }
           if (action === "reject") {
             return (
-              <Button key={action} className="h-9 rounded-xl bg-rose-600 hover:bg-rose-700" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
+              <Button key={action} variant="workflowDanger" size="sm" onClick={() => onWorkflowAction(action)} disabled={isMutating}>
                 Reject
               </Button>
             );
@@ -1851,3 +1851,4 @@ ServicePartnerDetails.Skeleton = function ServicePartnerDetailsSkeleton() {
     </div>
   );
 };
+

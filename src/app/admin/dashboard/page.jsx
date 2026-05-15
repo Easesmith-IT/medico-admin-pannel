@@ -1,11 +1,7 @@
-import { H1, H2, H3, H4 } from "@/components/typography";
+export const dynamic = "force-dynamic";
 
-const Dashboard = () => {
-    return (
-      <div>
-        <H1>Dashboard</H1>
-      </div>
-    );
-}
- 
-export default Dashboard;
+import { CommandCenterDashboard } from "@/components/dashboard/command-center-dashboard";
+
+const DashboardPage = () => <CommandCenterDashboard />;
+
+export default DashboardPage;

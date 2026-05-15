@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { Actions } from "../shared/actions";
-import { Badge } from "../ui/badge";
+import { OperationalBadge } from "../ui/OperationalBadge";
 import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
 import { useEffect, useState } from "react";
@@ -78,9 +78,7 @@ export const Patient = ({ patient }) => {
       <TableCell>{patient.bloodGroup || "NA"}</TableCell>
       <TableCell>
         <div className="flex flex-col gap-1">
-          <Badge variant={isActive ? "success" : "destructive"}>
-            {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
-          </Badge>
+          {isPending ? <Spinner /> : <OperationalBadge status={isActive ? "Active" : "Inactive"} />}
           <Switch
             checked={isActive}
             onCheckedChange={toggleStatus}

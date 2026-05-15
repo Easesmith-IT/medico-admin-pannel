@@ -10,15 +10,24 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+          "border-0 bg-primary/20 text-primary-foreground ring-1 ring-primary/40 [a&]:hover:bg-primary/30",
         secondary:
-          "border-transparent bg-[#EEF2FF] text-[#1E3A8A] [a&]:hover:bg-[#DFE8FF]",
+          "border-0 bg-[#EEF2FF] text-[#1E3A8A] ring-1 ring-[#1E3A8A]/20 [a&]:hover:bg-[#DFE8FF]",
         destructive:
-          "border border-red-200 bg-red-50 text-red-600 [a&]:hover:bg-red-100 focus-visible:ring-red-200",
-        success: "border border-emerald-200 bg-emerald-50 text-emerald-700",
+          "border-0 bg-red-500/20 text-red-700 ring-1 ring-red-300/40 [a&]:hover:bg-red-500/30",
+        success: "border-0 bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-300/40",
         outline:
-          "border-[#E5E7EB] bg-white text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        inprogress: "border border-amber-200 bg-amber-50 text-amber-700",
+          "border border-[#E5E7EB] bg-white text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        inprogress: "border-0 bg-amber-500/20 text-amber-700 ring-1 ring-amber-300/40",
+        approved: "border-0 bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-300/40",
+        pending: "border-0 bg-amber-500/20 text-amber-700 ring-1 ring-amber-300/40",
+        rejected: "border-0 bg-red-500/20 text-red-700 ring-1 ring-red-300/40",
+        completed: "border-0 bg-cyan-500/20 text-cyan-700 ring-1 ring-cyan-300/40",
+        cancelled: "border-0 bg-rose-500/20 text-rose-700 ring-1 ring-rose-300/40",
+        active: "border-0 bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-300/40",
+        inactive: "border-0 bg-slate-500/20 text-slate-700 ring-1 ring-slate-300/40",
+        paid: "border-0 bg-teal-500/20 text-teal-700 ring-1 ring-teal-300/40",
+        refunded: "border-0 bg-violet-500/20 text-violet-700 ring-1 ring-violet-300/40",
       },
     },
     defaultVariants: {

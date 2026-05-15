@@ -9,6 +9,7 @@ import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -108,9 +109,7 @@ const HospitalPage = () => {
   useEffect(() => {
     if (pageCount === 0 && params.page !== 1) {
       updateParams({ page: 1 });
-      return;
     }
-
     if (pageCount > 0 && params.page > pageCount) {
       updateParams({ page: pageCount });
     }
@@ -124,7 +123,7 @@ const HospitalPage = () => {
 
   return (
     <div className="space-y-6">
-      <H1>Hospitals</H1>
+      <ListPageHeader title="Hospitals" />
 
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">

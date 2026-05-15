@@ -11,6 +11,7 @@ export const localPermissions = {
   admins: "system_admin",
   doctors: "doctor_verification",
   payments: "payment_management",
+  treatments: "user_management",
   patients: "user_management",
   appointments: "user_management",
   services: "content_moderation",

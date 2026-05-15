@@ -29,9 +29,17 @@ export const setAuthCookies = ({
     Cookies.set("refreshToken", refreshToken, options);
   }
 
-  Cookies.set("isAuthenticated", JSON.stringify(Boolean(isAuthenticated)), options);
+  Cookies.set(
+    "isAuthenticated",
+    JSON.stringify(Boolean(isAuthenticated)),
+    options,
+  );
 
-  Cookies.set("userInfo", typeof userInfo === "string" ? userInfo : JSON.stringify(userInfo), options);
+  Cookies.set(
+    "userInfo",
+    typeof userInfo === "string" ? userInfo : JSON.stringify(userInfo),
+    options,
+  );
 };
 
 export const setSessionMetaCookies = ({
@@ -40,21 +48,34 @@ export const setSessionMetaCookies = ({
   expires = 90,
 }) => {
   const options = getClientCookieOptions(expires);
-  Cookies.set("isAuthenticated", JSON.stringify(Boolean(isAuthenticated)), options);
+  Cookies.set(
+    "isAuthenticated",
+    JSON.stringify(Boolean(isAuthenticated)),
+    options,
+  );
 
   if (userInfo) {
     Cookies.set(
       "userInfo",
       typeof userInfo === "string" ? userInfo : JSON.stringify(userInfo),
-      options
+      options,
     );
   }
 };
 
 export const removeAuthCookies = () => {
-  const options = { path: "/" }; // must match set options
-  Cookies.remove("accessToken", options);
-  Cookies.remove("refreshToken", options);
-  Cookies.remove("isAuthenticated", options);
-  Cookies.remove("userInfo", options);
+  // Remove cookies with multiple attribute combinations to avoid
+  // environment mismatch (http/https, SameSite variants).
+  const variants = [
+    { path: "/" },
+    { path: "/", sameSite: "Lax" },
+    { path: "/", secure: true, sameSite: "None" },
+  ];
+
+  for (const options of variants) {
+    Cookies.remove("accessToken", options);
+    Cookies.remove("refreshToken", options);
+    Cookies.remove("isAuthenticated", options);
+    Cookies.remove("userInfo", options);
+  }
 };

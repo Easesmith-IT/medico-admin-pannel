@@ -6,7 +6,7 @@ export const FilterBar = ({ className, children }) => {
   return (
     <div
       className={cn(
-        "relative z-10 rounded-[18px] border border-[#EAECEF] bg-white p-4 shadow-[0_1px_2px_rgb(15_23_42_/_0.04),0_10px_20px_rgb(15_23_42_/_0.08)]",
+        "relative z-10 app-glass-panel p-4 sm:p-5",
         className
       )}
     >

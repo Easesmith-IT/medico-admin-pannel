@@ -525,7 +525,7 @@ const WorkspaceHeader = ({
   const statusClass = service?.isActive ? STATUS_COLORS.active : STATUS_COLORS.inactive;
 
   return (
-    <div className="sticky top-[calc(var(--app-header-height)+12px)] z-30 rounded-[24px] border border-white/60 bg-white/72 p-4 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] backdrop-blur-xl">
+    <div className="sticky top-[var(--sticky-offset-workspace)] z-30 rounded-[24px] border border-white/60 bg-white/72 p-4 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-[#64748b]">
@@ -771,7 +771,7 @@ const AnalyticsStrip = ({ analytics }) => {
 };
 
 const StickySectionNav = ({ activeSection, onNavigate }) => (
-  <div className="sticky top-[calc(var(--app-header-height)+102px)] z-20 hidden overflow-x-auto rounded-2xl bg-white/85 p-2 shadow-[0_10px_28px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70 backdrop-blur xl:block">
+  <div className="sticky top-[var(--sticky-offset-section-nav)] z-20 hidden overflow-x-auto rounded-2xl bg-white/85 p-2 shadow-[0_10px_28px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70 backdrop-blur xl:block">
     <div className="flex min-w-max items-center gap-2">
       {SECTION_ITEMS.map((item) => (
         <button
@@ -1513,7 +1513,7 @@ const IntelligenceSidebar = ({
   const healthLabel = service?.isActive ? "Healthy" : "Needs Activation";
 
   return (
-    <div className="space-y-4 xl:sticky xl:top-[calc(var(--app-header-height)+1rem)]">
+    <div className="space-y-4 xl:sticky xl:top-[var(--sticky-offset-sidebar)]">
       <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4">
         <p className="text-sm font-semibold text-[#0f172a]">Service Health</p>
         <div className="mt-2 flex items-center justify-between">
@@ -1982,3 +1982,4 @@ export const ServiceDetailsWorkspace = ({ service, onRefetch }) => {
     </div>
   );
 };
+

@@ -1,11 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ChevronDown,
-  LogOut,
-  Plus,
-} from "lucide-react";
+import { ChevronDown, LogOut, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -17,7 +13,12 @@ import {
   ADMIN_QUICK_ACTION,
 } from "@/components/navigation/admin-navigation";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -34,8 +35,10 @@ import {
 import { POST } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { getDisplayEmail, getDisplayName } from "@/lib/display";
+import { removeAuthCookies } from "@/lib/cookies";
 import { readCookie } from "@/lib/readCookie";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 const isPathMatch = (pathname, href) =>
   pathname === href || pathname.startsWith(`${href}/`);
@@ -72,7 +75,13 @@ const SectionLabel = ({ title }) => (
   </p>
 );
 
-const SidebarNavItem = ({ item, sectionTitle, isActive, iconOnly, onNavigate }) => {
+const SidebarNavItem = ({
+  item,
+  sectionTitle,
+  isActive,
+  iconOnly,
+  onNavigate,
+}) => {
   const ItemIcon = item.icon;
 
   return (
@@ -91,8 +100,12 @@ const SidebarNavItem = ({ item, sectionTitle, isActive, iconOnly, onNavigate }) 
         tooltip={{
           children: (
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-white">{item.title}</span>
-              <span className="text-[10px] uppercase tracking-[0.16em] text-[#93C5FD]">{sectionTitle}</span>
+              <span className="text-xs font-semibold text-white">
+                {item.title}
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.16em] text-[#93C5FD]">
+                {sectionTitle}
+              </span>
             </div>
           ),
           className: "border border-[#1E3A8A] bg-[#0A1224]",
@@ -119,7 +132,12 @@ const SidebarNavItem = ({ item, sectionTitle, isActive, iconOnly, onNavigate }) 
               className="absolute -left-3 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-[#7DD3FC] shadow-[0_0_16px_rgba(125,211,252,0.9)]"
             />
           ) : null}
-          <ItemIcon className={cn("size-4 shrink-0 transition-transform duration-200 group-hover:scale-105", isActive ? "text-[#93C5FD]" : "text-[#8FA8CF]")} />
+          <ItemIcon
+            className={cn(
+              "size-4 shrink-0 transition-transform duration-200 group-hover:scale-105",
+              isActive ? "text-[#93C5FD]" : "text-[#8FA8CF]",
+            )}
+          />
           {!iconOnly ? <span className="truncate">{item.title}</span> : null}
         </Link>
       </SidebarMenuButton>
@@ -133,7 +151,9 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
   const activeBySection = useMemo(() => {
     const result = {};
     for (const section of ADMIN_NAVIGATION_SECTIONS) {
-      result[section.id] = section.items.some((item) => isPathActive(pathname, item));
+      result[section.id] = section.items.some((item) =>
+        isPathActive(pathname, item),
+      );
     }
     return result;
   }, [pathname]);
@@ -169,7 +189,8 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
             className={cn(
               "rounded-2xl px-1.5 py-1 transition-colors",
               sectionIndex > 0 && !iconOnly && "mt-3",
-              sectionActive && "bg-white/[0.03] ring-1 ring-inset ring-[#1E3A8A]/45",
+              sectionActive &&
+                "bg-white/[0.03] ring-1 ring-inset ring-[#1E3A8A]/45",
             )}
           >
             {!iconOnly ? (
@@ -198,7 +219,7 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
             ) : null}
 
             <AnimatePresence initial={false}>
-              {(iconOnly || !section.collapsible || sectionOpen) ? (
+              {iconOnly || !section.collapsible || sectionOpen ? (
                 <motion.div
                   key={`${section.id}-content`}
                   initial={iconOnly ? false : { height: 0, opacity: 0 }}
@@ -208,7 +229,9 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
                   className="overflow-hidden"
                 >
                   <SidebarGroupContent>
-                    <SidebarMenu className={cn("gap-1", iconOnly && "items-center")}> 
+                    <SidebarMenu
+                      className={cn("gap-1", iconOnly && "items-center")}
+                    >
                       {section.items.map((item) => (
                         <SidebarNavItem
                           key={item.href}
@@ -232,15 +255,24 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
 
 const MobileNavigation = ({ pathname, onNavigate }) => {
   const defaultOpenSections = useMemo(
-    () => ADMIN_NAVIGATION_SECTIONS.filter((section) => section.defaultOpen).map((section) => section.id),
+    () =>
+      ADMIN_NAVIGATION_SECTIONS.filter((section) => section.defaultOpen).map(
+        (section) => section.id,
+      ),
     [],
   );
 
   return (
     <div className="space-y-2 pb-2">
-      <Accordion type="multiple" defaultValue={defaultOpenSections} className="w-full">
+      <Accordion
+        type="multiple"
+        defaultValue={defaultOpenSections}
+        className="w-full"
+      >
         {ADMIN_NAVIGATION_SECTIONS.map((section) => {
-          const sectionActive = section.items.some((item) => isPathActive(pathname, item));
+          const sectionActive = section.items.some((item) =>
+            isPathActive(pathname, item),
+          );
 
           if (!section.collapsible) {
             return (
@@ -272,7 +304,9 @@ const MobileNavigation = ({ pathname, onNavigate }) => {
               )}
             >
               <AccordionTrigger className="px-3 py-2 no-underline hover:no-underline">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#90A3BF]">{section.title}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#90A3BF]">
+                  {section.title}
+                </span>
               </AccordionTrigger>
               <AccordionContent className="pb-2">
                 <SidebarMenu className="gap-1 px-1.5">
@@ -299,6 +333,7 @@ const MobileNavigation = ({ pathname, onNavigate }) => {
 export const AppSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const iconOnly = state === "collapsed" && !isMobile;
 
@@ -312,18 +347,20 @@ export const AppSidebar = () => {
   const profileItem = ADMIN_ACCOUNT_SECTION.item;
   const isProfileActive = isPathActive(pathname, profileItem);
 
-  const { mutateAsync, isPending, data } = useApiMutation({
+  const { mutateAsync, isPending } = useApiMutation({
     url: "/admin/logout",
     method: POST,
     invalidateKey: ["admin"],
   });
 
-  useEffect(() => {
-    if (data?.success) {
-      setIsAlertModalOpen(false);
-      router.refresh();
-    }
-  }, [data, router]);
+  const completeClientLogout = () => {
+    removeAuthCookies();
+    queryClient.clear();
+    setCurrentAdmin(null);
+    setIsAlertModalOpen(false);
+    router.replace("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     setCurrentAdmin(readCookie("userInfo") || null);
@@ -343,7 +380,11 @@ export const AppSidebar = () => {
   }, [isMobile, setOpen]);
 
   const handleLogout = async () => {
-    await mutateAsync();
+    try {
+      await mutateAsync();
+    } finally {
+      completeClientLogout();
+    }
   };
 
   const handleNavigate = useCallback(() => {
@@ -366,7 +407,11 @@ export const AppSidebar = () => {
               iconOnly && "justify-center px-2",
             )}
           >
-            <Link href="/admin/dashboard" prefetch aria-label="Medico Admin Home">
+            <Link
+              href="/admin/dashboard"
+              prefetch
+              aria-label="Medico Admin Home"
+            >
               <Image
                 src="/logos/medico-logo.svg"
                 width={26}
@@ -392,7 +437,11 @@ export const AppSidebar = () => {
               iconOnly && "px-0",
             )}
           >
-            <Link href={ADMIN_QUICK_ACTION.href} prefetch aria-label={`Quick action ${ADMIN_QUICK_ACTION.title}`}>
+            <Link
+              href={ADMIN_QUICK_ACTION.href}
+              prefetch
+              aria-label={`Quick action ${ADMIN_QUICK_ACTION.title}`}
+            >
               <Plus className="size-4" />
               {!iconOnly ? <span>{ADMIN_QUICK_ACTION.title}</span> : null}
             </Link>
@@ -415,7 +464,9 @@ export const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="gap-2 border-t border-[#1B2B45]/85 px-2.5 py-3">
-        {!iconOnly ? <SectionLabel title={ADMIN_ACCOUNT_SECTION.title} /> : null}
+        {!iconOnly ? (
+          <SectionLabel title={ADMIN_ACCOUNT_SECTION.title} />
+        ) : null}
 
         <SidebarMenu>
           <SidebarNavItem
@@ -434,11 +485,17 @@ export const AppSidebar = () => {
                 {getInitials(adminName)}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-medium text-[#E2E8F0]">{adminName}</p>
-                <p className="truncate text-[11px] text-[#8BA1C0]">{adminEmail}</p>
+                <p className="truncate text-[13px] font-medium text-[#E2E8F0]">
+                  {adminName}
+                </p>
+                <p className="truncate text-[11px] text-[#8BA1C0]">
+                  {adminEmail}
+                </p>
               </div>
             </div>
-            <p className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#7E8CA8]">{adminRole}</p>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#7E8CA8]">
+              {adminRole}
+            </p>
           </div>
         ) : null}
 
@@ -456,9 +513,7 @@ export const AppSidebar = () => {
         >
           <LogOut className="size-4" />
           {!iconOnly ? <span>Logout</span> : null}
-          {iconOnly ? (
-            <span className="sr-only">Logout</span>
-          ) : null}
+          {iconOnly ? <span className="sr-only">Logout</span> : null}
         </Button>
       </SidebarFooter>
 

@@ -8,7 +8,7 @@ import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,20 +49,25 @@ const CategoriesPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap justify-between gap-4">
-        <H1>Categories</H1>
-        <Button asChild variant="medico">
-          <Link href="/admin/categories/add">
-            <PlusIcon />
-            <span>Add Category</span>
-          </Link>
-        </Button>
-      </div>
+      <ListPageHeader
+        title="Categories"
+        actions={
+          <Button asChild variant="medico">
+            <Link href="/admin/categories/add">
+              <PlusIcon />
+              <span>Add Category</span>
+            </Link>
+          </Button>
+        }
+      />
 
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="category-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="category-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -100,7 +105,9 @@ const CategoriesPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[8.5rem] whitespace-nowrap">ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">
+                ID
+              </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
@@ -140,4 +147,3 @@ const CategoriesPage = () => {
 };
 
 export default CategoriesPage;
-

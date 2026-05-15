@@ -16,8 +16,10 @@ import {
 const SEGMENT_LABELS = {
   admin: "Admin",
   dashboard: "Dashboard",
+  "analytics-command-center": "Dashboard",
   admins: "Admins",
   appointments: "Appointments",
+  treatments: "Treatments",
   categories: "Categories",
   cities: "Cities",
   "crash-report": "Crash Report",

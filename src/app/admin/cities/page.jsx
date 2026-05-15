@@ -7,7 +7,7 @@ import { City } from "@/components/city/city";
 import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { StateView } from "@/components/shared/state-view";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,25 +36,30 @@ const Cities = () => {
 
   const cities = data?.data || [];
   const filteredCities = cities.filter((city) =>
-    `${city?.name || ""}`.toLowerCase().includes(debouncedSearch.toLowerCase())
+    `${city?.name || ""}`.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <H1>Cities</H1>
-        <Button asChild variant="medico">
-          <Link href="/admin/cities/add">
-            <PlusIcon />
-            Add City
-          </Link>
-        </Button>
-      </div>
+      <ListPageHeader
+        title="Cities"
+        actions={
+          <Button asChild variant="medico">
+            <Link href="/admin/cities/add">
+              <PlusIcon />
+              <span>Add City</span>
+            </Link>
+          </Button>
+        }
+      />
 
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="city-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="city-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -63,7 +68,9 @@ const Cities = () => {
                 id="city-search"
                 placeholder="Search city..."
                 value={params.search}
-                onChange={(event) => updateParams({ search: event.target.value })}
+                onChange={(event) =>
+                  updateParams({ search: event.target.value })
+                }
                 className="bg-white pl-9"
               />
             </div>
@@ -89,7 +96,9 @@ const Cities = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[8.5rem] whitespace-nowrap">ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">
+                ID
+              </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Polygon</TableHead>
               <TableHead>Status</TableHead>
@@ -110,7 +119,11 @@ const Cities = () => {
         </Table>
 
         {filteredCities.length === 0 && !isLoading ? (
-          <DataNotFound name="Cities" actionLabel="Add City" actionHref="/admin/cities/add" />
+          <DataNotFound
+            name="Cities"
+            actionLabel="Add City"
+            actionHref="/admin/cities/add"
+          />
         ) : null}
       </div>
     </div>
@@ -118,4 +131,3 @@ const Cities = () => {
 };
 
 export default Cities;
-

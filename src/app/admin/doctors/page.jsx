@@ -7,7 +7,7 @@ import { Doctor } from "@/components/doctor/doctor";
 import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,7 +44,7 @@ const Doctors = () => {
     url: `/admin/doctors?status=${
       params.status === "all" ? "" : params.status
     }&page=${params.page}&limit=${params.limit}&search=${encodeURIComponent(
-      debouncedSearch
+      debouncedSearch,
     )}`,
     queryKeys: [
       "doctors",
@@ -60,20 +60,25 @@ const Doctors = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <H1>Doctors</H1>
-        <Button asChild variant="medico">
-          <Link href="/admin/doctors/add">
-            <PlusIcon />
-            <span>Add Doctor</span>
-          </Link>
-        </Button>
-      </div>
+      <ListPageHeader
+        title="Doctors"
+        actions={
+          <Button asChild variant="medico">
+            <Link href="/admin/doctors/add">
+              <PlusIcon />
+              <span>Add Doctor</span>
+            </Link>
+          </Button>
+        }
+      />
 
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="doctor-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="doctor-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -93,7 +98,9 @@ const Doctors = () => {
           <div>
             <label className="mb-1 block text-sm font-medium">Status</label>
             <Select
-              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ status: value, page: 1 })
+              }
               value={params.status}
             >
               <SelectTrigger className="w-36">
@@ -148,7 +155,9 @@ const Doctors = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[8.5rem] whitespace-nowrap">Doctor ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">
+                Doctor ID
+              </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Specialization</TableHead>
@@ -190,4 +199,3 @@ const Doctors = () => {
 };
 
 export default Doctors;
-

@@ -238,12 +238,12 @@ const BookingDetails = () => {
   const showUpdateStatus = !["Cancelled", "Rejected"].includes(booking.status);
 
   return (
-    <div className="space-y-5 min-w-0">
+    <div className="space-y-4 min-w-0">
       {isModalOpen ? (
         <UpdateBookingModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
       ) : null}
 
-      <div className="sticky top-[60px] z-30 rounded-2xl border border-white/40 bg-white/75 p-3 backdrop-blur-xl shadow-sm">
+      <div className="sticky top-[var(--sticky-offset-workspace)] z-30 rounded-2xl border border-white/40 bg-white/75 p-3 backdrop-blur-xl shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs text-[#64748b]">Appointments / {customId(booking?.bookingId)}</p>

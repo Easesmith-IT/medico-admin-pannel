@@ -1,13 +1,9 @@
 "use client";
 
 import { TableRow, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { EyeIcon, MoreVertical, CalendarClock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { OperationalBadge } from "@/components/ui/OperationalBadge";
 import { Actions } from "../shared/actions";
 import { useRouter } from "next/navigation";
-import { appointmentStatusColors } from "@/constants/status";
 
 export const Booking = ({ booking }) => {
   const router = useRouter();
@@ -58,14 +54,7 @@ export const Booking = ({ booking }) => {
       <TableCell>{booking.duration} min</TableCell>
 
       <TableCell>
-        <Badge
-          className={cn(
-            "px-2 py-1 rounded-full text-xs",
-            appointmentStatusColors[booking.status]
-          )}
-        >
-          {booking.status}
-        </Badge>
+        <OperationalBadge status={booking.status} />
       </TableCell>
       <TableCell>{booking.category || "NA"}</TableCell>
 

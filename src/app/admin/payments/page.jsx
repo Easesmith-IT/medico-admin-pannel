@@ -15,7 +15,7 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
 import { H1 } from "@/components/typography";
-import { Badge } from "@/components/ui/badge";
+import { OperationalBadge } from "@/components/ui/OperationalBadge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -83,36 +83,6 @@ const formatDateTime = (value) => {
 
 const fullName = (item = {}) =>
   `${item?.firstName || ""} ${item?.lastName || ""}`.trim() || "-";
-
-const getStatusVariant = (status) => {
-  const normalized = String(status || "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
-
-  if (
-    ["paid", "processed", "approved", "resolved", "completed"].includes(normalized)
-  ) {
-    return "success";
-  }
-
-  if (["failed", "rejected", "refunded"].includes(normalized)) {
-    return "destructive";
-  }
-
-  if (
-    ["pending", "underreview", "partiallypaid", "partialrefund", "initiated"].includes(
-      normalized
-    )
-  ) {
-    return "inprogress";
-  }
-
-  if (["open", "unpaid"].includes(normalized)) {
-    return "secondary";
-  }
-
-  return "outline";
-};
 
 const PaymentPage = () => {
   const { params, updateParams, resetParams } = useListQueryParams(defaults);
@@ -541,9 +511,7 @@ const PaymentPage = () => {
                       <TableCell>{row.patient?.firstName || "-"}</TableCell>
                       <TableCell>{fullName(row.servicePartner)}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusVariant(row.paymentStatus)}>
-                          {row.paymentStatus || "-"}
-                        </Badge>
+                        <OperationalBadge status={row.paymentStatus || "-"} />
                       </TableCell>
                       <TableCell>{formatCurrency(row.totalBillAmount, row.currency)}</TableCell>
                       <TableCell>{formatCurrency(row.totalPaid, row.currency)}</TableCell>
@@ -648,7 +616,7 @@ const PaymentPage = () => {
                     <TableCell>{row.method}</TableCell>
                     <TableCell>{row.stage}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
+                      <OperationalBadge status={row.status} />
                     </TableCell>
                     <TableCell>{formatCurrency(row.amountPaid, row.currency)}</TableCell>
                     <TableCell>{formatDateTime(row.createdAt)}</TableCell>
@@ -691,7 +659,7 @@ const PaymentPage = () => {
                     <TableCell>{row.refundType}</TableCell>
                     <TableCell>{row.mode}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
+                      <OperationalBadge status={row.status} />
                     </TableCell>
                     <TableCell>{formatCurrency(row.amount)}</TableCell>
                     <TableCell>{formatDateTime(row.createdAt)}</TableCell>
@@ -725,7 +693,7 @@ const PaymentPage = () => {
                     <TableCell>{customId(row._id, "SET")}</TableCell>
                     <TableCell>{fullName(row.servicePartnerId)}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
+                      <OperationalBadge status={row.status} />
                     </TableCell>
                     <TableCell>{formatCurrency(row.amountRequested)}</TableCell>
                     <TableCell>{formatCurrency(row.amountApproved)}</TableCell>
@@ -773,7 +741,7 @@ const PaymentPage = () => {
                     <TableCell>{customId(row._id, "DSP")}</TableCell>
                     <TableCell>{row.category}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
+                      <OperationalBadge status={row.status} />
                     </TableCell>
                     <TableCell>{row.referenceType}</TableCell>
                     <TableCell>{formatDateTime(row.createdAt)}</TableCell>

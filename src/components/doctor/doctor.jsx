@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { TableCell, TableRow } from "../ui/table";
-import { Badge } from "../ui/badge";
+import { OperationalBadge } from "../ui/OperationalBadge";
 import { Skeleton } from "../ui/skeleton";
 import { ConfirmModal } from "../shared/confirm-modal";
 import { useEffect, useState } from "react";
@@ -81,30 +81,11 @@ export const Doctor = ({ doctor }) => {
         <TableCell>{doctor.phone}</TableCell>
         <TableCell>{doctor.specialization}</TableCell>
         <TableCell>
-          <Badge
-            variant={
-              doctor.verificationStatus === "pending"
-                ? "inprogress"
-                : doctor.verificationStatus === "rejected"
-                ? "destructive"
-                : "success"
-            }
-            className="capitalize"
-          >
-            {doctor.verificationStatus}
-          </Badge>
+          <OperationalBadge status={doctor.verificationStatus} />
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={isActive ? "success" : "destructive"}>
-              {isPending ? (
-                <Spinner />
-              ) : isActive ? (
-                "Active"
-              ) : (
-                "Inactive"
-              )}
-            </Badge>
+            {isPending ? <Spinner /> : <OperationalBadge status={isActive ? "Active" : "Inactive"} />}
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}

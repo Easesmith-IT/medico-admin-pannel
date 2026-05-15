@@ -8,6 +8,7 @@ import { ConfirmModal } from "../shared/confirm-modal";
 import { Actions } from "../shared/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import { OperationalBadge } from "../ui/OperationalBadge";
 import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
 import { Switch } from "../ui/switch";
@@ -117,9 +118,7 @@ export const Service = ({ service }) => {
 
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={isActive ? "success" : "destructive"}>
-              {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
-            </Badge>
+            {isPending ? <Spinner /> : <OperationalBadge status={isActive ? "Active" : "Inactive"} />}
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}

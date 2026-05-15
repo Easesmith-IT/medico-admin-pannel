@@ -47,6 +47,24 @@
 
 :root {
   --app-header-height: 3.75rem;
+  --sticky-offset-workspace: 12px;
+  --sticky-offset-section-nav: 102px;
+  --sticky-offset-section-nav-compact: 98px;
+  --sticky-offset-sidebar: 1rem;
+  --sticky-offset-sidebar-deep: 155px;
+  --layout-max-width: 1440px;
+  --space-page-x: 1rem;
+  --space-page-y: 1.5rem;
+  --space-section: 1.5rem;
+  --space-card: 1rem;
+  --radius-card: 18px;
+  --radius-control: 12px;
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 22px rgb(15 23 42 / 0.06);
+  --shadow-elevated: 0 18px 44px rgb(15 23 42 / 0.12);
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  --motion-fast: 180ms;
+  --motion-normal: 240ms;
+  --motion-slow: 320ms;
   --radius: 0.75rem;
   --background: #f5f7fb;
   --foreground: #111827;
@@ -133,6 +151,11 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    min-width: 0;
+  }
+
+  *:where(.min-w-0, [class*="min-w-0"]) {
+    min-width: 0;
   }
 
   button:not([disabled]),
@@ -145,9 +168,7 @@
   }
 
   .table-container {
-    @apply w-full overflow-hidden rounded-[18px] border bg-white;
-    border-color: #eaecef;
-    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 22px rgb(15 23 42 / 0.06);
+    @apply w-full overflow-hidden rounded-[24px] bg-white/72 shadow-[0_16px_38px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70 backdrop-blur-xl;
   }
 
   .table-wrapper {
@@ -177,6 +198,36 @@
   .table-container tbody tr:last-child td:last-child {
     border-bottom-right-radius: 14px;
   }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --space-page-x: 2rem;
+  }
+}
+
+.app-surface {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.app-glass {
+  border: 1px solid rgb(255 255 255 / 0.68);
+  border-radius: var(--radius-card);
+  background: rgb(255 255 255 / 0.74);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.app-glass-panel {
+  @apply rounded-[28px] bg-white/85 p-6 shadow-[0_18px_46px_rgb(15_23_42_/_0.08)] ring-1 ring-white/60 backdrop-blur-sm sm:p-8;
+}
+
+.app-page-grid {
+  display: grid;
+  gap: var(--space-section);
 }
 
 .patient-selector-scroll {

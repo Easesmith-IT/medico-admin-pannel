@@ -3,6 +3,7 @@ import {
   BriefcaseMedical,
   Building2,
   CalendarDays,
+  ClipboardList,
   FileClock,
   LayoutDashboard,
   Lock,
@@ -40,6 +41,11 @@ export const ADMIN_NAVIGATION_SECTIONS = [
         title: "Appointments",
         href: "/admin/appointments",
         icon: CalendarDays,
+      },
+      {
+        title: "Treatments",
+        href: "/admin/treatments",
+        icon: ClipboardList,
       },
       {
         title: "Services",

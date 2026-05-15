@@ -641,7 +641,7 @@ export const DoctorAnalyticsStrip = ({ metrics }) => {
 };
 
 export const DoctorStickyNav = ({ activeSection, onNavigate }) => (
-  <div className="sticky top-[calc(var(--app-header-height)+98px)] z-20 rounded-[20px] bg-white/86 p-2 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70 backdrop-blur-md">
+  <div className="sticky top-[var(--sticky-offset-section-nav-compact)] z-20 rounded-[20px] bg-white/86 p-2 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70 backdrop-blur-md">
     <div className="flex gap-2 overflow-x-auto overflow-y-visible pb-1">
       {SECTION_ITEMS.map((section) => (
         <button
@@ -1345,7 +1345,7 @@ export const DoctorIntelligenceRail = ({
   const upcomingRows = insights.upcomingFeed.slice(0, 4);
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-[calc(var(--app-header-height)+155px)] lg:self-start">
+    <aside className="space-y-4 lg:sticky lg:top-[var(--sticky-offset-sidebar-deep)] lg:self-start">
       <div className="rounded-[24px] bg-white/90 p-4 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] ring-1 ring-white/70">
         <p className="text-sm font-semibold text-[#0f172a]">Quick Actions</p>
         <div className="mt-3 space-y-2">
@@ -1735,7 +1735,7 @@ const StickyWorkspaceHeader = ({
       : "bg-amber-100 text-amber-700";
 
   return (
-    <div className="sticky top-[calc(var(--app-header-height)+12px)] z-30 rounded-[24px] border border-white/50 bg-white/74 p-4 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] backdrop-blur-xl">
+    <div className="sticky top-[var(--sticky-offset-workspace)] z-30 rounded-[24px] border border-white/50 bg-white/74 p-4 shadow-[0_14px_30px_rgb(15_23_42_/_0.08)] backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-[#64748b]">
@@ -2103,7 +2103,7 @@ export const DoctorDetails = ({ doctor, onRefetch }) => {
   const isActionBusy = isApproving || isRejecting || isToggling || isDeleting;
 
   return (
-    <div className="space-y-5 pb-8">
+    <div className="space-y-4 pb-8">
       <StickyWorkspaceHeader
         doctor={doctorState}
         workflowState={workflowState}
@@ -2252,3 +2252,4 @@ const StateFallback = ({ title, description }) => (
     <p className="mt-2 text-sm text-[#64748b]">{description}</p>
   </div>
 );
+

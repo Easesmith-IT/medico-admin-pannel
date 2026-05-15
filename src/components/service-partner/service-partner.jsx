@@ -1,14 +1,13 @@
 import { DELETE, PATCH } from "@/constants/apiMethods";
-import { STATUS_STYLES } from "@/constants/status";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { cn, customId } from "@/lib/utils";
+import { customId } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getDisplayName } from "@/lib/display";
 
 import { Actions } from "../shared/actions";
 import { ConfirmModal } from "../shared/confirm-modal";
-import { Badge } from "../ui/badge";
+import { OperationalBadge } from "../ui/OperationalBadge";
 import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
 import { Switch } from "../ui/switch";
@@ -88,22 +87,12 @@ export const ServicePartner = ({ servicePartner }) => {
         <TableCell className="capitalize">{servicePartner?.gender}</TableCell>
 
         <TableCell>
-          <Badge
-            variant="success"
-            className={cn(
-              "capitalize",
-              STATUS_STYLES[servicePartner?.approvalStatus],
-            )}
-          >
-            {servicePartner?.approvalStatus}
-          </Badge>
+          <OperationalBadge status={servicePartner?.approvalStatus} />
         </TableCell>
 
         <TableCell>
           <div className="flex flex-col gap-1">
-            <Badge variant={isActive ? "success" : "destructive"}>
-              {isPending ? <Spinner /> : isActive ? "Active" : "Inactive"}
-            </Badge>
+            {isPending ? <Spinner /> : <OperationalBadge status={isActive ? "Active" : "Inactive"} />}
             <Switch
               checked={isActive}
               onCheckedChange={toggleStatus}

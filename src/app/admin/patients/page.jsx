@@ -9,7 +9,7 @@ import DataNotFound from "@/components/shared/DataNotFound";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,7 +48,7 @@ const PatientsPage = () => {
     url: `/admin/patients?isActive=${
       params.status === "all" ? "" : params.status
     }&page=${params.page}&limit=${params.limit}&searchQuery=${encodeURIComponent(
-      debouncedSearch
+      debouncedSearch,
     )}&gender=${
       params.gender === "all" ? "" : encodeURIComponent(params.gender)
     }&bloodGroup=${
@@ -70,12 +70,23 @@ const PatientsPage = () => {
 
   return (
     <div className="space-y-6">
-      <H1>Patients</H1>
+      <ListPageHeader
+        title="Patients"
+        actions={
+          <Button variant="medico" onClick={() => setIsModalOpen(true)}>
+            <FileOutputIcon />
+            <span>Export Patients</span>
+          </Button>
+        }
+      />
 
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="patient-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="patient-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -96,7 +107,9 @@ const PatientsPage = () => {
             <label className="mb-1 block text-sm font-medium">Gender</label>
             <Select
               value={params.gender}
-              onValueChange={(value) => updateParams({ gender: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ gender: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All" />
@@ -111,7 +124,9 @@ const PatientsPage = () => {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Blood Group</label>
+            <label className="mb-1 block text-sm font-medium">
+              Blood Group
+            </label>
             <Select
               value={params.bloodGroup}
               onValueChange={(value) =>
@@ -139,7 +154,9 @@ const PatientsPage = () => {
             <label className="mb-1 block text-sm font-medium">Status</label>
             <Select
               value={params.status}
-              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ status: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All" />
@@ -197,7 +214,9 @@ const PatientsPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[8.5rem] whitespace-nowrap">Patient ID</TableHead>
+              <TableHead className="min-w-[8.5rem] whitespace-nowrap">
+                Patient ID
+              </TableHead>
               <TableHead>Profile</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Gender</TableHead>
@@ -243,4 +262,3 @@ const PatientsPage = () => {
 };
 
 export default PatientsPage;
-

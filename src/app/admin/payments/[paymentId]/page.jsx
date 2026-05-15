@@ -272,26 +272,26 @@ const PaymentLedgerHero = ({ ledger, serviceName, canCollect, canRefund, canSett
         <p className="text-xs uppercase tracking-[0.16em] text-[#93c5fd]/90">Quick Actions</p>
         <div className="mt-3 grid gap-2">
           {canCollect ? (
-            <Button asChild className="h-10 justify-start rounded-xl bg-[#2563eb] text-white hover:bg-[#1d4ed8]">
+            <Button asChild variant="workflowPrimary" className="justify-start">
               <Link href={`/admin/payments?tab=ledgers&search=${ledger._id}`}>Collect</Link>
             </Button>
           ) : null}
           {canRefund ? (
-            <Button asChild className="h-10 justify-start rounded-xl bg-white/12 text-white hover:bg-white/20">
+            <Button asChild variant="heroGhost" className="justify-start">
               <Link href={`/admin/payments?tab=ledgers&search=${ledger._id}`}>Refund</Link>
             </Button>
           ) : null}
           {canSettlement ? (
-            <Button asChild className="h-10 justify-start rounded-xl bg-white/12 text-white hover:bg-white/20">
+            <Button asChild variant="heroGhost" className="justify-start">
               <Link href={`/admin/payments?tab=settlements&search=${ledger._id}`}>Settlement</Link>
             </Button>
           ) : null}
           {canDispute ? (
-            <Button asChild className="h-10 justify-start rounded-xl bg-white/12 text-white hover:bg-white/20">
+            <Button asChild variant="heroGhost" className="justify-start">
               <Link href={`/admin/payments?tab=disputes&search=${ledger._id}`}>Dispute</Link>
             </Button>
           ) : null}
-          <Button asChild className="h-10 justify-start rounded-xl bg-white/12 text-white hover:bg-white/20" disabled={!ledger?.invoiceId?.invoiceUrl}>
+          <Button asChild variant="heroGhost" className="justify-start" disabled={!ledger?.invoiceId?.invoiceUrl}>
             <Link href={ledger?.invoiceId?.invoiceUrl || "#"} target="_blank">
               <DownloadIcon className="size-4" />
               Download Invoice
@@ -736,7 +736,7 @@ const PaymentInsightsSidebar = ({ ledger, paymentHealth, insights, canCollect, c
     .sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate))[0];
   const settlement = ledger.settlementSummary || null;
   return (
-    <div className="space-y-4 xl:sticky xl:top-[calc(var(--app-header-height)+1rem)]">
+    <div className="space-y-4 xl:sticky xl:top-[var(--sticky-offset-sidebar)]">
       <Card className="rounded-[22px] border-white/50 bg-[rgba(255,255,255,0.88)]">
         <CardHeader><CardTitle className="text-base text-[#0f172a]">Payment Health</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -901,3 +901,4 @@ const PaymentLedgerDetailPage = () => {
 };
 
 export default PaymentLedgerDetailPage;
+

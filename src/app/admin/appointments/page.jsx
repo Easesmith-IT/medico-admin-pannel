@@ -2,16 +2,22 @@
 export const dynamic = "force-dynamic";
 import { useState } from "react";
 import Link from "next/link";
-import { FileOutputIcon, PlusIcon, RotateCcwIcon, SearchIcon } from "lucide-react";
+import {
+  FileOutputIcon,
+  PlusIcon,
+  RotateCcwIcon,
+  SearchIcon,
+} from "lucide-react";
 
 import { Booking } from "@/components/booking/booking";
 import { ExportAppointmentModal } from "@/components/booking/export-modal";
 import DataNotFound from "@/components/shared/DataNotFound";
+import { H1 } from "@/components/typography";
 import DatePicker from "@/components/shared/DatePicker";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
-import { H1 } from "@/components/typography";
+import { ListPageHeader } from "@/components/layout/ListPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -130,7 +136,10 @@ const Appointments = () => {
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-56 grow md:max-w-md">
-            <label htmlFor="booking-search" className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="booking-search"
+              className="mb-1 block text-sm font-medium"
+            >
               Search
             </label>
             <div className="relative">
@@ -162,7 +171,9 @@ const Appointments = () => {
             <label className="mb-1 block text-sm font-medium">Status</label>
             <Select
               value={params.status}
-              onValueChange={(value) => updateParams({ status: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ status: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Status" />
@@ -182,7 +193,9 @@ const Appointments = () => {
             <label className="mb-1 block text-sm font-medium">Category</label>
             <Select
               value={params.category}
-              onValueChange={(value) => updateParams({ category: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ category: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Category" />
@@ -220,7 +233,9 @@ const Appointments = () => {
             <Select
               disabled={isServiceLoading}
               value={params.serviceId}
-              onValueChange={(value) => updateParams({ serviceId: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ serviceId: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Service" />
@@ -240,7 +255,9 @@ const Appointments = () => {
             <Select
               disabled={isPatientLoading}
               value={params.patientId}
-              onValueChange={(value) => updateParams({ patientId: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ patientId: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Patient" />
@@ -248,7 +265,8 @@ const Appointments = () => {
               <SelectContent>
                 {patientData?.data?.map((item) => (
                   <SelectItem key={item._id} value={item._id}>
-                    {`${item?.firstName || ""} ${item?.lastName || ""}`.trim() || "-"}
+                    {`${item?.firstName || ""} ${item?.lastName || ""}`.trim() ||
+                      "-"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -256,7 +274,9 @@ const Appointments = () => {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Service Partner</label>
+            <label className="mb-1 block text-sm font-medium">
+              Service Partner
+            </label>
             <Select
               disabled={isPartnerLoading}
               value={params.servicePartnerId}
@@ -270,7 +290,8 @@ const Appointments = () => {
               <SelectContent>
                 {partnerData?.data?.map((item) => (
                   <SelectItem key={item._id} value={item._id}>
-                    {`${item?.firstName || ""} ${item?.lastName || ""}`.trim() || "-"}
+                    {`${item?.firstName || ""} ${item?.lastName || ""}`.trim() ||
+                      "-"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -301,7 +322,9 @@ const Appointments = () => {
             <label className="mb-1 block text-sm font-medium">Date Range</label>
             <Select
               value={params.dateRange}
-              onValueChange={(value) => updateParams({ dateRange: value, page: 1 })}
+              onValueChange={(value) =>
+                updateParams({ dateRange: value, page: 1 })
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Date Range" />
@@ -425,4 +448,3 @@ const Appointments = () => {
 };
 
 export default Appointments;
-

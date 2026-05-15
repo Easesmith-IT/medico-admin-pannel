@@ -12,9 +12,9 @@ const Layout = ({ children }) => {
           <div className="sticky top-0 z-50 shrink-0">
             <AppHeader />
           </div>
-          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
-            <div className="mx-auto w-full max-w-[1440px] min-w-0 space-y-4">
-              <div className="rounded-xl bg-white/70 px-3 py-2 shadow-sm backdrop-blur md:px-4">
+          <main className="min-h-0 flex-1 overflow-y-auto px-[var(--space-page-x)] py-[var(--space-page-y)]">
+            <div className="mx-auto w-full max-w-[var(--layout-max-width)] min-w-0 app-page-grid">
+              <div className="app-glass px-3 py-2 md:px-4">
                 <AdminBreadcrumbs />
               </div>
               {children}
