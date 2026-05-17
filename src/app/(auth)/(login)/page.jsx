@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -60,7 +59,11 @@ const Login = () => {
   });
 
   const onSubmit = async (values) => {
-    await submitForm(values);
+    try {
+      await submitForm(values);
+    } catch {
+      // handled by mutation hook toast
+    }
     // router.push("/admin/dashboard");
   };
 

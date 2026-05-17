@@ -38,6 +38,7 @@ import DatePicker from "@/components/shared/DatePicker";
 import { Spinner } from "@/components/ui/spinner";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 import { FormFooter } from "@/components/shared/form-footer";
+import { StateView } from "@/components/shared/state-view";
 
 const UpdatePatient = () => {
   const router = useRouter();
@@ -79,7 +80,7 @@ const UpdatePatient = () => {
     getValues,
   } = form;
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/admin/patients/${params.patientId}`,
     queryKeys: ["patients", params.patientId],
   });
@@ -134,8 +135,21 @@ const UpdatePatient = () => {
     }
   }, [result]);
 
-  const onError = (error) => {
-  };
+  if (isLoading) {
+    return <StateView type="loading" rows={7} />;
+  }
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load patient details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,7 +158,7 @@ const UpdatePatient = () => {
       </BackLink>
 
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Card className="space-y-2">
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

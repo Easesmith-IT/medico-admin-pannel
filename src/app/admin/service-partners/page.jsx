@@ -43,7 +43,12 @@ const ServiceProviders = () => {
   const { params, updateParams, resetParams } = useListQueryParams(defaults);
   const debouncedSearch = useDebounce(params.search, 600);
 
-  const { data: cityData, isLoading: isCityLoading } = useApiQuery({
+  const {
+    data: cityData,
+    isLoading: isCityLoading,
+    error: cityError,
+    refetch: refetchCities,
+  } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -57,7 +62,7 @@ const ServiceProviders = () => {
     limit: params.limit,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/serviceProvider/getAllServiceProviders?${query}`,
     queryKeys: [
       "service-provider",
@@ -189,6 +194,14 @@ const ServiceProviders = () => {
           </Button>
         </div>
       </FilterBar>
+      {cityError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Unable to load city filter options.{" "}
+          <button type="button" className="underline" onClick={refetchCities}>
+            Retry
+          </button>
+        </div>
+      ) : null}
 
       {error ? (
         <StateView
@@ -198,6 +211,9 @@ const ServiceProviders = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing service partners...</p>
       ) : null}
 
       <div className="table-container">

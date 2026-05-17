@@ -42,6 +42,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 import { FormFooter } from "@/components/shared/form-footer";
 import { PatientSummaryCard } from "@/components/shared/patient-summary-card";
+import { StateView } from "@/components/shared/state-view";
 
 // -------------------------------
 // ZOD SCHEMA
@@ -100,7 +101,7 @@ const UpdateAppointment = () => {
   const serviceId = watch("serviceId");
   const cityId = watch("cityId");
 
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch: refetchBooking } = useApiQuery({
     url: `/booking/bookings/${params.appointmentId}`,
     queryKeys: ["bookings", params.appointmentId],
   });
@@ -138,6 +139,7 @@ const UpdateAppointment = () => {
   const {
     data: treatmentData,
     isLoading: isTreatmentLoading,
+    error: treatmentError,
     refetch: refetchTreatments,
   } = useApiQuery({
     url: `/admin/patients/${patientId}/treatments?serviceId=${serviceId || ""}`,
@@ -165,6 +167,7 @@ const UpdateAppointment = () => {
   const {
     data: selectedPatientData,
     isLoading: isSelectedPatientLoading,
+    error: selectedPatientError,
     refetch: refetchSelectedPatient,
   } = useApiQuery({
     url: `/admin/patients/${patientId}`,
@@ -180,7 +183,12 @@ const UpdateAppointment = () => {
 
   const selectedPatient = selectedPatientData?.data?.patient;
 
-  const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
+  const {
+    data: serviceData,
+    isLoading: isServiceLoading,
+    error: serviceError,
+    refetch: refetchServices,
+  } = useApiQuery({
     url: `/admin/services/names`,
     queryKeys: ["service-admin"],
   });
@@ -201,7 +209,12 @@ const UpdateAppointment = () => {
   }, [serviceId]);
 
 
-  const { data: cityData, isLoading: isCityLoading } = useApiQuery({
+  const {
+    data: cityData,
+    isLoading: isCityLoading,
+    error: cityError,
+    refetch: refetchCities,
+  } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -223,7 +236,8 @@ const UpdateAppointment = () => {
   const {
     data: partnerData,
     isLoading: isPartnerLoading,
-    refetch,
+    error: partnerError,
+    refetch: refetchPartners,
   } = useApiQuery({
     url: `/admin/service-providers/names?${query}`,
     queryKeys: ["service-provider", serviceId, cityId],
@@ -232,9 +246,9 @@ const UpdateAppointment = () => {
 
   useEffect(() => {
     if (serviceId || cityId) {
-      refetch();
+      refetchPartners();
     }
-  }, [serviceId, cityId]);
+  }, [serviceId, cityId, refetchPartners]);
 
   const {
     mutateAsync: submitForm,
@@ -268,6 +282,22 @@ const UpdateAppointment = () => {
       router.push("/admin/appointments");
     }
   }, [result]);
+
+  if (isLoading) {
+    return <StateView type="loading" rows={8} />;
+  }
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load appointment details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetchBooking}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -339,6 +369,14 @@ const UpdateAppointment = () => {
                     </FormItem>
                   )}
                 />
+                {serviceError ? (
+                  <p className="text-sm text-red-600">
+                    Unable to load services.{" "}
+                    <button type="button" className="underline" onClick={refetchServices}>
+                      Retry
+                    </button>
+                  </p>
+                ) : null}
 
                 <FormField
                   control={control}
@@ -371,6 +409,14 @@ const UpdateAppointment = () => {
                     </FormItem>
                   )}
                 />
+                {treatmentError ? (
+                  <p className="text-sm text-red-600">
+                    Unable to load treatments.{" "}
+                    <button type="button" className="underline" onClick={refetchTreatments}>
+                      Retry
+                    </button>
+                  </p>
+                ) : null}
               </div>
 
               {patientId && isSelectedPatientLoading && (
@@ -378,6 +424,14 @@ const UpdateAppointment = () => {
                   <Spinner />
                 </div>
               )}
+              {selectedPatientError ? (
+                <p className="text-sm text-red-600">
+                  Unable to load patient profile.{" "}
+                  <button type="button" className="underline" onClick={refetchSelectedPatient}>
+                    Retry
+                  </button>
+                </p>
+              ) : null}
 
               <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 col-span-4">
                 {/* Appointment Date */}
@@ -591,6 +645,14 @@ const UpdateAppointment = () => {
                       </FormItem>
                     )}
                   />
+                  {cityError ? (
+                    <p className="text-sm text-red-600">
+                      Unable to load cities.{" "}
+                      <button type="button" className="underline" onClick={refetchCities}>
+                        Retry
+                      </button>
+                    </p>
+                  ) : null}
                   <FormField
                     control={control}
                     name="servicePartnerId"
@@ -712,6 +774,14 @@ const UpdateAppointment = () => {
                       </FormItem>
                     )}
                   />
+                  {partnerError ? (
+                    <p className="text-sm text-red-600">
+                      Unable to load service providers.{" "}
+                      <button type="button" className="underline" onClick={refetchPartners}>
+                        Retry
+                      </button>
+                    </p>
+                  ) : null}
                 </div>
               )}
 

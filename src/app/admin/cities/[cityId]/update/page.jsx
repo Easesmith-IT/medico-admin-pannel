@@ -8,13 +8,14 @@ import { H1 } from "@/components/typography";
 import { useEffect, useState } from "react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useParams, useRouter } from "next/navigation";
+import { StateView } from "@/components/shared/state-view";
 
 const UpdateCity = () => {
   const params = useParams();
   const router = useRouter();
 
   const [city, setCity] = useState("");
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/city/cities/${params?.cityId}`,
     queryKeys: ["city", params?.cityId],
   });
@@ -42,6 +43,21 @@ const UpdateCity = () => {
     router.push("/admin/cities");
   };
 
+  if (isLoading) {
+    return <StateView type="loading" rows={6} />;
+  }
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load city details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

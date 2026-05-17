@@ -112,7 +112,9 @@ export function useApiQuery({
 
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    // Allow stale invalidated data to refresh when users return to a page
+    // after a mutation (e.g. add/edit/delete flows).
+    refetchOnMount: true,
     retry: 1,
 
     ...options,

@@ -252,6 +252,7 @@ const TreatmentsPage = () => {
             label="Service"
             value={params.serviceId}
             onChange={(value) => updateParams({ serviceId: value, page: 1 })}
+            disabled={serviceQuery.isLoading}
             options={(serviceQuery.data?.data || []).map((item) => ({
               value: item._id,
               label: item.name,
@@ -262,6 +263,7 @@ const TreatmentsPage = () => {
             label="Patient"
             value={params.patientId}
             onChange={(value) => updateParams({ patientId: value, page: 1 })}
+            disabled={patientQuery.isLoading}
             options={(patientQuery.data?.data || []).map((item) => ({
               value: item._id,
               label:
@@ -275,6 +277,7 @@ const TreatmentsPage = () => {
             onChange={(value) =>
               updateParams({ servicePartnerId: value, page: 1 })
             }
+            disabled={providerQuery.isLoading}
             options={(providerQuery.data?.data || []).map((item) => ({
               value: item._id,
               label:
@@ -286,6 +289,7 @@ const TreatmentsPage = () => {
             label="City"
             value={params.cityId}
             onChange={(value) => updateParams({ cityId: value, page: 1 })}
+            disabled={cityQuery.isLoading}
             options={(cityQuery.data?.data || []).map((item) => ({
               value: item._id,
               label: item.name,
@@ -331,6 +335,42 @@ const TreatmentsPage = () => {
           </div>
         </div>
       </FilterBar>
+      {serviceQuery.error || patientQuery.error || providerQuery.error || cityQuery.error ? (
+        <div className="space-y-1 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {serviceQuery.error ? (
+            <p>
+              Unable to load service filter options.{" "}
+              <button type="button" className="underline" onClick={serviceQuery.refetch}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {patientQuery.error ? (
+            <p>
+              Unable to load patient filter options.{" "}
+              <button type="button" className="underline" onClick={patientQuery.refetch}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {providerQuery.error ? (
+            <p>
+              Unable to load provider filter options.{" "}
+              <button type="button" className="underline" onClick={providerQuery.refetch}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {cityQuery.error ? (
+            <p>
+              Unable to load city filter options.{" "}
+              <button type="button" className="underline" onClick={cityQuery.refetch}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {treatmentResult.error ? (
         <StateView
@@ -340,6 +380,9 @@ const TreatmentsPage = () => {
           actionLabel="Retry"
           onAction={treatmentResult.refetch}
         />
+      ) : null}
+      {treatmentResult.isFetching && !treatmentResult.isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing treatments...</p>
       ) : null}
 
       <div className="table-container">
@@ -555,11 +598,11 @@ const TreatmentsPage = () => {
   );
 };
 
-const FilterSelect = ({ label, value, onChange, options = [] }) => (
+const FilterSelect = ({ label, value, onChange, options = [], disabled = false }) => (
   <div>
     <label className="mb-1 block text-sm font-medium">{label}</label>
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger disabled={disabled}>
         <SelectValue placeholder={`Select ${label}`} />
       </SelectTrigger>
       <SelectContent>

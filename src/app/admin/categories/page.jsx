@@ -39,7 +39,7 @@ const CategoriesPage = () => {
     search: debouncedSearch,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/items/getAllCategories?${query}`,
     queryKeys: ["category", debouncedSearch, params.page, params.limit],
   });
@@ -99,6 +99,9 @@ const CategoriesPage = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing categories...</p>
       ) : null}
 
       <div className="table-container">

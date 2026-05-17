@@ -78,7 +78,7 @@ const Appointments = () => {
     limit: params.limit,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/booking/getAllBookings?${query}`,
     queryKeys: [
       "bookings",
@@ -98,22 +98,42 @@ const Appointments = () => {
     ],
   });
 
-  const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
+  const {
+    data: serviceData,
+    isLoading: isServiceLoading,
+    error: serviceError,
+    refetch: refetchServices,
+  } = useApiQuery({
     url: `/admin/services/names`,
     queryKeys: ["service-admin"],
   });
 
-  const { data: patientData, isLoading: isPatientLoading } = useApiQuery({
+  const {
+    data: patientData,
+    isLoading: isPatientLoading,
+    error: patientError,
+    refetch: refetchPatients,
+  } = useApiQuery({
     url: `/admin/patients/names`,
     queryKeys: ["patient-admin"],
   });
 
-  const { data: partnerData, isLoading: isPartnerLoading } = useApiQuery({
+  const {
+    data: partnerData,
+    isLoading: isPartnerLoading,
+    error: partnerError,
+    refetch: refetchPartners,
+  } = useApiQuery({
     url: `/admin/service-providers/names`,
     queryKeys: ["service-provider"],
   });
 
-  const { data: cityData, isLoading: isCityLoading } = useApiQuery({
+  const {
+    data: cityData,
+    isLoading: isCityLoading,
+    error: cityError,
+    refetch: refetchCities,
+  } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -383,6 +403,42 @@ const Appointments = () => {
           </div>
         </div>
       </FilterBar>
+      {serviceError || patientError || partnerError || cityError ? (
+        <div className="space-y-1 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {serviceError ? (
+            <p>
+              Unable to load service filter options.{" "}
+              <button type="button" className="underline" onClick={refetchServices}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {patientError ? (
+            <p>
+              Unable to load patient filter options.{" "}
+              <button type="button" className="underline" onClick={refetchPatients}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {partnerError ? (
+            <p>
+              Unable to load service partner filter options.{" "}
+              <button type="button" className="underline" onClick={refetchPartners}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+          {cityError ? (
+            <p>
+              Unable to load city filter options.{" "}
+              <button type="button" className="underline" onClick={refetchCities}>
+                Retry
+              </button>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {error ? (
         <StateView
@@ -392,6 +448,9 @@ const Appointments = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing appointments...</p>
       ) : null}
 
       <div className="table-container">

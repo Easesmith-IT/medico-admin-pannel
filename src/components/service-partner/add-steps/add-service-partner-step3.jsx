@@ -109,6 +109,14 @@ export const AddServicePartnerStep3 = () => {
             Add
           </Button>
         </div>
+        {error ? (
+          <p className="mb-3 text-sm text-red-600">
+            Unable to load services.{" "}
+            <button type="button" className="underline" onClick={refetch}>
+              Retry
+            </button>
+          </p>
+        ) : null}
 
         {servicesFieldArray.fields.map((item, idx) => (
           <div key={item.id} className="grid grid-cols-12 gap-2 items-end mb-2">

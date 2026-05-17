@@ -18,8 +18,12 @@ const AddAdminPage = () => {
   });
 
   const onSubmit = async (values) => {
-    await mutateAsync(values);
-    router.push("/admin/admins");
+    try {
+      await mutateAsync(values);
+      router.push("/admin/admins");
+    } catch {
+      // handled by mutation hook toast
+    }
   };
 
   return (

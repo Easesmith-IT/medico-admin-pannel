@@ -33,7 +33,7 @@ const CrashReportsPage = () => {
     limit: params.limit,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/crash-report/get?${query}`,
     queryKeys: [
       "crash-report",
@@ -78,6 +78,9 @@ const CrashReportsPage = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing crash reports...</p>
       ) : null}
 
       <CrashTable crashes={crashes} isLoading={isLoading} />

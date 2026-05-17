@@ -44,7 +44,7 @@ const PatientsPage = () => {
   const { params, updateParams, resetParams } = useListQueryParams(defaults);
   const debouncedSearch = useDebounce(params.search, 600);
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/admin/patients?isActive=${
       params.status === "all" ? "" : params.status
     }&page=${params.page}&limit=${params.limit}&searchQuery=${encodeURIComponent(
@@ -208,6 +208,9 @@ const PatientsPage = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing patients...</p>
       ) : null}
 
       <div className="table-container">

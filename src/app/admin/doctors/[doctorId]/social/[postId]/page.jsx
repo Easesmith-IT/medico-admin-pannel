@@ -26,6 +26,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SocialPostSkeleton } from "@/components/doctor/social/skeleton/post-details/social-post-skeleton";
+import { StateView } from "@/components/shared/state-view";
 
 const statusLabel = {
   published: "Published",
@@ -35,7 +36,7 @@ const statusLabel = {
 
 const PostDetails = () => {
   const params = useParams();
-  const [error, setError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -50,7 +51,7 @@ const PostDetails = () => {
     });
   }, [api]);
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/socialPost/getPostByAdmin/${params.postId}`,
     queryKeys: ["post", params.postId],
   });
@@ -60,14 +61,33 @@ const PostDetails = () => {
   if (isLoading) {
     return <SocialPostSkeleton />;
   }
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load social post"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
+  if (!selectedPost) {
+    return (
+      <StateView
+        type="empty"
+        title="Post not found"
+        description="The requested post is not available."
+      />
+    );
+  }
 
 
   return (
     <div className="space-y-6">
       <BackLink href={`/admin/doctors/${params.doctorId}/social`}></BackLink>
       <div className="bg-white">
-        {selectedPost && (
-          <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full">
             <div className="px-6 pt-6 pb-3 border-b">
               {/* {selectedPost.type === "GALLERY" && (
                 <Image
@@ -86,7 +106,7 @@ const PostDetails = () => {
                       {selectedPost?.mediaUrls.map((img, index) => (
                         <CarouselItem key={index}>
                           <div>
-                            {!error && (
+                            {!imageError && (
                               <Image
                                 src={
                                   img?.includes("https")
@@ -97,10 +117,10 @@ const PostDetails = () => {
                                 width={800}
                                 height={600}
                                 className="aspect-square object-cover"
-                                onError={() => setError(true)}
+                                onError={() => setImageError(true)}
                               />
                             )}
-                            {error && (
+                            {imageError && (
                               <div className="flex items-center justify-center aspect-video w-[60%] bg-gray-200 rounded">
                                 <ImageOffIcon className="w-10 h-10 text-gray-400" />
                               </div>
@@ -163,8 +183,7 @@ const PostDetails = () => {
               {/* Right: overview & comments */}
               <Overview selectedPost={selectedPost} />
             </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

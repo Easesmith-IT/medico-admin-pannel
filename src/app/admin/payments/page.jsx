@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -83,6 +84,15 @@ const formatDateTime = (value) => {
 
 const fullName = (item = {}) =>
   `${item?.firstName || ""} ${item?.lastName || ""}`.trim() || "-";
+
+const renderLoadingRows = (count, colSpan, keyPrefix) =>
+  Array.from({ length: count }).map((_, index) => (
+    <TableRow key={`${keyPrefix}-loading-${index}`}>
+      <TableCell colSpan={colSpan}>
+        <Skeleton className="h-6 w-full" />
+      </TableCell>
+    </TableRow>
+  ));
 
 const PaymentPage = () => {
   const { params, updateParams, resetParams } = useListQueryParams(defaults);
@@ -301,28 +311,52 @@ const PaymentPage = () => {
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-4">
           <p className="text-xs text-[#64748B]">Total Bill</p>
           <p className="mt-1 text-lg font-semibold">
-            {formatCurrency(summaryQuery.data?.data?.ledger?.totalBillAmount || 0)}
+            {summaryQuery.isLoading ? (
+              <Skeleton className="h-6 w-28" />
+            ) : (
+              formatCurrency(summaryQuery.data?.data?.ledger?.totalBillAmount || 0)
+            )}
           </p>
         </div>
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-4">
           <p className="text-xs text-[#64748B]">Total Paid</p>
           <p className="mt-1 text-lg font-semibold">
-            {formatCurrency(summaryQuery.data?.data?.ledger?.totalPaid || 0)}
+            {summaryQuery.isLoading ? (
+              <Skeleton className="h-6 w-28" />
+            ) : (
+              formatCurrency(summaryQuery.data?.data?.ledger?.totalPaid || 0)
+            )}
           </p>
         </div>
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-4">
           <p className="text-xs text-[#64748B]">Total Refunded</p>
           <p className="mt-1 text-lg font-semibold">
-            {formatCurrency(summaryQuery.data?.data?.ledger?.totalRefunded || 0)}
+            {summaryQuery.isLoading ? (
+              <Skeleton className="h-6 w-28" />
+            ) : (
+              formatCurrency(summaryQuery.data?.data?.ledger?.totalRefunded || 0)
+            )}
           </p>
         </div>
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-4">
           <p className="text-xs text-[#64748B]">Disputes Open</p>
           <p className="mt-1 text-lg font-semibold">
-            {summaryQuery.data?.data?.dispute?.open || 0}
+            {summaryQuery.isLoading ? (
+              <Skeleton className="h-6 w-20" />
+            ) : (
+              summaryQuery.data?.data?.dispute?.open || 0
+            )}
           </p>
         </div>
       </section>
+      {summaryQuery.error ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Unable to load payment summary.{" "}
+          <button type="button" className="underline" onClick={summaryQuery.refetch}>
+            Retry
+          </button>
+        </div>
+      ) : null}
 
       <Tabs
         value={params.tab}
@@ -450,7 +484,7 @@ const PaymentPage = () => {
                   updateParams({ cityId: value === "all" ? "" : value, page: 1 })
                 }
               >
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48" disabled={cityQuery.isLoading}>
                   <SelectValue placeholder="All cities" />
                 </SelectTrigger>
                 <SelectContent>
@@ -469,6 +503,14 @@ const PaymentPage = () => {
               Reset
             </Button>
           </div>
+          {cityQuery.error ? (
+            <p className="text-sm text-red-600">
+              Unable to load city options.{" "}
+              <button type="button" className="underline" onClick={cityQuery.refetch}>
+                Retry
+              </button>
+            </p>
+          ) : null}
         </FilterBar>
 
         <TabsContent value="ledgers" className="space-y-4">
@@ -498,82 +540,85 @@ const PaymentPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row._id}>
-                      <TableCell>
-                        <Link
-                          href={`/admin/payments/${row._id}`}
-                          className="font-medium text-[#2563EB] hover:underline"
-                        >
-                          {customId(row._id, "PAY")}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{row.patient?.firstName || "-"}</TableCell>
-                      <TableCell>{fullName(row.servicePartner)}</TableCell>
-                      <TableCell>
-                        <OperationalBadge status={row.paymentStatus || "-"} />
-                      </TableCell>
-                      <TableCell>{formatCurrency(row.totalBillAmount, row.currency)}</TableCell>
-                      <TableCell>{formatCurrency(row.totalPaid, row.currency)}</TableCell>
-                      <TableCell>{formatCurrency(row.totalRefunded, row.currency)}</TableCell>
-                      <TableCell>{formatCurrency(row.remainingBalance, row.currency)}</TableCell>
-                      <TableCell>{formatDateTime(row.updatedAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button asChild size="sm" variant="outline">
-                            <Link href={`/admin/payments/${row._id}`}>
-                              <EyeIcon className="size-4" />
-                            </Link>
-                          </Button>
-                          {canMutate ? (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedLedger(row);
-                                  setIsCollectOpen(true);
-                                }}
-                              >
-                                Collect
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedLedger(row);
-                                  setIsRefundOpen(true);
-                                }}
-                              >
-                                Refund
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={!row.servicePartner?._id}
-                                onClick={() => {
-                                  setSelectedLedger(row);
-                                  setIsSettlementOpen(true);
-                                }}
-                              >
-                                Settlement
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedLedger(row);
-                                  setIsDisputeOpen(true);
-                                }}
-                              >
-                                Dispute
-                              </Button>
-                            </>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {ledgerResult.isLoading ? renderLoadingRows(8, 10, "ledgers") : null}
+                  {!ledgerResult.isLoading
+                    ? rows.map((row) => (
+                      <TableRow key={row._id}>
+                        <TableCell>
+                          <Link
+                            href={`/admin/payments/${row._id}`}
+                            className="font-medium text-[#2563EB] hover:underline"
+                          >
+                            {customId(row._id, "PAY")}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{row.patient?.firstName || "-"}</TableCell>
+                        <TableCell>{fullName(row.servicePartner)}</TableCell>
+                        <TableCell>
+                          <OperationalBadge status={row.paymentStatus || "-"} />
+                        </TableCell>
+                        <TableCell>{formatCurrency(row.totalBillAmount, row.currency)}</TableCell>
+                        <TableCell>{formatCurrency(row.totalPaid, row.currency)}</TableCell>
+                        <TableCell>{formatCurrency(row.totalRefunded, row.currency)}</TableCell>
+                        <TableCell>{formatCurrency(row.remainingBalance, row.currency)}</TableCell>
+                        <TableCell>{formatDateTime(row.updatedAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button asChild size="sm" variant="outline">
+                              <Link href={`/admin/payments/${row._id}`}>
+                                <EyeIcon className="size-4" />
+                              </Link>
+                            </Button>
+                            {canMutate ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedLedger(row);
+                                    setIsCollectOpen(true);
+                                  }}
+                                >
+                                  Collect
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedLedger(row);
+                                    setIsRefundOpen(true);
+                                  }}
+                                >
+                                  Refund
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!row.servicePartner?._id}
+                                  onClick={() => {
+                                    setSelectedLedger(row);
+                                    setIsSettlementOpen(true);
+                                  }}
+                                >
+                                  Settlement
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedLedger(row);
+                                    setIsDisputeOpen(true);
+                                  }}
+                                >
+                                  Dispute
+                                </Button>
+                              </>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                    : null}
                 </TableBody>
               </Table>
               {!ledgerResult.isLoading && rows.length === 0 ? (
@@ -588,185 +633,237 @@ const PaymentPage = () => {
         </TabsContent>
 
         <TabsContent value="transactions">
-          <div className="table-container">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Txn ID</TableHead>
-                  <TableHead>Payment ID</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.transactionId}>
-                    <TableCell>{customId(String(row.transactionId), "TXN")}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/admin/payments/${row.paymentId}`}
-                        className="font-medium text-[#2563EB] hover:underline"
-                      >
-                        {customId(String(row.paymentId), "PAY")}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{row.method}</TableCell>
-                    <TableCell>{row.stage}</TableCell>
-                    <TableCell>
-                      <OperationalBadge status={row.status} />
-                    </TableCell>
-                    <TableCell>{formatCurrency(row.amountPaid, row.currency)}</TableCell>
-                    <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+          {transactionResult.error ? (
+            <StateView
+              type="error"
+              title="Unable to load transactions"
+              description={transactionResult.error.message}
+              actionLabel="Retry"
+              onAction={transactionResult.refetch}
+            />
+          ) : (
+            <div className="table-container">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Txn ID</TableHead>
+                    <TableHead>Payment ID</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Stage</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!transactionResult.isLoading && rows.length === 0 ? (
-              <StateView type="empty" title="No transactions found" />
-            ) : null}
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {transactionResult.isLoading ? renderLoadingRows(8, 7, "transactions") : null}
+                  {!transactionResult.isLoading
+                    ? rows.map((row) => (
+                      <TableRow key={row.transactionId}>
+                        <TableCell>{customId(String(row.transactionId), "TXN")}</TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/admin/payments/${row.paymentId}`}
+                            className="font-medium text-[#2563EB] hover:underline"
+                          >
+                            {customId(String(row.paymentId), "PAY")}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{row.method}</TableCell>
+                        <TableCell>{row.stage}</TableCell>
+                        <TableCell>
+                          <OperationalBadge status={row.status} />
+                        </TableCell>
+                        <TableCell>{formatCurrency(row.amountPaid, row.currency)}</TableCell>
+                        <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+                      </TableRow>
+                    ))
+                    : null}
+                </TableBody>
+              </Table>
+              {!transactionResult.isLoading && rows.length === 0 ? (
+                <StateView type="empty" title="No transactions found" />
+              ) : null}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="refunds">
-          <div className="table-container">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Refund ID</TableHead>
-                  <TableHead>Payment ID</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Mode</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.refundId}>
-                    <TableCell>{customId(String(row.refundId), "RFD")}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/admin/payments/${row.paymentId}`}
-                        className="font-medium text-[#2563EB] hover:underline"
-                      >
-                        {customId(String(row.paymentId), "PAY")}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{row.refundType}</TableCell>
-                    <TableCell>{row.mode}</TableCell>
-                    <TableCell>
-                      <OperationalBadge status={row.status} />
-                    </TableCell>
-                    <TableCell>{formatCurrency(row.amount)}</TableCell>
-                    <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+          {refundResult.error ? (
+            <StateView
+              type="error"
+              title="Unable to load refunds"
+              description={refundResult.error.message}
+              actionLabel="Retry"
+              onAction={refundResult.refetch}
+            />
+          ) : (
+            <div className="table-container">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Refund ID</TableHead>
+                    <TableHead>Payment ID</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Mode</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!refundResult.isLoading && rows.length === 0 ? (
-              <StateView type="empty" title="No refunds found" />
-            ) : null}
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {refundResult.isLoading ? renderLoadingRows(8, 7, "refunds") : null}
+                  {!refundResult.isLoading
+                    ? rows.map((row) => (
+                      <TableRow key={row.refundId}>
+                        <TableCell>{customId(String(row.refundId), "RFD")}</TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/admin/payments/${row.paymentId}`}
+                            className="font-medium text-[#2563EB] hover:underline"
+                          >
+                            {customId(String(row.paymentId), "PAY")}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{row.refundType}</TableCell>
+                        <TableCell>{row.mode}</TableCell>
+                        <TableCell>
+                          <OperationalBadge status={row.status} />
+                        </TableCell>
+                        <TableCell>{formatCurrency(row.amount)}</TableCell>
+                        <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+                      </TableRow>
+                    ))
+                    : null}
+                </TableBody>
+              </Table>
+              {!refundResult.isLoading && rows.length === 0 ? (
+                <StateView type="empty" title="No refunds found" />
+              ) : null}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="settlements">
-          <div className="table-container">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Provider</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Requested</TableHead>
-                  <TableHead>Approved</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row._id}>
-                    <TableCell>{customId(row._id, "SET")}</TableCell>
-                    <TableCell>{fullName(row.servicePartnerId)}</TableCell>
-                    <TableCell>
-                      <OperationalBadge status={row.status} />
-                    </TableCell>
-                    <TableCell>{formatCurrency(row.amountRequested)}</TableCell>
-                    <TableCell>{formatCurrency(row.amountApproved)}</TableCell>
-                    <TableCell>{formatDateTime(row.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      {canMutate ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedSettlement(row);
-                            setIsSettlementUpdateOpen(true);
-                          }}
-                        >
-                          Update Status
-                        </Button>
-                      ) : null}
-                    </TableCell>
+          {settlementResult.error ? (
+            <StateView
+              type="error"
+              title="Unable to load settlements"
+              description={settlementResult.error.message}
+              actionLabel="Retry"
+              onAction={settlementResult.refetch}
+            />
+          ) : (
+            <div className="table-container">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Requested</TableHead>
+                    <TableHead>Approved</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!settlementResult.isLoading && rows.length === 0 ? (
-              <StateView type="empty" title="No settlements found" />
-            ) : null}
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {settlementResult.isLoading ? renderLoadingRows(8, 7, "settlements") : null}
+                  {!settlementResult.isLoading
+                    ? rows.map((row) => (
+                      <TableRow key={row._id}>
+                        <TableCell>{customId(row._id, "SET")}</TableCell>
+                        <TableCell>{fullName(row.servicePartnerId)}</TableCell>
+                        <TableCell>
+                          <OperationalBadge status={row.status} />
+                        </TableCell>
+                        <TableCell>{formatCurrency(row.amountRequested)}</TableCell>
+                        <TableCell>{formatCurrency(row.amountApproved)}</TableCell>
+                        <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          {canMutate ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedSettlement(row);
+                                setIsSettlementUpdateOpen(true);
+                              }}
+                            >
+                              Update Status
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                    : null}
+                </TableBody>
+              </Table>
+              {!settlementResult.isLoading && rows.length === 0 ? (
+                <StateView type="empty" title="No settlements found" />
+              ) : null}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="disputes">
-          <div className="table-container">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row._id}>
-                    <TableCell>{customId(row._id, "DSP")}</TableCell>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell>
-                      <OperationalBadge status={row.status} />
-                    </TableCell>
-                    <TableCell>{row.referenceType}</TableCell>
-                    <TableCell>{formatDateTime(row.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      {canMutate ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedDispute(row);
-                            setIsDisputeUpdateOpen(true);
-                          }}
-                        >
-                          Update Status
-                        </Button>
-                      ) : null}
-                    </TableCell>
+          {disputeResult.error ? (
+            <StateView
+              type="error"
+              title="Unable to load disputes"
+              description={disputeResult.error.message}
+              actionLabel="Retry"
+              onAction={disputeResult.refetch}
+            />
+          ) : (
+            <div className="table-container">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Reference</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!disputeResult.isLoading && rows.length === 0 ? (
-              <StateView type="empty" title="No disputes found" />
-            ) : null}
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {disputeResult.isLoading ? renderLoadingRows(8, 6, "disputes") : null}
+                  {!disputeResult.isLoading
+                    ? rows.map((row) => (
+                      <TableRow key={row._id}>
+                        <TableCell>{customId(row._id, "DSP")}</TableCell>
+                        <TableCell>{row.category}</TableCell>
+                        <TableCell>
+                          <OperationalBadge status={row.status} />
+                        </TableCell>
+                        <TableCell>{row.referenceType}</TableCell>
+                        <TableCell>{formatDateTime(row.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          {canMutate ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedDispute(row);
+                                setIsDisputeUpdateOpen(true);
+                              }}
+                            >
+                              Update Status
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                    : null}
+                </TableBody>
+              </Table>
+              {!disputeResult.isLoading && rows.length === 0 ? (
+                <StateView type="empty" title="No disputes found" />
+              ) : null}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

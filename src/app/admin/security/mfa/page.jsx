@@ -6,6 +6,7 @@ import { H1 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { POST } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 
@@ -33,18 +34,30 @@ const MfaSecurityPage = () => {
   });
 
   const onSetup = async () => {
-    const result = await setupMutation.mutateAsync();
-    setSecretPreview(result?.data || null);
+    try {
+      const result = await setupMutation.mutateAsync();
+      setSecretPreview(result?.data || null);
+    } catch {
+      // handled by useApiMutation
+    }
   };
 
   const onVerify = async () => {
-    await verifyMutation.mutateAsync({ otp });
-    setOtp("");
+    try {
+      await verifyMutation.mutateAsync({ otp });
+      setOtp("");
+    } catch {
+      // handled by useApiMutation
+    }
   };
 
   const onDisable = async () => {
-    await disableMutation.mutateAsync({ otp: disableOtp });
-    setDisableOtp("");
+    try {
+      await disableMutation.mutateAsync({ otp: disableOtp });
+      setDisableOtp("");
+    } catch {
+      // handled by useApiMutation
+    }
   };
 
   return (
@@ -57,7 +70,14 @@ const MfaSecurityPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button onClick={onSetup} disabled={setupMutation.isPending}>
-            Generate MFA Secret
+            {setupMutation.isPending ? (
+              <>
+                <Spinner className="size-4" />
+                Generating...
+              </>
+            ) : (
+              "Generate MFA Secret"
+            )}
           </Button>
 
           {secretPreview ? (
@@ -79,7 +99,14 @@ const MfaSecurityPage = () => {
               className="max-w-xs"
             />
             <Button onClick={onVerify} disabled={verifyMutation.isPending || !otp}>
-              Verify & Enable MFA
+              {verifyMutation.isPending ? (
+                <>
+                  <Spinner className="size-4" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify & Enable MFA"
+              )}
             </Button>
           </div>
         </CardContent>
@@ -102,7 +129,14 @@ const MfaSecurityPage = () => {
               onClick={onDisable}
               disabled={disableMutation.isPending || !disableOtp}
             >
-              Disable MFA
+              {disableMutation.isPending ? (
+                <>
+                  <Spinner className="size-4" />
+                  Disabling...
+                </>
+              ) : (
+                "Disable MFA"
+              )}
             </Button>
           </div>
         </CardContent>

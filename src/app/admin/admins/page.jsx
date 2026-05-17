@@ -49,7 +49,7 @@ const Admins = () => {
     search: debouncedSearch,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/admin/subadmins?${query}`,
     queryKeys: ["admin", params.page, params.limit, params.status, debouncedSearch],
   });
@@ -139,6 +139,9 @@ const Admins = () => {
           actionLabel="Retry"
           onAction={refetch}
         />
+      ) : null}
+      {isFetching && !isLoading ? (
+        <p className="text-sm text-muted-foreground">Refreshing admins...</p>
       ) : null}
 
       <div className="table-container">

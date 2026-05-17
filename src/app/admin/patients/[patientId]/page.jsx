@@ -145,12 +145,19 @@ const PatientDetailsPage = () => {
   const {
     data: timelineData,
     isLoading: isTimelineLoading,
+    error: timelineError,
+    refetch: refetchTimeline,
   } = useApiQuery({
     url: `/patient/myTreatmentHistory?${timelineQuery}`,
     queryKeys: ["patient-workspace-timeline", params.patientId],
   });
 
-  const { data: cityData } = useApiQuery({
+  const {
+    data: cityData,
+    isLoading: isCityLookupLoading,
+    error: cityLookupError,
+    refetch: refetchCityLookup,
+  } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -419,7 +426,17 @@ const PatientDetailsPage = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.8fr_1fr]">
-              <MedicalTimelineCard events={timelineEvents} loading={isTimelineLoading} />
+              <div className="space-y-3">
+                {timelineError ? (
+                  <p className="text-sm text-red-600">
+                    Unable to load patient timeline.{" "}
+                    <button type="button" className="underline" onClick={refetchTimeline}>
+                      Retry
+                    </button>
+                  </p>
+                ) : null}
+                <MedicalTimelineCard events={timelineEvents} loading={isTimelineLoading} />
+              </div>
               <div className="space-y-6">
                 <Card>
                   <CardHeader className="pb-2">
@@ -467,6 +484,19 @@ const PatientDetailsPage = () => {
                     <CardTitle className="text-lg">Address Book</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    {isCityLookupLoading ? (
+                      <p className="text-sm text-muted-foreground">
+                        Loading city labels...
+                      </p>
+                    ) : null}
+                    {cityLookupError ? (
+                      <p className="text-sm text-red-600">
+                        Unable to load city labels.{" "}
+                        <button type="button" className="underline" onClick={refetchCityLookup}>
+                          Retry
+                        </button>
+                      </p>
+                    ) : null}
                     {addresses.length ? (
                       addresses.map((address) => (
                         <div
@@ -513,6 +543,14 @@ const PatientDetailsPage = () => {
                 </Button>
               </CardHeader>
               <CardContent>
+                {timelineError ? (
+                  <p className="mb-3 text-sm text-red-600">
+                    Unable to load appointments timeline.{" "}
+                    <button type="button" className="underline" onClick={refetchTimeline}>
+                      Retry
+                    </button>
+                  </p>
+                ) : null}
                 <MedicalTimelineCard
                   events={timelineEvents.filter((item) => item.type === "appointment")}
                   loading={isTimelineLoading}

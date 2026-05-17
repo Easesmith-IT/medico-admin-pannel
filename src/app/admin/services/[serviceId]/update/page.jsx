@@ -38,6 +38,7 @@ import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
 import { FormFooter } from "@/components/shared/form-footer";
+import { StateView } from "@/components/shared/state-view";
 
 function DurationChips({ values = [], selected = [], onChange }) {
   return (
@@ -114,7 +115,7 @@ const UpdateService = () => {
   const category = watch("category");
   const supportsDuration = watch("supportsDuration");
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error: cityError, refetch: refetchCities } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -129,7 +130,12 @@ const UpdateService = () => {
     }
   }, [data]);
 
-  const { data: serviceData, isLoading: isServiceLoading } = useApiQuery({
+  const {
+    data: serviceData,
+    isLoading: isServiceLoading,
+    error: serviceError,
+    refetch: refetchService,
+  } = useApiQuery({
     url: `/service/getServiceById/${params.serviceId}`,
     queryKeys: ["service", params.serviceId],
   });
@@ -267,7 +273,21 @@ const UpdateService = () => {
     }
   }, [result]);
 
-  const onError = () => {};
+  if (isServiceLoading) {
+    return <StateView type="loading" rows={8} />;
+  }
+
+  if (serviceError) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load service details"
+        description={serviceError.message}
+        actionLabel="Retry"
+        onAction={refetchService}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -279,7 +299,7 @@ const UpdateService = () => {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={handleSubmit(onSubmit, onError)}
+              onSubmit={handleSubmit(onSubmit)}
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -694,6 +714,14 @@ const UpdateService = () => {
                         />
                       </FormControl>
                       <FormMessage />
+                      {cityError ? (
+                        <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
+                          <span>Unable to load city options.</span>
+                          <Button type="button" variant="outline" size="sm" onClick={refetchCities}>
+                            Retry
+                          </Button>
+                        </div>
+                      ) : null}
                     </FormItem>
                   )}
                 />

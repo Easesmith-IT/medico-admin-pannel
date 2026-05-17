@@ -47,6 +47,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -1025,7 +1026,7 @@ export const CommandCenterDashboard = () => {
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B]">City</label>
             <Select value={params.cityId || "all"} onValueChange={(value) => updateParams({ cityId: value === "all" ? "" : value })}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="All cities" /></SelectTrigger>
+              <SelectTrigger className="h-9" disabled={optionsQuery.isLoading}><SelectValue placeholder="All cities" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Cities</SelectItem>
                 {(options.cities || []).map((city) => (
@@ -1037,7 +1038,7 @@ export const CommandCenterDashboard = () => {
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B]">Service</label>
             <Select value={params.serviceId || "all"} onValueChange={(value) => updateParams({ serviceId: value === "all" ? "" : value })}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="All services" /></SelectTrigger>
+              <SelectTrigger className="h-9" disabled={optionsQuery.isLoading}><SelectValue placeholder="All services" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Services</SelectItem>
                 {(options.services || []).map((service) => (
@@ -1047,6 +1048,14 @@ export const CommandCenterDashboard = () => {
             </Select>
           </div>
         </div>
+        {optionsQuery.error ? (
+          <div className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            Unable to load city/service filters.{" "}
+            <button type="button" className="underline" onClick={optionsQuery.refetch}>
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={resetParams}>
@@ -1307,40 +1316,63 @@ export const CommandCenterDashboard = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(schedulesQuery.data?.data || []).map((schedule) => (
-                            <TableRow key={schedule._id}>
-                              <TableCell className="font-medium">{schedule.name}</TableCell>
-                              <TableCell className="capitalize">{schedule.frequency}</TableCell>
-                              <TableCell>
-                                <Badge variant={schedule.active ? "approved" : "inactive"} className="h-7 px-2.5 text-[10px] uppercase">
-                                  {schedule.active ? "Active" : "Paused"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>{formatDateTime(schedule.nextRunAt)}</TableCell>
-                              <TableCell>{formatDateTime(schedule.lastRunAt)}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  {canMutateSchedules ? (
-                                    <Button size="sm" variant="outline" onClick={() => setScheduleDialog({ open: true, mode: "edit", schedule })}>Edit</Button>
-                                  ) : null}
-                                  {canMutateSchedules ? (
-                                    <Button size="sm" variant="outline" onClick={() => runScheduleMutation.mutate(schedule._id)} disabled={runScheduleMutation.isPending}>Run</Button>
-                                  ) : null}
-                                  {canMutateSchedules ? (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => updateScheduleMutation.mutate({ scheduleId: schedule._id, payload: { active: !schedule.active } })}
-                                      disabled={updateScheduleMutation.isPending}
-                                    >
-                                      {schedule.active ? "Pause" : "Activate"}
-                                    </Button>
-                                  ) : null}
+                          {schedulesQuery.isLoading
+                            ? Array.from({ length: 5 }).map((_, index) => (
+                              <TableRow key={`schedule-loading-${index}`}>
+                                <TableCell colSpan={6}>
+                                  <Skeleton className="h-6 w-full" />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                            : null}
+                          {schedulesQuery.error ? (
+                            <TableRow>
+                              <TableCell colSpan={6}>
+                                <div className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+                                  <span>Unable to load schedules.</span>
+                                  <Button size="sm" variant="outline" onClick={schedulesQuery.refetch}>
+                                    Retry
+                                  </Button>
                                 </div>
                               </TableCell>
                             </TableRow>
-                          ))}
-                          {!schedulesQuery.isLoading && (schedulesQuery.data?.data || []).length === 0 ? (
+                          ) : null}
+                          {!schedulesQuery.isLoading && !schedulesQuery.error
+                            ? (schedulesQuery.data?.data || []).map((schedule) => (
+                              <TableRow key={schedule._id}>
+                                <TableCell className="font-medium">{schedule.name}</TableCell>
+                                <TableCell className="capitalize">{schedule.frequency}</TableCell>
+                                <TableCell>
+                                  <Badge variant={schedule.active ? "approved" : "inactive"} className="h-7 px-2.5 text-[10px] uppercase">
+                                    {schedule.active ? "Active" : "Paused"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>{formatDateTime(schedule.nextRunAt)}</TableCell>
+                                <TableCell>{formatDateTime(schedule.lastRunAt)}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    {canMutateSchedules ? (
+                                      <Button size="sm" variant="outline" onClick={() => setScheduleDialog({ open: true, mode: "edit", schedule })}>Edit</Button>
+                                    ) : null}
+                                    {canMutateSchedules ? (
+                                      <Button size="sm" variant="outline" onClick={() => runScheduleMutation.mutate(schedule._id)} disabled={runScheduleMutation.isPending}>Run</Button>
+                                    ) : null}
+                                    {canMutateSchedules ? (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => updateScheduleMutation.mutate({ scheduleId: schedule._id, payload: { active: !schedule.active } })}
+                                        disabled={updateScheduleMutation.isPending}
+                                      >
+                                        {schedule.active ? "Pause" : "Activate"}
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                            : null}
+                          {!schedulesQuery.isLoading && !schedulesQuery.error && (schedulesQuery.data?.data || []).length === 0 ? (
                             <TableRow>
                               <TableCell colSpan={6}>
                                 <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
@@ -1373,30 +1405,53 @@ export const CommandCenterDashboard = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(runsQuery.data?.data || []).map((run) => (
-                            <TableRow key={run._id}>
-                              <TableCell>{formatDateTime(run.startedAt)}</TableCell>
-                              <TableCell>{run.scheduleId?.name || "Ad-hoc"}</TableCell>
-                              <TableCell>
-                                <Badge variant={run.status === "completed" ? "approved" : run.status === "failed" ? "rejected" : "pending"} className="h-7 px-2.5 text-[10px] uppercase">
-                                  {run.status}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="uppercase">{run.format || "-"}</TableCell>
-                              <TableCell>{run.outputSizeBytes ? `${Math.max((run.outputSizeBytes / 1024).toFixed(1), 0)} KB` : "-"}</TableCell>
-                              <TableCell className="text-right">
-                                {run.status === "completed" ? (
-                                  <Button size="sm" variant="outline" onClick={() => downloadRun(run._id)}>
-                                    <DownloadIcon className="size-4" />
-                                    Download
+                          {runsQuery.isLoading
+                            ? Array.from({ length: 5 }).map((_, index) => (
+                              <TableRow key={`run-loading-${index}`}>
+                                <TableCell colSpan={6}>
+                                  <Skeleton className="h-6 w-full" />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                            : null}
+                          {runsQuery.error ? (
+                            <TableRow>
+                              <TableCell colSpan={6}>
+                                <div className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+                                  <span>Unable to load report runs.</span>
+                                  <Button size="sm" variant="outline" onClick={runsQuery.refetch}>
+                                    Retry
                                   </Button>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground">-</span>
-                                )}
+                                </div>
                               </TableCell>
                             </TableRow>
-                          ))}
-                          {!runsQuery.isLoading && (runsQuery.data?.data || []).length === 0 ? (
+                          ) : null}
+                          {!runsQuery.isLoading && !runsQuery.error
+                            ? (runsQuery.data?.data || []).map((run) => (
+                              <TableRow key={run._id}>
+                                <TableCell>{formatDateTime(run.startedAt)}</TableCell>
+                                <TableCell>{run.scheduleId?.name || "Ad-hoc"}</TableCell>
+                                <TableCell>
+                                  <Badge variant={run.status === "completed" ? "approved" : run.status === "failed" ? "rejected" : "pending"} className="h-7 px-2.5 text-[10px] uppercase">
+                                    {run.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="uppercase">{run.format || "-"}</TableCell>
+                                <TableCell>{run.outputSizeBytes ? `${Math.max((run.outputSizeBytes / 1024).toFixed(1), 0)} KB` : "-"}</TableCell>
+                                <TableCell className="text-right">
+                                  {run.status === "completed" ? (
+                                    <Button size="sm" variant="outline" onClick={() => downloadRun(run._id)}>
+                                      <DownloadIcon className="size-4" />
+                                      Download
+                                    </Button>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                            : null}
+                          {!runsQuery.isLoading && !runsQuery.error && (runsQuery.data?.data || []).length === 0 ? (
                             <TableRow>
                               <TableCell colSpan={6}>
                                 <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">

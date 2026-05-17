@@ -22,9 +22,12 @@ const AddCity = () => {
       polygon: values.geoFence.map(([lat, lng]) => [lng, lat]),
     };
 
-    await mutateAsync(payload);
-
-    router.push("/admin/cities");
+    try {
+      await mutateAsync(payload);
+      router.push("/admin/cities");
+    } catch {
+      // handled by mutation hook toast
+    }
   };
 
   return (

@@ -110,7 +110,7 @@ const CreateService = () => {
   const [cities, setCities] = useState([]);
   const router = useRouter();
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error: cityError, refetch: refetchCities } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -227,9 +227,6 @@ const CreateService = () => {
     }
   }, [result]);
 
-  const onError = (error) => {
-  };
-
   return (
     <div className="space-y-6">
       <Link href="/admin/services" className="flex gap-1 items-center mb-4">
@@ -241,7 +238,7 @@ const CreateService = () => {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={handleSubmit(onSubmit, onError)}
+              onSubmit={handleSubmit(onSubmit)}
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -655,6 +652,14 @@ const CreateService = () => {
                         />
                       </FormControl>
                       <FormMessage />
+                      {cityError ? (
+                        <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
+                          <span>Unable to load city options.</span>
+                          <Button type="button" variant="outline" size="sm" onClick={refetchCities}>
+                            Retry
+                          </Button>
+                        </div>
+                      ) : null}
                     </FormItem>
                   )}
                 />

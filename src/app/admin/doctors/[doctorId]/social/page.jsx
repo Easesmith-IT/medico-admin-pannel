@@ -60,6 +60,7 @@ import { mockPosts } from "@/data/posts";
 import { Profile } from "@/components/doctor/social/profile";
 import { PostCard } from "@/components/doctor/social/post-card";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { StateView } from "@/components/shared/state-view";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { POST } from "@/constants/apiMethods";
 
@@ -70,7 +71,7 @@ const Social = () => {
 
   const params = useParams();
 
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/socialPost/getPosts`,
     queryKeys: ["post"],
   });
@@ -198,12 +199,24 @@ const Social = () => {
         </div> */}
 
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {error ? (
+            <div className="sm:col-span-2 lg:col-span-3 2xl:col-span-4">
+              <StateView
+                type="error"
+                title="Unable to load social posts"
+                description={error.message}
+                actionLabel="Retry"
+                onAction={refetch}
+              />
+            </div>
+          ) : null}
           {!isLoading &&
+            !error &&
             posts?.map((post) => (
               <PostCard key={post._id} post={post} setPosts={setPosts} />
             ))}
 
-          {posts?.length === 0 && !isLoading && (
+          {posts?.length === 0 && !isLoading && !error && (
             <p className="text-center text-slate-500 py-10 sm:col-span-2 lg:col-span-3 2xl:col-span-4">
               No posts found.
             </p>

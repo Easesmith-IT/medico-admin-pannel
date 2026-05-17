@@ -6,15 +6,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { H1 } from "@/components/typography";
+import { StateView } from "@/components/shared/state-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { axiosInstance } from "@/lib/axiosInstance";
 
 const SessionsPage = () => {
   const queryClient = useQueryClient();
-  const { data, isLoading, refetch } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: "/admin/sessions/me",
     queryKeys: ["admin-sessions"],
   });
@@ -71,6 +74,16 @@ const SessionsPage = () => {
           </Button>
         </CardHeader>
         <CardContent>
+          {error ? (
+            <StateView
+              type="error"
+              title="Unable to load sessions"
+              description={error.message}
+              actionLabel="Retry"
+              onAction={refetch}
+              className="mb-4"
+            />
+          ) : null}
           <div className="table-container">
             <Table>
               <TableHeader>
@@ -83,6 +96,18 @@ const SessionsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={`session-skeleton-${index}`}>
+                        <TableCell><Skeleton className="h-4 w-full max-w-[280px]" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="ml-auto h-8 w-20" /></TableCell>
+                      </TableRow>
+                    ))
+                  : null}
+
                 {sessions.map((session) => (
                   <TableRow key={session._id}>
                     <TableCell className="max-w-sm truncate">
@@ -109,8 +134,17 @@ const SessionsPage = () => {
                           onClick={() => revokeOneMutation.mutate(session._id)}
                           disabled={revokeOneMutation.isPending}
                         >
-                          <Trash2 className="h-4 w-4" />
-                          Revoke
+                          {revokeOneMutation.isPending ? (
+                            <>
+                              <Spinner className="size-4" />
+                              Revoking...
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 className="h-4 w-4" />
+                              Revoke
+                            </>
+                          )}
                         </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">-</span>
@@ -119,7 +153,7 @@ const SessionsPage = () => {
                   </TableRow>
                 ))}
 
-                {!isLoading && sessions.length === 0 ? (
+                {!isLoading && !error && sessions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
                       No sessions found.

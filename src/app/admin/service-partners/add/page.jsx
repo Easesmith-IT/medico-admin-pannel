@@ -163,8 +163,6 @@ const AddServicePartner = () => {
   // };
 
   const onBack = () => setStep((s) => Math.max(s - 1, 0));
-  const onError = (error) => {
-  };
 
   const {
     mutateAsync: submitForm,
@@ -374,7 +372,7 @@ const AddServicePartner = () => {
       <Stepper steps={steps} step={step} />
 
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardContent>
               {step === 0 && <AddServicePartnerStep1 />}

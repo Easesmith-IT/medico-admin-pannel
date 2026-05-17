@@ -30,7 +30,24 @@ const CrashDetailPage = () => {
   // Loading state
   // ----------------------------
   if (isLoading) {
-    return <Skeleton className="h-40 w-full" />;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-80" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
   }
 
   // ----------------------------

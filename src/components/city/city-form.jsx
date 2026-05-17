@@ -15,7 +15,7 @@ import { AddCitySchema } from "@/schemas/CitySchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const CityGeoFenceMap = dynamic(
   () => import("@/components/city/city-geo-fence-map"),
@@ -23,17 +23,22 @@ const CityGeoFenceMap = dynamic(
 );
 
 const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
+  const normalizedDefaults = useMemo(
+    () => ({
+      name: defaultValues?.name ?? "",
+      latitude: defaultValues?.latitude ?? undefined,
+      longitude: defaultValues?.longitude ?? undefined,
+      geoFence: defaultValues?.geoFence ?? [],
+    }),
+    [defaultValues],
+  );
+
   const form = useForm({
     resolver: zodResolver(AddCitySchema),
-    defaultValues: {
-      name: defaultValues?.name || "",
-      latitude: defaultValues?.latitude,
-      longitude: defaultValues?.longitude,
-      geoFence: defaultValues?.geoFence ? defaultValues.geoFence : [],
-    },
+    defaultValues: normalizedDefaults,
   });
 
-  const { control, handleSubmit, watch, setValue, getValues } = form;
+  const { control, handleSubmit, watch, setValue, reset } = form;
 
   const cityName = watch("name");
 
@@ -74,16 +79,8 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
     typeof rawLng === "number" ? rawLng : Number(rawLng) || 80.3;
 
   useEffect(() => {
-    if (defaultValues) {
-      setValue("name", defaultValues.name);
-      setValue("latitude", defaultValues.latitude);
-      setValue("longitude", defaultValues.longitude);
-      setValue(
-        "geoFence",
-        defaultValues?.geoFence ? defaultValues.geoFence : [],
-      );
-    }
-  }, [defaultValues]);
+    reset(normalizedDefaults);
+  }, [normalizedDefaults, reset]);
 
   const polygonCoords = defaultValues?.geoFence || [];
 
@@ -97,7 +94,7 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
             <FormItem>
               <FormLabel>City Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,7 +108,15 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
               <FormItem>
                 <FormLabel>Latitude</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      field.onChange(value === "" ? undefined : Number(value));
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +129,15 @@ const CityForm = ({ defaultValues, isSubmitting, onSubmit }) => {
               <FormItem>
                 <FormLabel>Longitude</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      field.onChange(value === "" ? undefined : Number(value));
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

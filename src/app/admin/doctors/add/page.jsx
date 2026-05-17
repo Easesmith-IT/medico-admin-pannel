@@ -114,7 +114,11 @@ export default function AddDoctor() {
       professionalBio: data.bio,
     };
 
-    await submitForm(apiData);
+    try {
+      await submitForm(apiData);
+    } catch {
+      // handled by mutation hook toast
+    }
   };
 
   useEffect(() => {

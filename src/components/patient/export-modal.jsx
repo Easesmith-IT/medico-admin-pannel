@@ -51,6 +51,7 @@ export const ExportPatientsModal = ({ isModalOpen, setIsModalOpen }) => {
   const {
     data: result,
     isLoading,
+    error,
     refetch,
   } = useApiQuery({
     url: `/admin/patients/export?from=${fromDate || ""}&to=${
@@ -62,6 +63,7 @@ export const ExportPatientsModal = ({ isModalOpen, setIsModalOpen }) => {
   });
 
   const onSubmit = () => {
+    setUrl("");
     refetch();
   };
 
@@ -154,6 +156,11 @@ export const ExportPatientsModal = ({ isModalOpen, setIsModalOpen }) => {
                 </a>
               )}
             </div>
+            {error ? (
+              <p className="text-sm text-red-600">
+                Unable to export patients. Please try again.
+              </p>
+            ) : null}
           </form>
         </Form>
       </DialogContent>

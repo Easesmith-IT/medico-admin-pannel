@@ -30,7 +30,7 @@ export const AddServicePartnerStep6 = () => {
   const selectedCities = watch("serviceCities") || [];
   const languages = watch("languages") || [];
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/city/getAllCities`,
     queryKeys: ["city"],
   });
@@ -80,6 +80,14 @@ export const AddServicePartnerStep6 = () => {
           </FormItem>
         )}
       />
+      {error ? (
+        <p className="text-sm text-red-600">
+          Unable to load cities.{" "}
+          <button type="button" className="underline" onClick={refetch}>
+            Retry
+          </button>
+        </p>
+      ) : null}
 
       {/* LANGUAGES (TAGS INPUT) */}
       <FormLabel>Languages</FormLabel>

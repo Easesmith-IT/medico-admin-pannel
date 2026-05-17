@@ -9,6 +9,7 @@ import { PUT } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { BackLink } from "@/components/shared/back-link";
+import { StateView } from "@/components/shared/state-view";
 
 const EditCategoryPage = () => {
   const { categoryId } = useParams();
@@ -20,7 +21,7 @@ const EditCategoryPage = () => {
     invalidateKey: ["category"],
   });
 
-  const { data, isLoading } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/items/category/${categoryId}`,
     queryKeys: ["category", categoryId],
   });
@@ -36,7 +37,20 @@ const EditCategoryPage = () => {
     }
   };
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
+  if (isLoading) {
+    return <StateView type="loading" title="Loading category details" rows={5} />;
+  }
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load category"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

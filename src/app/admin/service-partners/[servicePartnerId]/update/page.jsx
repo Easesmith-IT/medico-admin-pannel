@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { Spinner } from "@/components/ui/spinner";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
+import { StateView } from "@/components/shared/state-view";
 
 const defaultValues = {
   firstName: "",
@@ -156,10 +157,7 @@ const UpdatePage = () => {
   };
 
   const onBack = () => setStep((s) => Math.max(s - 1, 0));
-  const onError = (error) => {
-  };
-
-  const { data, isLoading, error } = useApiQuery({
+  const { data, isLoading, error, refetch } = useApiQuery({
     url: `/serviceProvider/service-provider/${params.servicePartnerId}`,
     queryKeys: ["service-provider", params.servicePartnerId],
   });
@@ -470,7 +468,7 @@ const UpdatePage = () => {
       <Stepper steps={steps} step={step} />
 
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardContent>
               {step === 0 && <AddServicePartnerStep1 />}
@@ -518,3 +516,18 @@ const UpdatePage = () => {
 };
 
 export default UpdatePage;
+  if (isLoading) {
+    return <StateView type="loading" rows={8} />;
+  }
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load service provider details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }

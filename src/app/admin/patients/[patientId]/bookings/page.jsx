@@ -54,7 +54,7 @@ const TreatmentHistory = () => {
     patientId: params.patientId,
   });
 
-  const { data, isLoading, error, refetch } = useApiQuery({
+  const { data, isLoading, isFetching, error, refetch } = useApiQuery({
     url: `/patient/myTreatmentHistory?${query}`,
     queryKeys: ["bookings", params.patientId, status, dateRange],
   });
@@ -174,6 +174,9 @@ const TreatmentHistory = () => {
             </Button>
           </div>
         </FilterBar>
+        {isFetching && !isLoading ? (
+          <p className="mt-2 text-sm text-muted-foreground">Refreshing treatment history...</p>
+        ) : null}
       </motion.div>
 
       <motion.div

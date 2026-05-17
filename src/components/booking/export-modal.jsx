@@ -44,6 +44,7 @@ export const ExportAppointmentModal = ({ isModalOpen, setIsModalOpen }) => {
   const {
     data: result,
     isLoading,
+    error,
     refetch,
   } = useApiQuery({
     url: `/admin/bookings/export?from=${fromDate || ""}&to=${
@@ -147,6 +148,12 @@ export const ExportAppointmentModal = ({ isModalOpen, setIsModalOpen }) => {
                 </a>
               )}
             </div>
+
+            {error ? (
+              <p className="text-sm text-red-600">
+                Unable to export appointments. Please try again.
+              </p>
+            ) : null}
           </form>
         </Form>
       </DialogContent>
