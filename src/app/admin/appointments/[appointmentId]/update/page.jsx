@@ -268,7 +268,7 @@ const UpdateAppointment = () => {
         data.appointmentDate &&
         format(new Date(data.appointmentDate), "yyyy-MM-dd"),
       modes: data.modes ? [data.modes] : [],
-      cityId: null,
+      cityId: data.cityId || undefined,
       treatmentId: isCreateTreatment ? undefined : data.treatmentSelection,
       createNewTreatment: isCreateTreatment,
     };

@@ -4,11 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import CategoryForm from "@/components/category/CategoryForm";
-import { H2 } from "@/components/typography";
 import { PUT } from "@/constants/apiMethods";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { BackLink } from "@/components/shared/back-link";
 import { StateView } from "@/components/shared/state-view";
 
 const EditCategoryPage = () => {
@@ -53,18 +51,12 @@ const EditCategoryPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <BackLink href="/admin/categories">
-        <H2>Edit Category</H2>
-      </BackLink>
-
-      <CategoryForm
-        defaultValues={initialData}
-        onSubmit={handleSubmit}
-        isLoading={isPending}
-        submitLabel="Update"
-      />
-    </div>
+    <CategoryForm
+      defaultValues={initialData}
+      onSubmit={handleSubmit}
+      isLoading={isPending}
+      submitLabel="Update"
+    />
   );
 };
 

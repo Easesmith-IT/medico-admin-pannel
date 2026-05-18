@@ -20,7 +20,7 @@ export const AppHeader = () => {
   const queryClient = useQueryClient();
   const { syncStatus, syncMeta, isBusy } = useGlobalLoading();
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState(null);
 
   const onLogout = async () => {
     setIsAlertModalOpen(true);
@@ -49,25 +49,31 @@ export const AppHeader = () => {
   };
 
   useEffect(() => {
+    const updateNow = () => setNow(new Date());
+    updateNow();
     const timer = setInterval(() => {
-      setNow(new Date());
+      updateNow();
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const formattedDate = now.toLocaleDateString("en-IN", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const formattedDate = now
+    ? now.toLocaleDateString("en-IN", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "--";
 
-  const formattedTime = now.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const formattedTime = now
+    ? now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "--:--";
 
   return (
     <div className="w-full">

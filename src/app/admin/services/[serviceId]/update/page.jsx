@@ -390,7 +390,6 @@ const UpdateService = () => {
                             </SelectItem>
                             <SelectItem value="12-hour">12 Hour</SelectItem>
                             <SelectItem value="24-hour">24 Hour</SelectItem>
-                            <SelectItem value="null">None</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

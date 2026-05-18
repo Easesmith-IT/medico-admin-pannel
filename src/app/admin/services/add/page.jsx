@@ -1,953 +1,512 @@
-// Refactored CreateService component using clean FormField structure (Shadcn-UI)
 "use client";
 
-import MultiSelect from "@/components/shared/MultiSelect";
-import { H1 } from "@/components/typography";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { POST } from "@/constants/apiMethods";
-import { shiftTypesOptions } from "@/constants/service";
-import { useApiMutation } from "@/hooks/useApiMutation";
-import { useApiQuery } from "@/hooks/useApiQuery";
-import { serviceSchema } from "@/schemas/ServicesSchema";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeftIcon, UploadCloud } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Form } from "@/components/ui/form";
+import { Spinner } from "@/components/ui/spinner";
+import { POST } from "@/constants/apiMethods";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes-warning";
-import { FormFooter } from "@/components/shared/form-footer";
+import { serviceSchema } from "@/schemas/ServicesSchema";
+import { useRouter } from "next/navigation";
+import { ServiceHeader } from "@/components/services/workspace/service-header";
+import { ServiceBasicInfo } from "@/components/services/workspace/service-basic-info";
+import { ServiceModeSelector } from "@/components/services/workspace/service-mode-selector";
+import { ServicePricingWorkspace } from "@/components/services/workspace/service-pricing-workspace";
+import { ConsultationConfigCard } from "@/components/services/workspace/consultation-config-card";
+import { NursingConfigCard } from "@/components/services/workspace/nursing-config-card";
+import { EquipmentConfigCard } from "@/components/services/workspace/equipment-config-card";
+import { ServiceDurationManager } from "@/components/services/workspace/service-duration-manager";
+import { ServiceMediaStudio } from "@/components/services/workspace/service-media-studio";
+import { ServicePreviewSidebar } from "@/components/services/workspace/service-preview-sidebar";
+import { ServiceValidationPanel } from "@/components/services/workspace/service-validation-panel";
+import { ServiceFooterActions } from "@/components/services/workspace/service-footer-actions";
 
-const DEFAULT = {
-  name: "Nursing",
-  description:
-    "Professional medical consultation and examination by qualified doctors",
-  basePrice: 500,
+const DRAFT_STORAGE_KEY = "medico_service_workspace_draft_v1";
+const DRAFT_DEBOUNCE_MS = 900;
+
+const DEFAULT_VALUES = {
+  name: "",
+  category: "",
+  nursingType: undefined,
+  description: "",
+  basePrice: 0,
   equipmentCharges: 0,
   taxPercentage: 18,
-  modes: ["Home Service", "Visit Provider Location"],
-  supportsDuration: true,
+  modes: ["Home Service"],
+  supportsDuration: false,
   defaultDuration: 30,
-  durationOptions: [30, 45, 60],
+  durationOptions: [30],
   paymentMode: "Both",
-  icon: "",
-  image: "",
+  icon: null,
+  image: null,
   cities: [],
   consultationSlots: {
     enabled: true,
-    startTime: "",
-    endTime: "",
+    startTime: "09:00",
+    endTime: "19:00",
     slotDuration: 30,
   },
   nursingSlots: {
     enabled: true,
-    shiftTypes: ["24-hour"],
-    minDuration: 1440,
-    maxDuration: 1440,
-    available24x7: true,
+    shiftTypes: [],
+    minDuration: 60,
+    maxDuration: 10080,
+    available24x7: false,
     allowCustomDuration: false,
   },
   equipmentBooking: {
     enabled: true,
     minDuration: 60,
     maxDuration: 720,
-    available24x7: true,
+    available24x7: false,
   },
   timeFormat: "12-hour",
 };
 
-function DurationChips({ values = [], selected = [], onChange }) {
-  return (
-    <div className="flex gap-2 flex-wrap">
-      {values.map((d) => {
-        const isActive = selected.includes(d);
-        return (
-          <button
-            key={d}
-            type="button"
-            className={`px-3 py-1 rounded-lg border text-sm transition-all
-              ${
-                isActive
-                  ? "border-primary bg-primary/10 text-primary shadow-sm"
-                  : "border-muted text-muted-foreground hover:shadow"
-              }
-            `}
-            onClick={() => onChange(d)}
-          >
-            {d} min
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+const serializeDraft = (values) => ({
+  ...values,
+  icon: null,
+  image: null,
+});
 
-const CreateService = () => {
-  const [imagePreview, setImagePreview] = useState("");
-  const [iconPreview, setIconPreview] = useState("");
-  const [cities, setCities] = useState([]);
+const isValidImageFile = (file, { maxMB, allowSvg = false }) => {
+  if (!file) return "No file selected";
+  const allowedTypes = allowSvg
+    ? ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/svg+xml"]
+    : ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    return "Unsupported file type. Use PNG, JPG, or WebP.";
+  }
+  if (file.size > maxMB * 1024 * 1024) {
+    return `File exceeds ${maxMB}MB limit.`;
+  }
+  return "";
+};
+
+const CreateServiceWorkspace = () => {
   const router = useRouter();
-
-  const { data, isLoading, error: cityError, refetch: refetchCities } = useApiQuery({
-    url: `/city/getAllCities`,
-    queryKeys: ["city"],
-  });
-
-  useEffect(() => {
-    if (data) {
-      const modifiedCities = data?.data?.map((city) => ({
-        label: city?.name,
-        value: city?._id,
-      }));
-      setCities(modifiedCities || []);
-    }
-  }, [data]);
+  const isMobile = useIsMobile();
+  const [iconPreview, setIconPreview] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [iconError, setIconError] = useState("");
+  const [imageError, setImageError] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [autosaveState, setAutosaveState] = useState("idle");
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  const autosaveTimeoutRef = useRef(null);
+  const hydratedDraftRef = useRef(false);
 
   const form = useForm({
     resolver: zodResolver(serviceSchema),
-    defaultValues: DEFAULT,
+    defaultValues: DEFAULT_VALUES,
     mode: "onBlur",
   });
+
   useUnsavedChangesWarning(form.formState.isDirty);
 
-  const { control, handleSubmit, watch, setValue, formState, getValues } = form;
+  const {
+    handleSubmit,
+    watch,
+    setValue,
+    formState,
+    reset,
+    getValues,
+    setError,
+    clearErrors,
+  } = form;
 
+  const watchedValues = watch();
   const category = watch("category");
   const supportsDuration = watch("supportsDuration");
 
-  // ===== Dropzones =====
-  const onDropImage = useCallback(
-    (acceptedFiles) => {
-      if (!acceptedFiles?.length) return;
-      const file = acceptedFiles[0];
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
-      setValue("image", file);
-    },
-    [setValue],
+  const {
+    data: citiesData,
+    isLoading: isCitiesLoading,
+    error: cityError,
+    refetch: refetchCities,
+  } = useApiQuery({
+    url: "/city/getAllCities",
+    queryKeys: ["city"],
+  });
+
+  const cityOptions = useMemo(
+    () =>
+      (citiesData?.data || []).map((city) => ({
+        label: city?.name,
+        value: city?._id,
+      })),
+    [citiesData],
   );
+
+  const { data: servicesData } = useApiQuery({
+    url: "/service/getAllServices?limit=200&page=1",
+    queryKeys: ["service", "duplicate-check"],
+    options: { retry: 0 },
+  });
+
+  const duplicateName = useMemo(() => {
+    const inputName = String(watchedValues.name || "").trim().toLowerCase();
+    if (!inputName) return false;
+    const existing = servicesData?.data?.services || [];
+    return existing.some(
+      (service) => String(service?.name || "").trim().toLowerCase() === inputName,
+    );
+  }, [servicesData, watchedValues.name]);
+
+  const validationChecks = useMemo(() => {
+    const values = watchedValues;
+    return [
+      {
+        key: "name",
+        ok: String(values.name || "").trim().length >= 2,
+        label: "Service identity configured",
+      },
+      {
+        key: "pricing",
+        ok: Number(values.basePrice) > 0,
+        label: "Pricing configured",
+      },
+      {
+        key: "cities",
+        ok: (values.cities || []).length > 0,
+        label: "Coverage cities selected",
+      },
+      {
+        key: "modes",
+        ok: (values.modes || []).length > 0,
+        label: "Service modes selected",
+      },
+      {
+        key: "media",
+        ok: Boolean(values.image || imagePreview),
+        label: "Service banner uploaded",
+      },
+      {
+        key: "duration",
+        ok: values.supportsDuration ? (values.durationOptions || []).length > 0 : true,
+        label: "Duration system validated",
+      },
+    ];
+  }, [watchedValues, imagePreview]);
+
+  const validationProgress = useMemo(() => {
+    const done = validationChecks.filter((item) => item.ok).length;
+    return validationChecks.length ? (done / validationChecks.length) * 100 : 0;
+  }, [validationChecks]);
+
+  const saveDraftToStorage = useCallback(
+    (values, silent = false) => {
+      try {
+        localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            values: serializeDraft(values),
+            savedAt: new Date().toISOString(),
+          }),
+        );
+        setLastSavedAt(new Date().toISOString());
+        setAutosaveState("saved");
+        if (!silent) {
+          toast.success("Draft saved");
+        }
+      } catch {
+        setAutosaveState("error");
+        if (!silent) {
+          toast.error("Unable to save draft locally");
+        }
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (hydratedDraftRef.current) return;
+    hydratedDraftRef.current = true;
+
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.values) {
+        reset(
+          {
+            ...DEFAULT_VALUES,
+            ...parsed.values,
+          },
+          { keepDefaultValues: false },
+        );
+        setLastSavedAt(parsed?.savedAt || null);
+        setAutosaveState("saved");
+      }
+    } catch {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    if (!hydratedDraftRef.current) return;
+    if (!formState.isDirty) return;
+    setAutosaveState("saving");
+
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current);
+    }
+    autosaveTimeoutRef.current = setTimeout(() => {
+      saveDraftToStorage(getValues(), true);
+    }, DRAFT_DEBOUNCE_MS);
+
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+    };
+  }, [formState.isDirty, getValues, saveDraftToStorage, watchedValues]);
 
   const onDropIcon = useCallback(
     (acceptedFiles) => {
-
-      if (!acceptedFiles?.length) return;
-      const file = acceptedFiles[0];
-      const url = URL.createObjectURL(file);
-      setIconPreview(url);
-      setValue("icon", file);
+      const file = acceptedFiles?.[0];
+      if (!file) return;
+      const error = isValidImageFile(file, { maxMB: 2, allowSvg: true });
+      if (error) {
+        setIconError(error);
+        setError("icon", { type: "custom", message: error });
+        return;
+      }
+      clearErrors("icon");
+      setIconError("");
+      const previewUrl = URL.createObjectURL(file);
+      setIconPreview(previewUrl);
+      setValue("icon", file, { shouldValidate: true, shouldDirty: true });
     },
-    [setValue],
+    [clearErrors, setError, setValue],
   );
 
-  const { getRootProps: getRootImageProps, getInputProps: getInputImageProps } =
-    useDropzone({
-      onDrop: onDropImage,
-      accept: { "image/*": [] },
-      maxFiles: 1,
-    });
+  const onDropImage = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles?.[0];
+      if (!file) return;
+      const error = isValidImageFile(file, { maxMB: 5 });
+      if (error) {
+        setImageError(error);
+        setError("image", { type: "custom", message: error });
+        return;
+      }
+      clearErrors("image");
+      setImageError("");
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      setValue("image", file, { shouldValidate: true, shouldDirty: true });
+    },
+    [clearErrors, setError, setValue],
+  );
 
-  const { getRootProps: getRootIconProps, getInputProps: getInputIconProps } =
-    useDropzone({ onDrop: onDropIcon, accept: { "image/*": [] }, maxFiles: 1 });
+  const iconDropzone = useDropzone({
+    onDrop: onDropIcon,
+    maxFiles: 1,
+    accept: {
+      "image/png": [],
+      "image/jpeg": [],
+      "image/jpg": [],
+      "image/webp": [],
+      "image/svg+xml": [],
+    },
+  });
 
-  const {
-    mutateAsync: submitForm,
-    isPending: isSubmitFormLoading,
-    data: result,
-  } = useApiMutation({
+  const imageDropzone = useDropzone({
+    onDrop: onDropImage,
+    maxFiles: 1,
+    accept: {
+      "image/png": [],
+      "image/jpeg": [],
+      "image/jpg": [],
+      "image/webp": [],
+    },
+  });
+
+  const { mutateAsync: createService, isPending: isPublishing } = useApiMutation({
     url: "/service/createService",
     method: POST,
     invalidateKey: ["service"],
   });
 
-  // ===== Submit handler =====
-  const onSubmit = async (values) => {
+  const submit = useCallback(async (values) => {
+    if (duplicateName) {
+      setError("name", {
+        type: "manual",
+        message: "A service with this name already exists.",
+      });
+      toast.error("Choose a unique service name before publishing.");
+      return;
+    }
 
-    const slotConfig = {};
-    slotConfig.consultationSlots = values.consultationSlots;
-    slotConfig.nursingSlots = values.nursingSlots;
-    slotConfig.equipmentBooking = values.equipmentBooking;
+    const slotConfig = {
+      consultationSlots: values.consultationSlots,
+      nursingSlots: values.nursingSlots,
+      equipmentBooking: values.equipmentBooking,
+    };
 
     const formData = new FormData();
-    // Scalar and string fields (API expects these as form fields)
     formData.append("name", values.name ?? "");
     formData.append("category", values.category ?? "");
     formData.append("nursingType", values.nursingType ?? "");
     formData.append("description", values.description ?? "");
-    formData.append("basePrice", String(values.basePrice ?? ""));
+    formData.append("basePrice", String(values.basePrice ?? 0));
     formData.append("equipmentCharges", String(values.equipmentCharges ?? 0));
-    formData.append("taxPercentage", String(values.taxPercentage ?? 18));
+    formData.append("taxPercentage", String(values.taxPercentage ?? 0));
+    formData.append("supportsDuration", values.supportsDuration ? "true" : "false");
+    formData.append("defaultDuration", String(values.defaultDuration ?? 30));
     formData.append(
-      "supportsDuration",
-      values.supportsDuration === true || values.supportsDuration === "true",
+      "durationOptions",
+      JSON.stringify(values.supportsDuration ? values.durationOptions ?? [] : []),
     );
     formData.append("paymentMode", values.paymentMode ?? "Both");
-    formData.append("timeFormat", values.timeFormat ?? "24-hour");
-    // JSON fields (backend uses parseJson)
+    formData.append("timeFormat", values.timeFormat ?? "12-hour");
     formData.append("modes", JSON.stringify(values.modes ?? []));
     formData.append("cities", JSON.stringify(values.cities ?? []));
     formData.append("slotConfig", JSON.stringify(slotConfig));
 
-    // Service image: append file so backend receives req.files.image[0]
     if (values.image instanceof File) {
       formData.append("image", values.image);
     }
-    // Service icon: append file so backend receives req.files.icon[0]
     if (values.icon instanceof File) {
       formData.append("icon", values.icon);
     }
 
-    await submitForm(formData);
-  };
+    await createService(formData);
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setAutosaveState("idle");
+    router.push("/admin/services");
+  }, [createService, duplicateName, router, setError]);
 
   useEffect(() => {
-    if (result) {
-      router.push("/admin/services");
+    if (!category) return;
+    if (category === "consultation") return;
+    if (supportsDuration) {
+      setValue("supportsDuration", false, { shouldDirty: true, shouldValidate: true });
     }
-  }, [result]);
+  }, [category, setValue, supportsDuration]);
+
+  const handleSaveDraft = useCallback(() => {
+    saveDraftToStorage(getValues(), false);
+  }, [getValues, saveDraftToStorage]);
+
+  const handlePublish = useCallback(() => {
+    handleSubmit(submit)();
+  }, [handleSubmit, submit]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        handleSaveDraft();
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        handlePublish();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handlePublish, handleSaveDraft]);
+
+  const previewValues = watch();
+  const mediaProps = {
+    iconPreview,
+    imagePreview,
+    iconError,
+    imageError,
+    iconUpload: {
+      getRootProps: iconDropzone.getRootProps,
+      getInputProps: iconDropzone.getInputProps,
+      isUploading: false,
+      clear: () => {
+        setIconPreview("");
+        setIconError("");
+        setValue("icon", null, { shouldDirty: true });
+      },
+    },
+    imageUpload: {
+      getRootProps: imageDropzone.getRootProps,
+      getInputProps: imageDropzone.getInputProps,
+      isUploading: false,
+      clear: () => {
+        setImagePreview("");
+        setImageError("");
+        setValue("image", null, { shouldDirty: true });
+      },
+    },
+  };
 
   return (
-    <div className="space-y-6">
-      <Link href="/admin/services" className="flex gap-1 items-center mb-4">
-        <ArrowLeftIcon className="text-3xl cursor-pointer" />
-        <H1>Add Service</H1>
-      </Link>
+    <Form {...form}>
+      <div className="space-y-5 pb-6">
+        <ServiceHeader
+          isDirty={formState.isDirty}
+          isSubmitting={isPublishing}
+          autosaveState={autosaveState}
+          lastSavedAt={lastSavedAt}
+          validationProgress={validationProgress}
+          onSaveDraft={handleSaveDraft}
+          onPreview={() => setPreviewOpen(true)}
+          onPublish={handlePublish}
+        />
 
-      <Card className="shadow-md">
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Name */}
-                <FormField
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Service name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <div className="space-y-5">
+            <ServiceBasicInfo form={form} duplicateName={duplicateName} />
+            <ServiceModeSelector
+              form={form}
+              cityOptions={cityOptions}
+              isCityLoading={isCitiesLoading}
+              cityError={cityError}
+              onRetryCities={refetchCities}
+            />
+            <ServicePricingWorkspace form={form} />
 
-                <FormField
-                  control={control}
-                  name="timeFormat"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Time Format</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select time format" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="12-hour">12 Hour</SelectItem>
-                          <SelectItem value="24-hour">24 Hour</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {category === "consultation" ? <ConsultationConfigCard form={form} /> : null}
+            {category === "nursing" ? <NursingConfigCard form={form} /> : null}
+            {category === "equipment" ? <EquipmentConfigCard form={form} /> : null}
 
-                <FormField
-                  control={control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="consultation">
-                            Consultation
-                          </SelectItem>
-                          <SelectItem value="nursing">Nursing</SelectItem>
-                          <SelectItem value="equipment">Equipment</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {category === "consultation" ? <ServiceDurationManager form={form} /> : null}
+            <ServiceMediaStudio form={form} media={mediaProps} />
+            <ServiceValidationPanel checks={validationChecks} />
 
-                {category === "nursing" && (
-                  <FormField
-                    control={control}
-                    name="nursingType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nursing Type</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select nursing type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hourly">Hourly</SelectItem>
-                            <SelectItem value="full-day">Full Day</SelectItem>
-                            <SelectItem value="full-night">
-                              Full Night
-                            </SelectItem>
-                            <SelectItem value="12-hour">12 Hour</SelectItem>
-                            <SelectItem value="24-hour">24 Hour</SelectItem>
-                            <SelectItem value="null">None</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+            <ServiceFooterActions
+              onSaveDraft={handleSaveDraft}
+              onPreview={() => setPreviewOpen(true)}
+              onPublish={handlePublish}
+              isSubmitting={isPublishing}
+            />
+          </div>
 
-                {/* {category === "consultation" && ( */}
-                <div className="border p-4 rounded space-y-4 col-span-3">
-                  <FormField
-                    control={form.control}
-                    name="consultationSlots.enabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between">
-                        <FormLabel>Consultation Enabled</FormLabel>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <div className={isMobile ? "hidden" : ""}>
+            <ServicePreviewSidebar values={previewValues} open={previewOpen} onOpenChange={setPreviewOpen} />
+          </div>
+        </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="consultationSlots.startTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Start Time</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+        {isMobile ? (
+          <ServicePreviewSidebar values={previewValues} open={previewOpen} onOpenChange={setPreviewOpen} />
+        ) : null}
 
-                    <FormField
-                      control={form.control}
-                      name="consultationSlots.endTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>End Time</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="consultationSlots.slotDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Slot Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                {/* )} */}
-
-                {/* {category === "nursing" && ( */}
-                <div className="border p-4 rounded space-y-4 col-span-3">
-                  {/* Enabled Switch */}
-                  <FormField
-                    control={form.control}
-                    name="nursingSlots.enabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between">
-                        <FormLabel>Nursing Slots Enabled</FormLabel>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* Shift Types */}
-                    <FormField
-                      control={form.control}
-                      name="nursingSlots.shiftTypes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Shift Types</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              label="Select Shift Type"
-                              options={shiftTypesOptions}
-                              value={field.value || []}
-                              onChange={field.onChange}
-                              isLoading={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Min Duration */}
-                    <FormField
-                      control={form.control}
-                      name="nursingSlots.minDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Max Duration */}
-                    <FormField
-                      control={form.control}
-                      name="nursingSlots.maxDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Max Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Switches Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* 24x7 */}
-                    <FormField
-                      control={form.control}
-                      name="nursingSlots.available24x7"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between border p-3 rounded">
-                          <FormLabel>Available 24x7</FormLabel>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Allow Custom Duration */}
-                    <FormField
-                      control={form.control}
-                      name="nursingSlots.allowCustomDuration"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between border p-3 rounded">
-                          <FormLabel>Allow Custom Duration</FormLabel>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                {/* )} */}
-
-                {/* {category === "equipment" && ( */}
-                <div className="border p-4 rounded space-y-4 col-span-3">
-                  {/* Enabled Switch */}
-                  <FormField
-                    control={form.control}
-                    name="equipmentBooking.enabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between">
-                        <FormLabel>Equipment Booking Enabled</FormLabel>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* Min Duration */}
-                    <FormField
-                      control={form.control}
-                      name="equipmentBooking.minDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Max Duration */}
-                    <FormField
-                      control={form.control}
-                      name="equipmentBooking.maxDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Max Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Available 24x7 */}
-                    <FormField
-                      control={form.control}
-                      name="equipmentBooking.available24x7"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between border p-3 rounded">
-                          <FormLabel>Available 24x7</FormLabel>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                {/* )} */}
-
-                {/* <div className="grid grid-cols-2 gap-5"> */}
-                {/* Base Price */}
-                <FormField
-                  control={control}
-                  name="basePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Base Price (₹)</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={control}
-                  name="cities"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Select Cities</FormLabel>
-                      <FormControl>
-                        <MultiSelect
-                          label="Select Cities"
-                          options={cities}
-                          value={field.value || []}
-                          onChange={field.onChange}
-                          isLoading={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      {cityError ? (
-                        <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
-                          <span>Unable to load city options.</span>
-                          <Button type="button" variant="outline" size="sm" onClick={refetchCities}>
-                            Retry
-                          </Button>
-                        </div>
-                      ) : null}
-                    </FormItem>
-                  )}
-                />
-                {/* </div> */}
-
-                {/* Description */}
-                <FormField
-                  control={control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-3">
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          // rows={5}
-                          placeholder="Short description"
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Equipment Charges */}
-                <FormField
-                  control={control}
-                  name="equipmentCharges"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Equipment Charges (₹)</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Tax Percentage */}
-                <FormField
-                  control={control}
-                  name="taxPercentage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tax Percentage (%)</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Modes */}
-                <FormField
-                  control={control}
-                  name="modes"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-">
-                      <FormLabel>Modes</FormLabel>
-                      <div className="flex gap-3 mt-2">
-                        {["Home Service", "Visit Provider Location"].map(
-                          (m) => (
-                            <label key={m} className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                value={m}
-                                checked={field.value?.includes(m)}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  if (checked)
-                                    field.onChange([...(field.value || []), m]);
-                                  else
-                                    field.onChange(
-                                      field.value.filter((x) => x !== m),
-                                    );
-                                }}
-                              />
-                              {m}
-                            </label>
-                          ),
-                        )}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Supports Duration */}
-                <FormField
-                  control={control}
-                  name="supportsDuration"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col justify-center">
-                      <div className="flex items-center gap-3">
-                        <FormLabel>Supports Duration</FormLabel>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={(v) => field.onChange(Boolean(v))}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormDescription>
-                        Enable duration options for this service.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Duration fields */}
-                {supportsDuration && (
-                  <>
-                    <FormField
-                      control={control}
-                      name="defaultDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Default Duration (minutes)</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={control}
-                      name="durationOptions"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Duration Options</FormLabel>
-                          <FormControl>
-                            <DurationChips
-                              values={[15, 30, 45, 60, 90]}
-                              selected={field.value || []}
-                              onChange={(d) => {
-                                const exists = field.value?.includes(d);
-                                const next = exists
-                                  ? field.value.filter((x) => x !== d)
-                                  : [...(field.value || []), d].sort(
-                                      (a, b) => a - b,
-                                    );
-                                field.onChange(next);
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Click to select multiple duration options.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
-                {/* Payment Mode */}
-                <FormField
-                  control={control}
-                  name="paymentMode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Mode</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select payment mode" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Both">Both</SelectItem>
-                          <SelectItem value="Prepaid">Prepaid</SelectItem>
-                          <SelectItem value="Postpaid">Postpaid</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {/* Icon & Image Uploads */}
-              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={control}
-                  name="icon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service Icon</FormLabel>
-                      <FormControl>
-                        <div
-                          {...getRootIconProps()}
-                          className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
-                        >
-                          <input {...getInputIconProps()} />
-                          <div className="flex flex-col items-center gap-2">
-                            <UploadCloud />
-                            <span className="text-sm">
-                              Drop or click to upload icon
-                            </span>
-                          </div>
-                        </div>
-                      </FormControl>
-                      {iconPreview ? (
-                        <div className="mt-2">
-                          <img
-                            src={iconPreview}
-                            alt="icon preview"
-                            className="w-20 h-20 object-cover rounded"
-                          />
-                        </div>
-                      ) : null}
-                      <FormDescription>
-                        PNG/SVG recommended. Max 2MB (demo).
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={control}
-                  name="image"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service Image</FormLabel>
-                      <FormControl>
-                        <div
-                          {...getRootImageProps()}
-                          className="border-dashed border rounded p-3 flex items-center justify-center cursor-pointer min-h-[96px]"
-                        >
-                          <input {...getInputImageProps()} />
-                          <div className="flex flex-col items-center gap-2">
-                            <UploadCloud />
-                            <span className="text-sm">
-                              Drop or click to upload image
-                            </span>
-                          </div>
-                        </div>
-                      </FormControl>
-                      {imagePreview ? (
-                        <div className="mt-2">
-                          <img
-                            src={imagePreview}
-                            alt="image preview"
-                            className="w-full h-40 object-cover rounded"
-                          />
-                        </div>
-                      ) : field.value ? (
-                        <div className="mt-2">
-                          <img
-                            src={field.value}
-                            alt="image"
-                            className="w-full h-40 object-cover rounded"
-                          />
-                        </div>
-                      ) : null}
-                      <FormDescription>
-                        Landscape images look best. (demo only)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormFooter className="flex gap-3 justify-end">
-                <Button
-                  type="submit"
-                  disabled={formState.isSubmitting || isSubmitFormLoading}
-                >
-                  {formState.isSubmitting || isSubmitFormLoading ? (
-                    <Spinner />
-                  ) : (
-                    "Save Service"
-                  )}
-                </Button>
-              </FormFooter>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+        {isPublishing ? (
+          <div className="fixed bottom-5 right-5 z-50 rounded-full bg-[#0f172a] px-4 py-2 text-xs text-white shadow-[0_18px_30px_rgb(15_23_42_/_0.35)]">
+            <span className="inline-flex items-center gap-2">
+              <Spinner />
+              Publishing service workspace...
+            </span>
+          </div>
+        ) : null}
+      </div>
+    </Form>
   );
 };
 
-export default CreateService;
+export default CreateServiceWorkspace;
