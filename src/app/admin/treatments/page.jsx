@@ -10,6 +10,7 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
 import { ListPageHeader } from "@/components/layout/ListPageHeader";
+import { TableLoader } from "@/components/loading/table-loader";
 import { OperationalBadge } from "@/components/ui/OperationalBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -381,11 +382,7 @@ const TreatmentsPage = () => {
           onAction={treatmentResult.refetch}
         />
       ) : null}
-      {treatmentResult.isFetching && !treatmentResult.isLoading ? (
-        <p className="text-sm text-muted-foreground">Refreshing treatments...</p>
-      ) : null}
-
-      <div className="table-container">
+      <div className="relative table-container">
         <Table>
           <TableHeader>
             <TableRow>
@@ -513,6 +510,7 @@ const TreatmentsPage = () => {
               : null}
           </TableBody>
         </Table>
+        <TableLoader active={treatmentResult.isFetching && !treatmentResult.isLoading} rows={5} columns={10} />
 
         {!treatmentResult.isLoading && rows.length === 0 ? (
           <DataNotFound name="Treatments" actionLabel={null} />

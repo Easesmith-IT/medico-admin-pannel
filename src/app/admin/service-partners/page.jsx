@@ -9,6 +9,7 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
 import { H1 } from "@/components/typography";
+import { TableLoader } from "@/components/loading/table-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -212,11 +213,7 @@ const ServiceProviders = () => {
           onAction={refetch}
         />
       ) : null}
-      {isFetching && !isLoading ? (
-        <p className="text-sm text-muted-foreground">Refreshing service partners...</p>
-      ) : null}
-
-      <div className="table-container">
+      <div className="relative table-container">
         <Table>
           <TableHeader>
             <TableRow>
@@ -245,6 +242,7 @@ const ServiceProviders = () => {
               : null}
           </TableBody>
         </Table>
+        <TableLoader active={isFetching && !isLoading} rows={5} columns={9} />
         {serviceProviders.length === 0 && !isLoading ? (
           <DataNotFound
             name="Service Partners"

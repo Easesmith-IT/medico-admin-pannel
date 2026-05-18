@@ -7,11 +7,11 @@ import {
 } from "@/components/ui/table";
 import { CrashRow } from "./CrashRow";
 import DataNotFound from "../shared/DataNotFound";
-import Spinner from "../shared/Spinner";
+import { TableLoader } from "@/components/loading/table-loader";
 
-export function CrashTable({ crashes, isLoading }) {
+export function CrashTable({ crashes, isLoading, isRefreshing = false }) {
   return (
-    <div className="overflow-x-auto overflow-y-visible table-container">
+    <div className="relative overflow-x-auto overflow-y-visible table-container">
       <Table>
         <TableHeader>
           <TableRow>
@@ -36,6 +36,7 @@ export function CrashTable({ crashes, isLoading }) {
             ))}
         </TableBody>
       </Table>
+      <TableLoader active={isRefreshing && !isLoading} rows={5} columns={9} />
       {crashes.length === 0 && !isLoading && (
         <DataNotFound name="Crash Reports" />
       )}

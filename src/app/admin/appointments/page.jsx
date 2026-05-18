@@ -18,6 +18,7 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
 import { ListPageHeader } from "@/components/layout/ListPageHeader";
+import { TableLoader } from "@/components/loading/table-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -449,11 +450,7 @@ const Appointments = () => {
           onAction={refetch}
         />
       ) : null}
-      {isFetching && !isLoading ? (
-        <p className="text-sm text-muted-foreground">Refreshing appointments...</p>
-      ) : null}
-
-      <div className="table-container">
+      <div className="relative table-container">
         <Table>
           <TableHeader>
             <TableRow>
@@ -479,6 +476,7 @@ const Appointments = () => {
               : null}
           </TableBody>
         </Table>
+        <TableLoader active={isFetching && !isLoading} rows={5} columns={9} />
 
         {bookings.length === 0 && !isLoading ? (
           <DataNotFound

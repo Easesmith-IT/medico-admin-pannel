@@ -39,6 +39,7 @@ import { removeAuthCookies } from "@/lib/cookies";
 import { readCookie } from "@/lib/readCookie";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGlobalLoading } from "@/components/loading/loading-provider";
 
 const isPathMatch = (pathname, href) =>
   pathname === href || pathname.startsWith(`${href}/`);
@@ -145,7 +146,7 @@ const SidebarNavItem = ({
   );
 };
 
-const DesktopNavigation = ({ pathname, iconOnly }) => {
+const DesktopNavigation = ({ pathname, iconOnly, onNavigate }) => {
   const [openSections, setOpenSections] = useState(getInitialSectionState);
 
   const activeBySection = useMemo(() => {
@@ -239,6 +240,7 @@ const DesktopNavigation = ({ pathname, iconOnly }) => {
                           sectionTitle={section.title}
                           isActive={isPathActive(pathname, item)}
                           iconOnly={iconOnly}
+                          onNavigate={onNavigate}
                         />
                       ))}
                     </SidebarMenu>
@@ -334,6 +336,7 @@ export const AppSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { beginRouteTransition } = useGlobalLoading();
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const iconOnly = state === "collapsed" && !isMobile;
 
@@ -388,10 +391,11 @@ export const AppSidebar = () => {
   };
 
   const handleNavigate = useCallback(() => {
+    beginRouteTransition();
     if (isMobile) {
       setOpenMobile(false);
     }
-  }, [isMobile, setOpenMobile]);
+  }, [beginRouteTransition, isMobile, setOpenMobile]);
 
   return (
     <Sidebar
@@ -411,6 +415,7 @@ export const AppSidebar = () => {
               href="/admin/dashboard"
               prefetch
               aria-label="Medico Admin Home"
+              onClick={handleNavigate}
             >
               <Image
                 src="/logos/medico-logo.svg"
@@ -441,6 +446,7 @@ export const AppSidebar = () => {
               href={ADMIN_QUICK_ACTION.href}
               prefetch
               aria-label={`Quick action ${ADMIN_QUICK_ACTION.title}`}
+              onClick={handleNavigate}
             >
               <Plus className="size-4" />
               {!iconOnly ? <span>{ADMIN_QUICK_ACTION.title}</span> : null}
@@ -459,7 +465,7 @@ export const AppSidebar = () => {
             <MobileNavigation pathname={pathname} onNavigate={handleNavigate} />
           </motion.div>
         ) : (
-          <DesktopNavigation pathname={pathname} iconOnly={iconOnly} />
+          <DesktopNavigation pathname={pathname} iconOnly={iconOnly} onNavigate={handleNavigate} />
         )}
       </SidebarContent>
 

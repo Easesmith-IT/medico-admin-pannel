@@ -1,14 +1,7 @@
-import { LoadingState } from "@/components/ui/LoadingState";
+import { PageLoader } from "@/components/loading/page-loader";
 
 const AdminLoading = () => {
-  return (
-    <div className="space-y-6">
-      <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-4">
-        <LoadingState rows={1} />
-      </div>
-      <LoadingState rows={8} />
-    </div>
-  );
+  return <PageLoader />;
 };
 
 export default AdminLoading;

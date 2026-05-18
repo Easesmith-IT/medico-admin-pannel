@@ -297,3 +297,31 @@
 .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
   background: #3b5a85;
 }
+
+.skeleton-line {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(110deg, rgba(219, 234, 254, 0.55) 8%, rgba(191, 219, 254, 0.78) 18%, rgba(219, 234, 254, 0.55) 33%);
+  background-size: 220% 100%;
+  animation: medico-skeleton-shimmer 1.45s linear infinite;
+}
+
+.skeleton-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: auto 12% -18px 12%;
+  height: 28px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.28) 0%, rgba(59, 130, 246, 0) 74%);
+  filter: blur(8px);
+}
+
+@keyframes medico-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}

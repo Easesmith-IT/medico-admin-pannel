@@ -79,11 +79,7 @@ const CrashReportsPage = () => {
           onAction={refetch}
         />
       ) : null}
-      {isFetching && !isLoading ? (
-        <p className="text-sm text-muted-foreground">Refreshing crash reports...</p>
-      ) : null}
-
-      <CrashTable crashes={crashes} isLoading={isLoading} />
+      <CrashTable crashes={crashes} isLoading={isLoading} isRefreshing={isFetching} />
 
       <PaginationComp
         page={params.page}

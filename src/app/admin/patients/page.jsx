@@ -10,6 +10,7 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { PaginationComp } from "@/components/shared/PaginationComp";
 import { StateView } from "@/components/shared/state-view";
 import { ListPageHeader } from "@/components/layout/ListPageHeader";
+import { TableLoader } from "@/components/loading/table-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,10 +30,12 @@ import {
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useListQueryParams } from "@/hooks/use-list-query-params";
 import { useDebounce } from "@/hooks/use-debounce";
+import { buildQuery } from "@/lib/utils";
 
 const defaults = {
   gender: "all",
   bloodGroup: "all",
+  city: "all",
   status: "all",
   search: "",
   page: 1,
@@ -44,16 +47,28 @@ const PatientsPage = () => {
   const { params, updateParams, resetParams } = useListQueryParams(defaults);
   const debouncedSearch = useDebounce(params.search, 600);
 
+  const {
+    data: cityData,
+    isLoading: isCityLoading,
+    error: cityError,
+    refetch: refetchCities,
+  } = useApiQuery({
+    url: "/city/getAllCities",
+    queryKeys: ["city"],
+  });
+
+  const query = buildQuery({
+    isActive: params.status,
+    page: params.page,
+    limit: params.limit,
+    searchQuery: debouncedSearch,
+    gender: params.gender,
+    bloodGroup: params.bloodGroup,
+    cityId: params.city,
+  });
+
   const { data, isLoading, isFetching, error, refetch } = useApiQuery({
-    url: `/admin/patients?isActive=${
-      params.status === "all" ? "" : params.status
-    }&page=${params.page}&limit=${params.limit}&searchQuery=${encodeURIComponent(
-      debouncedSearch,
-    )}&gender=${
-      params.gender === "all" ? "" : encodeURIComponent(params.gender)
-    }&bloodGroup=${
-      params.bloodGroup === "all" ? "" : encodeURIComponent(params.bloodGroup)
-    }`,
+    url: `/admin/patients?${query}`,
     queryKeys: [
       "patients",
       params.status,
@@ -62,6 +77,7 @@ const PatientsPage = () => {
       params.gender,
       params.bloodGroup,
       debouncedSearch,
+      params.city,
     ],
   });
 
@@ -151,6 +167,27 @@ const PatientsPage = () => {
           </div>
 
           <div>
+            <label className="mb-1 block text-sm font-medium">City</label>
+            <Select
+              disabled={isCityLoading}
+              value={params.city}
+              onValueChange={(value) => updateParams({ city: value, page: 1 })}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Select City" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {cityData?.data?.map((city) => (
+                  <SelectItem key={city._id} value={city._id}>
+                    {city.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <label className="mb-1 block text-sm font-medium">Status</label>
             <Select
               value={params.status}
@@ -200,6 +237,15 @@ const PatientsPage = () => {
         </div>
       </FilterBar>
 
+      {cityError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Unable to load city filter options.{" "}
+          <button type="button" className="underline" onClick={refetchCities}>
+            Retry
+          </button>
+        </div>
+      ) : null}
+
       {error ? (
         <StateView
           type="error"
@@ -209,11 +255,7 @@ const PatientsPage = () => {
           onAction={refetch}
         />
       ) : null}
-      {isFetching && !isLoading ? (
-        <p className="text-sm text-muted-foreground">Refreshing patients...</p>
-      ) : null}
-
-      <div className="table-container">
+      <div className="relative table-container">
         <Table>
           <TableHeader>
             <TableRow>
@@ -241,6 +283,7 @@ const PatientsPage = () => {
               : null}
           </TableBody>
         </Table>
+        <TableLoader active={isFetching && !isLoading} rows={5} columns={7} />
 
         {patients.length === 0 && !isLoading ? (
           <DataNotFound name="Patients" />

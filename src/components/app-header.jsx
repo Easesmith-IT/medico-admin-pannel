@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2Icon, LogOutIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { SidebarTrigger } from "./ui/sidebar";
 import { Button } from "./ui/button";
@@ -11,12 +11,14 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { POST } from "@/constants/apiMethods";
 import { CommandPalette } from "./shared/command-palette";
 import { removeAuthCookies } from "@/lib/cookies";
-import { useIsFetching, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { InlineSyncIndicator } from "@/components/loading/sync-indicator";
+import { useGlobalLoading } from "@/components/loading/loading-provider";
 
 export const AppHeader = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const inFlightQueries = useIsFetching();
+  const { syncStatus, syncMeta, isBusy } = useGlobalLoading();
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
 
@@ -85,11 +87,16 @@ export const AppHeader = () => {
                 Date and Time
               </p>
               <p className="text-sm font-semibold text-[#0F172A]">
-                {formattedDate} • {formattedTime}
+                {formattedDate} | {formattedTime}
               </p>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <InlineSyncIndicator
+              state={syncStatus}
+              label={syncMeta?.label || "System ready"}
+              className="hidden lg:inline-flex"
+            />
             <CommandPalette />
             <Button
               onClick={onLogout}
@@ -114,14 +121,15 @@ export const AppHeader = () => {
           />
         )}
       </motion.header>
-      {inFlightQueries > 0 ? (
-        <div className="border-b border-[#E2E8F0] bg-white/95 px-4 py-1.5 text-xs text-[#475569] sm:px-6 lg:px-8">
-          <div className="mx-auto flex w-full max-w-[1440px] items-center gap-2">
-            <Loader2Icon className="size-3.5 animate-spin text-[#2563EB]" />
-            <span>Updating data...</span>
-          </div>
-        </div>
-      ) : null}
+      <div className="border-b border-transparent px-4 py-1 lg:hidden">
+        {isBusy ? (
+          <InlineSyncIndicator
+            state={syncStatus}
+            label={syncMeta?.label || "System ready"}
+            className="inline-flex"
+          />
+        ) : null}
+      </div>
     </div>
   );
 };

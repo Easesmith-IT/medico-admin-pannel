@@ -6,6 +6,7 @@ import { ArchiveIcon, RotateCcwIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import TreatmentHistorySkeleton from "@/components/patient/treatment-history-skeleton";
+import { InlineSyncIndicator } from "@/components/loading/sync-indicator";
 import { BackLink } from "@/components/shared/back-link";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { StateView } from "@/components/shared/state-view";
@@ -175,7 +176,9 @@ const TreatmentHistory = () => {
           </div>
         </FilterBar>
         {isFetching && !isLoading ? (
-          <p className="mt-2 text-sm text-muted-foreground">Refreshing treatment history...</p>
+          <div className="mt-2">
+            <InlineSyncIndicator state="refreshing" label="Refreshing treatment history" />
+          </div>
         ) : null}
       </motion.div>
 

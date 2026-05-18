@@ -18,6 +18,7 @@ import {
   ADMIN_ACCOUNT_SECTION,
   ADMIN_NAVIGATION_SECTIONS,
 } from "@/components/navigation/admin-navigation";
+import { useGlobalLoading } from "@/components/loading/loading-provider";
 
 const commandSections = [
   ...ADMIN_NAVIGATION_SECTIONS,
@@ -31,6 +32,7 @@ const commandSections = [
 export const CommandPalette = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { beginRouteTransition } = useGlobalLoading();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export const CommandPalette = () => {
 
   const onSelect = (href) => {
     setIsOpen(false);
+    beginRouteTransition();
     router.push(href);
   };
 
