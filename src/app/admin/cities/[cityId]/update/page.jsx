@@ -33,9 +33,18 @@ const UpdateCity = () => {
   });
 
   const handleUpdate = async (values) => {
+    let polygon = (values.geoFence || []).map(([lat, lng]) => [lng, lat]);
+    if (polygon.length >= 3) {
+      const first = polygon[0];
+      const last = polygon[polygon.length - 1];
+      if (first[0] !== last[0] || first[1] !== last[1]) {
+        polygon = [...polygon, first];
+      }
+    }
+
     const payload = {
       ...values,
-      polygon: values.geoFence.map(([lat, lng]) => [lng, lat]),
+      polygon,
     };
 
     await mutateAsync(payload);

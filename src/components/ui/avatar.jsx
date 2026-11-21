@@ -19,12 +19,19 @@ function Avatar({
 
 function AvatarImage({
   className,
+  src,
   ...props
 }) {
+  const safeSrc =
+    typeof src === "string" && !src.includes("docs.rehabmedico.in")
+      ? src
+      : undefined;
+
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn("aspect-square size-full", className)}
+      src={safeSrc}
       {...props} />
   );
 }

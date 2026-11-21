@@ -7,9 +7,17 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function Select({
+  value,
   ...props
 }) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />;
+  const isControlled = "value" in props;
+  return (
+    <SelectPrimitive.Root
+      data-slot="select"
+      {...(isControlled ? { value: value ?? "" } : {})}
+      {...props}
+    />
+  );
 }
 
 function SelectGroup({

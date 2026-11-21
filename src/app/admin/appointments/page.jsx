@@ -201,10 +201,12 @@ const Appointments = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="Pending">Waiting for Approval (Pending)</SelectItem>
+                <SelectItem value="Approved">Scheduled (Approved)</SelectItem>
+                <SelectItem value="In-Progress">In-Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Rescheduled">Rescheduled</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
                 <SelectItem value="Cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>

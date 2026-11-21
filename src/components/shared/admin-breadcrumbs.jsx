@@ -72,15 +72,19 @@ export const AdminBreadcrumbs = () => {
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {
-          const href = `/admin/${segments.slice(0, index + 1).join("/")}`;
+          let href = `/admin/${segments.slice(0, index + 1).join("/")}`;
+          if (href === "/admin/governance") href = "/admin/governance/audit-logs";
+          if (href === "/admin/security") href = "/admin/security/sessions";
+
           const isLast = index === segments.length - 1;
+          const isUnlinkedId = looksLikeMongoId(segment) && segments[index - 1] === "cities";
           const label = toLabel(segment);
 
           return (
             <Fragment key={`${segment}-${index}`}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                {isLast ? (
+                {isLast || isUnlinkedId ? (
                   <BreadcrumbPage>{label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>

@@ -3,6 +3,11 @@
 import { MapContainer, TileLayer, Polygon, FeatureGroup } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { useRef } from "react";
+import L from "leaflet";
+
+if (typeof window !== "undefined" && L?.Polyline && L?.LineUtil?.isFlat) {
+  L.Polyline._flat = L.LineUtil.isFlat;
+}
 import FitBounds from "./fit-bounds";
 import MapSetView from "./map-set-view";
 
@@ -37,13 +42,22 @@ const CityGeoFenceMap = ({ latitude, longitude, polygon, onChange,polygonCoords 
               remove: polygon.length > 0, // 🗑️ allow delete
             }}
             onCreated={(e) => {
-              const latlngs = e.layer.getLatLngs()[0];
-              onChange(latlngs.map((p) => [p.lat, p.lng]));
+              if (!e?.layer || typeof e.layer.getLatLngs !== "function") return;
+              const raw = e.layer.getLatLngs();
+              const latlngs = Array.isArray(raw[0]) ? raw[0] : raw;
+              if (Array.isArray(latlngs)) {
+                onChange(latlngs.map((p) => [p.lat, p.lng]));
+              }
             }}
             onEdited={(e) => {
-              const layer = Object.values(e.layers._layers)[0];
-              const latlngs = layer.getLatLngs()[0];
-              onChange(latlngs.map((p) => [p.lat, p.lng]));
+              const layers = e?.layers ? (typeof e.layers.getLayers === "function" ? e.layers.getLayers() : Object.values(e.layers._layers || {})) : [];
+              const layer = layers[0];
+              if (!layer || typeof layer.getLatLngs !== "function") return;
+              const raw = layer.getLatLngs();
+              const latlngs = Array.isArray(raw[0]) ? raw[0] : raw;
+              if (Array.isArray(latlngs)) {
+                onChange(latlngs.map((p) => [p.lat, p.lng]));
+              }
             }}
             onDeleted={() => onChange([])}
           />

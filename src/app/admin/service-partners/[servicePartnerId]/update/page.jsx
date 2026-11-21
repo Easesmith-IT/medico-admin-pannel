@@ -459,6 +459,22 @@ const UpdatePage = () => {
     }
   }, [result]);
 
+  if (isLoading) {
+    return <StateView type="loading" rows={8} />;
+  }
+
+  if (error) {
+    return (
+      <StateView
+        type="error"
+        title="Unable to load service provider details"
+        description={error.message}
+        actionLabel="Retry"
+        onAction={refetch}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <BackLink href="/admin/service-partners">
@@ -516,18 +532,3 @@ const UpdatePage = () => {
 };
 
 export default UpdatePage;
-  if (isLoading) {
-    return <StateView type="loading" rows={8} />;
-  }
-
-  if (error) {
-    return (
-      <StateView
-        type="error"
-        title="Unable to load service provider details"
-        description={error.message}
-        actionLabel="Retry"
-        onAction={refetch}
-      />
-    );
-  }

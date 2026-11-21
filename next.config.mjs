@@ -10,6 +10,20 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin/governance",
+        destination: "/admin/governance/audit-logs",
+        permanent: false,
+      },
+      {
+        source: "/admin/security",
+        destination: "/admin/security/sessions",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
